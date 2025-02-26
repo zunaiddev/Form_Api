@@ -6,6 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -35,6 +39,14 @@ public class User {
 
     @NotNull
     private boolean enabled = false;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @OneToOne(mappedBy = "user")
+    @JoinColumn(name = "key_id")
+    @ToString.Exclude
+    private ApiKey key;
 
     public User(String name, String email, String password) {
         this.name = name;

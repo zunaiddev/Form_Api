@@ -12,7 +12,7 @@ public class TextFormatter extends JsonDeserializer<String> {
     public String deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
         String text = jsonParser.getText();
         if (text != null) {
-            return text.trim().replaceAll("\\s+", " ");
+            return text.trim().replaceAll("\\s+", " ").toLowerCase();
         }
 
         return null;

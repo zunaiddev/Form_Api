@@ -1,6 +1,8 @@
 package com.api.formSync.service;
 
+import com.api.formSync.exception.CooldownNotMetException;
 import com.api.formSync.exception.InvalidTokenException;
+import com.api.formSync.exception.TokenExpiredException;
 import com.api.formSync.model.Token;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.TokenRepository;
@@ -8,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -21,22 +22,26 @@ public class TokenService {
 
     public String regenerateToken(User user) {
         Token token = repo.findByUser(user);
+
+        if (token.getCreatedAt().plusMinutes(2).isAfter(LocalDateTime.now())) {
+            throw new CooldownNotMetException("Please wait 2 minutes before requesting another verification link");
+        }
+
         token.regenerate();
         repo.save(token);
         return token.getToken();
     }
 
-    public void verify(String token, Long id) {
-        Token savedToken = repo.findByToken(token);
+    public User verify(String token) {
+        Token savedToken = repo.findByToken(token)
+                .orElseThrow(() -> new InvalidTokenException("Invalid Token"));
 
-        if (savedToken == null || savedToken.getExpiry().isBefore(LocalDateTime.now())) {
-            throw new InvalidTokenException("Token expired or Invalid");
-        }
-
-        if (!Objects.equals(savedToken.getUser().getId(), id)) {
-            throw new InvalidTokenException("Invalid id");
+        if (savedToken.getExpiry().isBefore(LocalDateTime.now())) {
+            throw new TokenExpiredException("Token has expired. Please resend the token");
         }
 
         repo.delete(savedToken);
+
+        return savedToken.getUser();
     }
 }

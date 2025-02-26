@@ -2,9 +2,10 @@ package com.api.formSync.exception;
 
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,7 +21,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public Map<String, Object> validationHandler(MethodArgumentNotValidException exp) {
+    public Map<String, Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException exp) {
         Map<String, Object> errors = new HashMap<>();
 
         for (FieldError error : exp.getBindingResult().getFieldErrors()) {
@@ -32,31 +33,73 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateEntrypointEmailException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse DuplicateEntryHandler(DuplicateEntrypointEmailException exp, HttpServletRequest req) {
-        return new ErrorResponse(HttpStatus.CONFLICT.value(), exp.getMessage(), req.getRequestURI());
+    public ErrorResponse handleDuplicateEntrypointEmailException(DuplicateEntrypointEmailException exp) {
+        return new ErrorResponse(HttpStatus.CONFLICT.value(), exp.getMessage());
     }
 
     @ExceptionHandler(MessagingException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse MessagingExceptionHandler(MessagingException exp, HttpServletRequest req) {
-        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Could not send an verification Email Please try resend Email", req.getRequestURI());
+    public ErrorResponse handleMessagingException(MessagingException exp) {
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Could not send an verification Email Please try resend Email");
     }
 
     @ExceptionHandler(InvalidTokenException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse invalidTokenHandler(InvalidTokenException exp, HttpServletRequest req) {
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exp.getMessage(), req.getRequestURI());
+    @ResponseStatus(HttpStatus.GONE)
+    public ErrorResponse handleInvalidTokenException(InvalidTokenException exp) {
+        return new ErrorResponse(HttpStatus.GONE.value(), exp.getMessage());
+    }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ErrorResponse handleTokenExpiredException(TokenExpiredException exp) {
+        return new ErrorResponse(HttpStatus.NOT_ACCEPTABLE.value(), exp.getMessage());
+    }
+
+    @ExceptionHandler(CooldownNotMetException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ErrorResponse handleCooldownNotMetException(CooldownNotMetException exp) {
+        return new ErrorResponse(HttpStatus.TOO_MANY_REQUESTS.value(), exp.getMessage());
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse userNotFoundHandler(EntityNotFoundException exp, HttpServletRequest req) {
-        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exp.getMessage(), req.getRequestURI());
+    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException exp) {
+        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exp.getMessage());
     }
 
     @ExceptionHandler(UserAlreadyVerifiedException.class)
-    @ResponseStatus(HttpStatus.ALREADY_REPORTED)
-    public ErrorResponse userVerifiedExceptionHandler(UserAlreadyVerifiedException exp, HttpServletRequest req) {
-        return new ErrorResponse(HttpStatus.ALREADY_REPORTED.value(), exp.getMessage(), req.getRequestURI());
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUserAlreadyVerifiedException(UserAlreadyVerifiedException exp) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exp.getMessage());
+    }
+
+    @ExceptionHandler(InvalidApiKeyException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidApiKeyException(InvalidApiKeyException exp) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exp.getMessage());
+    }
+
+    @ExceptionHandler(InvalidFormIdException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidFormIdException(InvalidFormIdException exp) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exp.getMessage());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadCredentialsException(BadCredentialsException exp) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exp.getMessage());
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleUsernameNotFoundException(UsernameNotFoundException exp) {
+        return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exp.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleException(Exception exp) {
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), exp.getMessage());
     }
 }

@@ -25,7 +25,6 @@ public class SignupRequest {
     private String email;
 
     @NotBlank(message = "password is null or blank")
-    @JsonDeserialize(using = TextFormatter.class)
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9]).{8,20}$",
             message = "password length must be between 8 and 20 and contain at least 1 uppercase, 1 lowercase, 1 special character, and 1 digit")
     private String password;

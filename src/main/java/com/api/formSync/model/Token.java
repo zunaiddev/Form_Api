@@ -25,15 +25,20 @@ public class Token {
     private User user;
 
     @NotNull
+    private LocalDateTime createdAt;
+
+    @NotNull
     private LocalDateTime expiry;
 
     public Token(User user) {
         this.user = user;
+        this.createdAt = LocalDateTime.now();
         this.expiry = LocalDateTime.now().plusHours(12);
         this.token = UUID.randomUUID().toString();
     }
 
     public void regenerate() {
+        this.createdAt = LocalDateTime.now();
         this.expiry = LocalDateTime.now().plusHours(12);
         this.token = UUID.randomUUID().toString();
     }
