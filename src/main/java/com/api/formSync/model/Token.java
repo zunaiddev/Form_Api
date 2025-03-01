@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "tokens")
+@Table(name = "token")
 @NoArgsConstructor
 public class Token {
     @Id
@@ -21,8 +21,8 @@ public class Token {
     private String token;
 
     @OneToOne(optional = false)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "tempUser_id")
+    private TempUser user;
 
     @NotNull
     private LocalDateTime createdAt;
@@ -30,16 +30,16 @@ public class Token {
     @NotNull
     private LocalDateTime expiry;
 
-    public Token(User user) {
+    public Token(TempUser user) {
         this.user = user;
         this.createdAt = LocalDateTime.now();
-        this.expiry = LocalDateTime.now().plusHours(12);
-        this.token = UUID.randomUUID().toString();
+        this.expiry = LocalDateTime.now().plusMinutes(15);
+        this.token = UUID.randomUUID().toString().replace("-", "_");
     }
 
     public void regenerate() {
         this.createdAt = LocalDateTime.now();
-        this.expiry = LocalDateTime.now().plusHours(12);
+        this.expiry = LocalDateTime.now().plusMinutes(15);
         this.token = UUID.randomUUID().toString();
     }
 }

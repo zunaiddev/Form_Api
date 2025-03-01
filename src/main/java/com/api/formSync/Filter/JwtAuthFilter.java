@@ -49,7 +49,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String username;
 
         try {
-            username = service.extractUsername(token);
+            username = service.extractEmail(token);
 
             if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
                 sendErrorResponse(res, HttpStatus.BAD_REQUEST, "Invalid Token");

@@ -38,12 +38,12 @@ public class User {
     private boolean locked = false;
 
     @NotNull
-    private boolean enabled = false;
+    private boolean enabled = true;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne
     @JoinColumn(name = "key_id")
     @ToString.Exclude
     private ApiKey key;

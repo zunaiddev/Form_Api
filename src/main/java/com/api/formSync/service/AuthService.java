@@ -2,14 +2,24 @@ package com.api.formSync.service;
 
 import com.api.formSync.Email.EmailService;
 import com.api.formSync.Email.EmailTemplate;
-import com.api.formSync.dto.*;
-import com.api.formSync.exception.UserAlreadyVerifiedException;
+import com.api.formSync.Principal.UserPrincipal;
+import com.api.formSync.dto.LoginRequest;
+import com.api.formSync.dto.LoginResponse;
+import com.api.formSync.dto.SignupRequest;
+import com.api.formSync.dto.SignupResponse;
+import com.api.formSync.exception.DuplicateEntrypointEmailException;
 import com.api.formSync.model.ApiKey;
+import com.api.formSync.model.TempUser;
 import com.api.formSync.model.User;
+import com.api.formSync.util.Log;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -19,43 +29,80 @@ public class AuthService {
     private final EmailService emailService;
     private final ApiKeyService apiKeyService;
     private final JwtService jwtService;
+    private final TempUserService tempUserService;
 
     public SignupResponse register(SignupRequest req) {
-        User user = userService.create(req);
-        sendEmail(user.getEmail(), user.getName(), tokenService.generateToken(user));
-        return new SignupResponse("User Created Successfully. Please Verify Your Email", new UserDTO(user));
-    }
 
-    public String verify(String token) {
-        User user = tokenService.verify(token);
-        ApiKey apiKey = apiKeyService.create(user);
-        user.setKey(apiKey);
-        user.setEnabled(true);
-        userService.save(user);
-        return "Verified";
-    }
-
-    public ResendTokenResponse resendToken(String email) {
-        User user = userService.getByEmail(email);
-        if (user.isEnabled()) {
-            throw new UserAlreadyVerifiedException(user.getName() + " is Already verified");
+        if (userService.isExists(req.getEmail())) {
+            throw new DuplicateEntrypointEmailException("user with email already exist.");
         }
 
-        sendEmail(user.getEmail(), user.getName(), tokenService.regenerateToken(user));
-        return new ResendTokenResponse(HttpStatus.OK.value(), "Verification Email Sent", new UserDTO(user));
+        TempUser user = tempUserService.create(req);
+        String token = tokenService.generateToken(user);
+
+        Log.blue("token", token);
+        sendEmail(user.getEmail(), user.getName(), token);
+
+        return new SignupResponse("User Created Successfully. Please Verify Your Email", req);
+    }
+
+    public Map<String, String> verify(String token) {
+        TempUser tempUser = tokenService.verify(token);
+        User user = userService.create(tempUser);
+        ApiKey apiKey = apiKeyService.create(user);
+        user.setKey(apiKey);
+        userService.save(user);
+        tempUserService.delete(tempUser);
+        return Map.of("token", "not found");
     }
 
     private void sendEmail(String to, String name, String token) {
-        final String LINK = "http://localhost:8080/api/auth/verify?token=" + token;
-        emailService.sendEmail(to, " Verify Your Email Address", EmailTemplate.tokenBody(name, LINK));
+        final String LINK = "http://localhost:5173/auth/verify-email?token=" + token;
+        emailService.sendEmail(to, "Verify Your Email Address", EmailTemplate.tokenBody(name, LINK));
     }
 
-    public LoginResponse authenticate(LoginRequest req) {
+    public LoginResponse authenticate(LoginRequest req, HttpServletResponse response) {
         Authentication auth = userService.getAuthentication(req.getEmail(), req.getPassword());
         if (!auth.isAuthenticated()) {
             return new LoginResponse(HttpStatus.UNAUTHORIZED.value(), null);
         }
 
-        return new LoginResponse(HttpStatus.ACCEPTED.value(), jwtService.generateToken(userService.getByEmail(req.getEmail())));
+        User user = userService.getByEmail(req.getEmail());
+
+        String accessToken = jwtService.generateToken(user, 900);
+        String refreshToken = jwtService.generateToken(user, 2_592_000);
+
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(2_592_000);
+
+        response.addCookie(cookie);
+        return new LoginResponse(HttpStatus.OK.value(), accessToken);
+    }
+
+    public LoginResponse refreshToken(String refreshToken) {
+        if (refreshToken == null) {
+            return null;
+        }
+
+        String email;
+
+        try {
+            email = jwtService.extractEmail(refreshToken);
+        } catch (Exception exp) {
+            return null;
+        }
+
+        User user = userService.getByEmail(email);
+
+        if (!jwtService.validateToken(refreshToken, new UserPrincipal(user))) {
+            return null;
+        }
+
+        String accessToken = jwtService.generateToken(user, 900);
+
+        return new LoginResponse(HttpStatus.OK.value(), accessToken);
     }
 }

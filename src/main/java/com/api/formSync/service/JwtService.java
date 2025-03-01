@@ -17,26 +17,25 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    public String generateToken(User user) {
+    public String generateToken(User user, long expiry) {
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole());
 
-        int EXPIRY = 1_44_000_00;
         return Jwts.builder()
                 .claims(claims)
                 .subject(user.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + EXPIRY))
+                .expiration(new Date(System.currentTimeMillis() + expiry * 1000))
                 .signWith(getKey()).compact();
     }
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return extractClaims(token, Claims::getSubject);
     }
 
     public boolean validateToken(String token, UserDetails details) {
-        final String username = extractUsername(token);
+        final String username = extractEmail(token);
         return (username.equals(details.getUsername()) && !isTokenExpired(token));
     }
 

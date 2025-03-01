@@ -7,7 +7,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class UserResponse {
+public class UserInfo {
     private Long id;
     private String name;
     private String email;
@@ -15,7 +15,7 @@ public class UserResponse {
     private LocalDateTime createdAt;
     private ApiKeyDto apikey;
 
-    public UserResponse(User user) {
+    public UserInfo(User user) {
         this.id = user.getId();
         this.name = user.getName();
         this.email = user.getEmail();

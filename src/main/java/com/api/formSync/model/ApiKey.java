@@ -19,7 +19,7 @@ public class ApiKey {
     @Column(nullable = false, unique = true)
     private String apiKey;
 
-    @OneToOne(optional = false)
+    @OneToOne
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     private User user;

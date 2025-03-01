@@ -26,8 +26,6 @@ public class ApiKeyService {
 
     public ApiKey create(User user) {
         String generatedKey = generateKey();
-//        Log.blue("Key:", generatedKey);
-//        String encodedKey = encryption.encrypt(generatedKey);
         ApiKey apiKey = new ApiKey(user, generatedKey);
         return repo.save(apiKey);
     }

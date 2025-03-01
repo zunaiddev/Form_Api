@@ -1,6 +1,7 @@
 package com.api.formSync.dto;
 
 import com.api.formSync.model.Form;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ public class FormResponse {
     private String email;
     private String subject;
     private String message;
+    @JsonFormat(pattern = "dd-mm-yy hh:mm:ss")
     private LocalDateTime submittedAt;
 
     public FormResponse(Form form) {
@@ -21,7 +23,7 @@ public class FormResponse {
         this.name = form.getName();
         this.email = form.getEmail();
         this.subject = form.getSubject();
-        this.message = form.getSubject();
+        this.message = form.getMessage();
         this.submittedAt = form.getSubmittedAt();
     }
 }

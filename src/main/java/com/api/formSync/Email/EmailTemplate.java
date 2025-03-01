@@ -44,7 +44,7 @@ public class EmailTemplate {
                     <a href="$LINK" class="button">Verify Email Address</a>
                     <p>If the button above doesn’t work, you can copy and paste the following URL into your browser:</p>
                     <p><a href="$LINK">$LINK</a></p>
-                    <p>Please note that this link will expire in 24hours, so be sure to verify your email soon.</p>
+                    <p>Please note that this link will expire in <b>15 minutes</b>, so be sure to verify your email soon.</p>
                     <p>If you did not create an account with us, please ignore this email</p>
                     <p>Thank you for choosing Form sync! We’re excited to have you on board.</p>
                   </div>
