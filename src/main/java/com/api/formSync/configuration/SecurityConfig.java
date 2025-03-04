@@ -66,10 +66,10 @@ public class SecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173")); // ✅ Allow frontend
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // ✅ Allow methods
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type")); // ✅ Allow headers
-        config.setAllowCredentials(true); // ✅ Allow authentication
+        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:63343", "https://zunaid.netlify.app/"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
