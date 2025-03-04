@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -18,6 +19,12 @@ public class EmailService {
 
     @Value("${spring.mail.username}")
     private String FROM;
+
+    @Async
+    public void sendEmailAsync(String to, String subject, String body) {
+        sendEmail(to, subject, body);
+        System.out.println("Email Sent to: " + to + " At: " + new Date());
+    }
 
     public void sendEmail(String to, String subject, String body) {
         MimeMessage message = mailSender.createMimeMessage();
