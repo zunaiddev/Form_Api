@@ -2,12 +2,13 @@ package com.api.formSync.service;
 
 import com.api.formSync.dto.FormRequest;
 import com.api.formSync.dto.FormResponse;
-import com.api.formSync.exception.InvalidFormIdException;
+import com.api.formSync.exception.ResourceNotFoundException;
 import com.api.formSync.model.Form;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.FormRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,10 +34,15 @@ public class FormService {
                 .collect(Collectors.toList());
     }
 
-    public FormResponse delete(Long id) {
-        Form form = repo.findById(id).orElseThrow(() -> new InvalidFormIdException("Invalid Form Id"));
+    public void delete(Long id, User user) {
+        Form form = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Form not found."));
+
+        if (!form.getUser().equals(user)) {
+            throw new AccessDeniedException("You are not authorized to delete this form");
+        }
+
         repo.delete(form);
-        return new FormResponse(form);
     }
 
     private String getKey(HttpServletRequest http) {

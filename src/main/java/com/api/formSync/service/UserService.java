@@ -48,17 +48,37 @@ public class UserService {
         repo.save(user);
     }
 
-    public void delete(String auth) {
-        User user = getUserFromHeader(auth);
+    public void delete(Authentication auth) {
+        User user = getByEmail(auth.getName());
     }
 
-    public UserInfo getUser(String auth) {
-        return new UserInfo(getUserFromHeader(auth));
+    public UserInfo getUser(Authentication auth) {
+        if (!auth.isAuthenticated()) {
+            throw new UsernameNotFoundException("Unauthorized");
+        }
+
+        User user = getByEmail(auth.getName());
+
+        return new UserInfo(user);
     }
 
-    public List<FormResponse> getForms(String auth) {
-        User user = getUserFromHeader(auth);
+    public List<FormResponse> getForms(Authentication auth) {
+        if (!auth.isAuthenticated()) {
+            throw new UsernameNotFoundException("Unauthorized");
+        }
+
+        User user = getByEmail(auth.getName());
+
         return formService.get(user);
+    }
+
+    public void deleteForm(Long id, Authentication auth) {
+        if (!auth.isAuthenticated()) {
+            throw new UsernameNotFoundException("Unauthorised");
+        }
+
+        User user = getByEmail(auth.getName());
+        formService.delete(id, user);
     }
 
 

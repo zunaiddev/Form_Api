@@ -1,17 +1,19 @@
 package com.api.formSync.exception;
 
+import com.api.formSync.util.Log;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,16 +88,36 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleBadCredentialsException(BadCredentialsException exp) {
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exp.getMessage());
+        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exp.getMessage());
     }
 
-    @ExceptionHandler(UsernameNotFoundException.class)
+    @ExceptionHandler(NoUserFoundException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handleUsernameNotFoundException(UsernameNotFoundException exp) {
+    public ErrorResponse handleUsernameNotFoundException(NoUserFoundException exp) {
+        Log.red("Invalid user");
         return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exp.getMessage());
     }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleResourceNotFoundException(ResourceNotFoundException exp) {
+        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exp.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleAccessDeniedException(AccessDeniedException exp) {
+        return new ErrorResponse(HttpStatus.FORBIDDEN.value(), exp.getMessage());
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoHandlerFoundException(NoHandlerFoundException exp) {
+        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exp.getMessage());
+    }
+
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

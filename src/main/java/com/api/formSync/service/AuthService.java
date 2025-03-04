@@ -57,7 +57,7 @@ public class AuthService {
     }
 
     private void sendEmail(String to, String name, String token) {
-        final String LINK = "http://localhost:5173/auth/verify-email?token=" + token;
+        final String LINK = "http://localhost:8080/auth/verify?token=" + token;
         emailService.sendEmail(to, "Verify Your Email Address", EmailTemplate.tokenBody(name, LINK));
     }
 
