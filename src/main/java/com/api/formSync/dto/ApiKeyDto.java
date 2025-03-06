@@ -12,11 +12,13 @@ public class ApiKeyDto {
     private int requests = 10;
     private int requestsLeft;
     private LocalDate lastUsed;
+    private boolean isActive;
 
     public ApiKeyDto(ApiKey apiKey) {
         this.id = apiKey.getId();
         this.key = apiKey.getApiKey();
         this.requestsLeft = requests - apiKey.getRequestCount();
         this.lastUsed = apiKey.getLastReset();
+        this.isActive = this.requestsLeft > 0;
     }
 }

@@ -13,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -27,7 +25,7 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<Map<String, String>> verify(@RequestParam @NotBlank String token) {
+    public ResponseEntity<String> verify(@RequestParam @NotBlank String token) {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(service.verify(token));
     }
 
@@ -36,7 +34,12 @@ public class AuthController {
         return ResponseEntity.ok(service.authenticate(req, response));
     }
 
-    @PostMapping("/refresh-token")
+    @GetMapping("/available/{email}")
+    public ResponseEntity<?> isAvailable(@PathVariable String email) {
+        return ResponseEntity.ok(service.isAvailable(email));
+    }
+
+    @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refreshToken(@CookieValue("refreshToken") String refreshToken) {
         LoginResponse response = service.refreshToken(refreshToken);
 

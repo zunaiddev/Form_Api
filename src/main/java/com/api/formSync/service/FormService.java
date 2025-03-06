@@ -54,7 +54,6 @@ public class FormService {
     }
 
     private String getKey(HttpServletRequest http) {
-        System.out.println("APi KEY: " + http.getHeader("X-API-KEY"));
         return http.getHeader("X-API-KEY");
     }
 }

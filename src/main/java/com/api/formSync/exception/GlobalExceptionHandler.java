@@ -1,6 +1,5 @@
 package com.api.formSync.exception;
 
-import com.api.formSync.util.Log;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -97,7 +96,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoUserFoundException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleUsernameNotFoundException(NoUserFoundException exp) {
-        Log.red("Invalid user");
         return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exp.getMessage());
     }
 

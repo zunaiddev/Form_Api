@@ -8,18 +8,16 @@ import com.api.formSync.dto.LoginResponse;
 import com.api.formSync.dto.SignupRequest;
 import com.api.formSync.dto.SignupResponse;
 import com.api.formSync.exception.DuplicateEntrypointEmailException;
-import com.api.formSync.model.ApiKey;
+import com.api.formSync.exception.UserAlreadyVerifiedException;
 import com.api.formSync.model.TempUser;
 import com.api.formSync.model.User;
-import com.api.formSync.util.Log;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +28,8 @@ public class AuthService {
     private final ApiKeyService apiKeyService;
     private final JwtService jwtService;
     private final TempUserService tempUserService;
+    @Value("${BASE_URL}")
+    private String BASE_URL;
 
     public SignupResponse register(SignupRequest req) {
 
@@ -40,25 +40,34 @@ public class AuthService {
         TempUser user = tempUserService.create(req);
         String token = tokenService.generateToken(user);
 
-        Log.blue("token", token);
         sendEmail(user.getEmail(), user.getName(), token);
 
         return new SignupResponse("User Created Successfully. Please Verify Your Email", req);
     }
 
-    public Map<String, String> verify(String token) {
+    public String isAvailable(String email) {
+        if (!userService.isAvailable(email)) {
+            throw new UserAlreadyVerifiedException("Unavailable");
+        }
+
+        return "Available";
+    }
+
+    public String verify(String token) {
         TempUser tempUser = tokenService.verify(token);
         User user = userService.create(tempUser);
-        ApiKey apiKey = apiKeyService.create(user);
-        user.setKey(apiKey);
+
+        user.setKey(apiKeyService.create(user));
         userService.save(user);
+
         tempUserService.delete(tempUser);
-        return Map.of("status", "Verified");
+        return "Verified";
     }
 
     private void sendEmail(String to, String name, String token) {
-        final String LINK = "http://localhost:8080/api/auth/verify?token=" + token;
+        final String LINK = "http://" + BASE_URL + "/api/auth/verify?token=" + token;
         emailService.sendEmail(to, "Verify Your Email Address", EmailTemplate.tokenBody(name, LINK));
+        System.out.println("\uD83D\uDCE7 Verification Email Sent to: " + to);
     }
 
     public LoginResponse authenticate(LoginRequest req, HttpServletResponse response) {

@@ -99,4 +99,9 @@ public class UserService {
     public boolean isExists(String email) {
         return repo.findByEmail(email).isPresent();
     }
+
+    public boolean isAvailable(String email) {
+        User user = repo.findByEmail(email).orElse(null);
+        return user == null;
+    }
 }

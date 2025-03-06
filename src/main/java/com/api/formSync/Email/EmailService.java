@@ -23,7 +23,7 @@ public class EmailService {
     @Async
     public void sendEmailAsync(String to, String subject, String body) {
         sendEmail(to, subject, body);
-        System.out.println("Email Sent to: " + to + " At: " + new Date());
+        System.out.println("\uD83D\uDCE7 Email Sent to: " + to);
     }
 
     public void sendEmail(String to, String subject, String body) {

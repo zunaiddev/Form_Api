@@ -69,7 +69,6 @@ public class ApiKeyService {
     }
 
     public User getUser(String key) {
-        System.out.println("Sending user:" + key);
         ApiKey apiKey = repo.findByApiKey(key).orElseThrow(() -> new InvalidApiKeyException("Invalid Api key"));
         System.out.println(apiKey.getId());
         return apiKey.getUser();

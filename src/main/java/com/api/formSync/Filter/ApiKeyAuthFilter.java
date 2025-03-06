@@ -2,7 +2,6 @@ package com.api.formSync.Filter;
 
 import com.api.formSync.exception.TodayLimitReachedException;
 import com.api.formSync.service.ApiKeyService;
-import com.api.formSync.util.Log;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,9 +36,7 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
         try {
             Authentication auth = keyService.getAuthentication(API_KEY);
-            Log.green("Authentication got");
             SecurityContextHolder.getContext().setAuthentication(auth);
-            Log.green("Context Holder Set");
             filterChain.doFilter(request, response);
         } catch (TodayLimitReachedException exp) {
             response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), exp.getMessage());

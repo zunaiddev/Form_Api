@@ -13,7 +13,7 @@ public class UserInfo {
     private String email;
     private Role role;
     private LocalDateTime createdAt;
-    private ApiKeyDto apikey;
+    private ApiKeyDto keyInfo;
 
     public UserInfo(User user) {
         this.id = user.getId();
@@ -21,6 +21,6 @@ public class UserInfo {
         this.email = user.getEmail();
         this.role = user.getRole();
         this.createdAt = user.getCreatedAt();
-        this.apikey = new ApiKeyDto(user.getKey());
+        this.keyInfo = new ApiKeyDto(user.getKey());
     }
 }
