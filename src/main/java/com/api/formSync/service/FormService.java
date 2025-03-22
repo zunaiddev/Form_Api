@@ -30,7 +30,7 @@ public class FormService {
         Form submittedForm = repo.save(form);
 
         if (user.getRole().equals(Role.ADMIN)) {
-            emailService.sendEmailAsync(req.getEmail(), "Thank You for Contacting Me", EmailTemplate.adminBody(req.getName()));
+            emailService.sendEmailAsync(req.getEmail(), "Thank You for Contacting Zunaid", EmailTemplate.adminBody(req.getName()));
         }
 
         return new FormResponse(submittedForm);

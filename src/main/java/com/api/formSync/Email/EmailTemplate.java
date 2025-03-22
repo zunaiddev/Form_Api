@@ -58,7 +58,7 @@ public class EmailTemplate {
                 "<head>\n" +
                 "    <meta charset=\"UTF-8\">\n" +
                 "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-                "    <title>Thank You for Contacting Me</title>\n" +
+                "    <title>Thank You for Contacting Zunaid</title>\n" +
                 "    <style>\n" +
                 "        body {\n" +
                 "            font-family: Arial, sans-serif;\n" +
@@ -124,18 +124,15 @@ public class EmailTemplate {
                 "</head>\n" +
                 "<body>\n" +
                 "    <div class=\"email-container\">\n" +
-                "        <div class=\"header\">\n" +
-                "            <h1>Thank You for Reaching Out!</h1>\n" +
-                "        </div>\n" +
                 "        <div class=\"content\">\n" +
                 "            <h2>Hello " + name + ",</h2>\n" +
-                "            <p>Thank you for submitting the form on my portfolio website. I have received your message and will get back to you as soon as possible.</p>\n" +
+                "            <p>Thank you for reaching out! I have received your message and will get back to you as soon as possible.\n</p>\n" +
                 "            <p>If you have any urgent inquiries, feel free to contact me directly at <a href=\"mailto:zunaiddev@outlook.com\">zunaiddev@outlook.com</a>.</p>\n" +
                 "            <p>Best regards,</p>\n" +
                 "            <p>Zunaid</p>\n" +
                 "        </div>\n" +
                 "        <div class=\"footer\">\n" +
-                "            <p>You are receiving this email because you submitted a form on <a href=\"https://zunaid.netlify.app/\">portfolio</a>.</p>\n" +
+                "            <p>You are receiving this email because you submitted a form on <a href=\"https://zunaid.netlify.app/\">my portfolio</a>.</p>\n" +
                 "            <p>If you did not submit this form, please ignore this email.</p>\n" +
                 "        </div>\n" +
                 "    </div>\n" +
