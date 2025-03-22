@@ -12,15 +12,22 @@ public class RequestLoggerInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        System.out.println("🔹 Request Received: " + LocalDateTime.now());
-        System.out.println("🔹 Method: " + request.getMethod());
-        System.out.println("🔹 URL: " + request.getRequestURI());
-        System.out.println("🔹 IP Address: " + request.getRemoteAddr());
+        System.out.println("Request Received: " + LocalDateTime.now());
+        System.out.println("Method: " + request.getMethod());
+        System.out.println("URL: " + request.getRequestURI());
+        System.out.println("IP Address: " + request.getRemoteAddr());
         return true;
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        System.out.println("✅ Response Status: " + response.getStatus());
+        System.out.print("Response Status: ");
+
+        if (response.getStatus() > 300){
+           Log.red(Integer.toString(response.getStatus()));
+       }
+        Log.green(Integer.toString(response.getStatus()));
+
+        System.out.println();
     }
 }
