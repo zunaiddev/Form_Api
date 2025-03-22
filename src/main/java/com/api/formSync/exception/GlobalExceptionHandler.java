@@ -28,21 +28,29 @@ public class GlobalExceptionHandler {
 
         for (FieldError error : exp.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
+            log.error("Validation Failed for {} Cause {}", error.getField(), error.getDefaultMessage());
         }
-
         return errors;
     }
 
     @ExceptionHandler(DuplicateEntrypointEmailException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleDuplicateEntrypointEmailException(DuplicateEntrypointEmailException exp) {
+        log.error("Duplicate Email Entry {}", exp.getMessage());
         return new ErrorResponse(HttpStatus.CONFLICT.value(), exp.getMessage());
     }
 
     @ExceptionHandler(MessagingException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleMessagingException(MessagingException exp) {
-        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Could not send an verification Email Please try resend Email");
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to send Email");
+    }
+
+    @ExceptionHandler(EmailSenderFailException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleEmailSenderFailException(EmailSenderFailException exp) {
+        log.error("Failed to send email {}", exp.getMessage());
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to send Email.");
     }
 
     @ExceptionHandler(InvalidTokenException.class)

@@ -1,6 +1,7 @@
 package com.api.formSync.Email;
 
 import com.api.formSync.exception.EmailSenderFailException;
+import com.api.formSync.util.Log;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class EmailService {
     @Async
     public void sendEmailAsync(String to, String subject, String body) {
         sendEmail(to, subject, body);
-        System.out.println("\uD83D\uDCE7 Email Sent to: " + to);
+        Log.blue("Email sent to: ", to);
     }
 
     public void sendEmail(String to, String subject, String body) {
