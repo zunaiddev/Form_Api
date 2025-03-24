@@ -25,6 +25,7 @@ public class RequestLoggerInterceptor implements HandlerInterceptor {
 
         if (response.getStatus() > 300){
            Log.red(Integer.toString(response.getStatus()));
+            return;
        }
         Log.green(Integer.toString(response.getStatus()));
 

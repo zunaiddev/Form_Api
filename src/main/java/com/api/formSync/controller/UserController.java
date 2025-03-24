@@ -1,8 +1,10 @@
 package com.api.formSync.controller;
 
 import com.api.formSync.dto.FormResponse;
+import com.api.formSync.dto.UpdateEmailRequest;
 import com.api.formSync.dto.UserInfo;
 import com.api.formSync.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,6 +26,16 @@ public class UserController {
     @GetMapping("/forms")
     public ResponseEntity<List<FormResponse>> getForms(Authentication auth) {
         return ResponseEntity.ok(service.getForms(auth));
+    }
+
+    @PutMapping("/update-email")
+    public ResponseEntity<UserInfo> updateEmail(@RequestBody @Valid UpdateEmailRequest req, Authentication auth) {
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/update-password")
+    public ResponseEntity<UserInfo> updateEmail() {
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/forms/{id}")

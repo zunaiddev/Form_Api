@@ -56,4 +56,8 @@ public class FormService {
     private String getKey(HttpServletRequest http) {
         return http.getHeader("X-API-KEY");
     }
+
+    public List<FormResponse> get() {
+        return repo.findAll().stream().map(FormResponse::new).toList();
+    }
 }
