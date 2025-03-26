@@ -1,9 +1,10 @@
-package com.api.formSync.service;
+package com.api.formSync.Service;
 
 import com.api.formSync.exception.InvalidTokenException;
 import com.api.formSync.exception.TokenExpiredException;
 import com.api.formSync.model.TempUser;
 import com.api.formSync.model.Token;
+import com.api.formSync.model.User;
 import com.api.formSync.repository.TokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,15 +28,27 @@ public class TokenService {
     }
 
     public TempUser verify(String token) {
-        Token savedToken = repo.findByToken(token)
-                .orElseThrow(() -> new InvalidTokenException("Invalid Token"));
+        Token savedToken = get(token);
 
-        if (savedToken.getExpiry().isBefore(LocalDateTime.now())) {
+        if (isExpired(savedToken)) {
             throw new TokenExpiredException("Token has expired. Please Signup again");
         }
 
         repo.delete(savedToken);
 
         return savedToken.getUser();
+    }
+
+    public User verifyResetPassword(String token) {
+        
+    }
+
+    private boolean isExpired(Token token) {
+        return token.getExpiry().isBefore(LocalDateTime.now());
+    }
+
+    private Token get(String token) {
+        return repo.findByToken(token)
+                .orElseThrow(() -> new InvalidTokenException("Invalid Token"));
     }
 }

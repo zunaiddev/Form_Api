@@ -1,9 +1,9 @@
 package com.api.formSync.controller;
 
+import com.api.formSync.Service.UserService;
 import com.api.formSync.dto.FormResponse;
 import com.api.formSync.dto.UpdateEmailRequest;
 import com.api.formSync.dto.UserInfo;
-import com.api.formSync.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.api.formSync.service;
+package com.api.formSync.Service;
 
 import com.api.formSync.model.User;
 import io.jsonwebtoken.Claims;

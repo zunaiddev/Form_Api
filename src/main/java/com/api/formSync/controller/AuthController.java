@@ -1,13 +1,14 @@
 package com.api.formSync.controller;
 
+import com.api.formSync.Service.AuthService;
 import com.api.formSync.dto.LoginRequest;
 import com.api.formSync.dto.LoginResponse;
 import com.api.formSync.dto.SignupRequest;
 import com.api.formSync.dto.SignupResponse;
-import com.api.formSync.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,5 +49,10 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset")
+    public ResponseEntity<String> resetPassword(@PathParam("token") @NotBlank String token, @NotBlank String password) {
+        return ResponseEntity.ok(service.resetPassword(token));
     }
 }

@@ -1,4 +1,4 @@
-package com.api.formSync.service;
+package com.api.formSync.Service;
 
 import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.exception.NoUserFoundException;
@@ -15,8 +15,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) {
-        System.out.println("user details service entered");
-
         return repo.findByEmail(email)
                 .map(UserPrincipal::new)
                 .orElseThrow(() -> new NoUserFoundException("Invalid username or password"));

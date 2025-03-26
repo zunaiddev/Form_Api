@@ -1,9 +1,7 @@
 package com.api.formSync.controller;
 
-import com.api.formSync.dto.FormResponse;
+import com.api.formSync.Service.AdminService;
 import com.api.formSync.dto.UserInfo;
-import com.api.formSync.model.User;
-import com.api.formSync.service.AdminService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.websocket.server.PathParam;
@@ -12,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -34,35 +33,14 @@ public class AdminController {
         return ResponseEntity.ok(service.getUser(email));
     }
 
-    @PutMapping("/users/{id}")
-    public ResponseEntity<User> update(@PathVariable @NotNull Long id) {
-        return ResponseEntity.ok().build();
-    }
-
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<?> delete(@PathVariable @NotNull Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable @NotNull Long id) {
         service.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/users/forms/{id}")
-    public ResponseEntity<List<FormResponse>> formsByUserId(@PathVariable @NotNull Long id) {
-        return ResponseEntity.ok(service.getFormsByUserId(id));
-    }
-
-    @GetMapping("/forms")
-    public ResponseEntity<List<FormResponse>> form() {
-        return ResponseEntity.ok(service.getForms());
-    }
-
-    @GetMapping("/forms/{id}")
-    public ResponseEntity<FormResponse> form(@PathVariable @NotNull Long id) {
-        return ResponseEntity.ok(service.getForm(id));
-    }
-
-    @DeleteMapping("/forms/{id}")
-    public ResponseEntity<?> deleteForm(@PathVariable @NotNull Long id) {
-        service.deleteForm(id);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/users/{id}")
+    public ResponseEntity<UserInfo> updateUser(@PathVariable @NotNull Long id, @RequestBody @NotNull Map<String, Object> updates) {
+        return ResponseEntity.ok(service.updateUser(id, updates));
     }
 }

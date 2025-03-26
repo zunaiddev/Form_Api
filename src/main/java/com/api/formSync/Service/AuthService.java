@@ -1,4 +1,4 @@
-package com.api.formSync.service;
+package com.api.formSync.Service;
 
 import com.api.formSync.Email.EmailService;
 import com.api.formSync.Email.EmailTemplate;
@@ -55,10 +55,10 @@ public class AuthService {
 
     public String verify(String token) {
         TempUser tempUser = tokenService.verify(token);
-        User user = userService.create(tempUser);
+        User user = userService.save(new User(tempUser.getName(), tempUser.getEmail(), tempUser.getPassword()));
 
         user.setKey(apiKeyService.create(user));
-        userService.save(user);
+        userService.update(user);
 
         tempUserService.delete(tempUser);
         return "Verified";
@@ -76,7 +76,7 @@ public class AuthService {
             return new LoginResponse(HttpStatus.UNAUTHORIZED.value(), null);
         }
 
-        User user = userService.getByEmail(req.getEmail());
+        User user = userService.get(req.getEmail());
 
         String accessToken = jwtService.generateToken(user, 900);
         String refreshToken = jwtService.generateToken(user, 2_592_000);
@@ -104,7 +104,7 @@ public class AuthService {
             return null;
         }
 
-        User user = userService.getByEmail(email);
+        User user = userService.get(email);
 
         if (!jwtService.validateToken(refreshToken, new UserPrincipal(user))) {
             return null;
@@ -113,5 +113,10 @@ public class AuthService {
         String accessToken = jwtService.generateToken(user, 900);
 
         return new LoginResponse(HttpStatus.OK.value(), accessToken);
+    }
+
+    public String resetPassword(String token) {
+        User user = tokenService.verify(token);
+        return "Successfully Reset The password";
     }
 }

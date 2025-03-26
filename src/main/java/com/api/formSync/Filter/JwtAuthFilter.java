@@ -1,7 +1,7 @@
 package com.api.formSync.Filter;
 
-import com.api.formSync.service.JwtService;
-import com.api.formSync.service.UserDetailsServiceImpl;
+import com.api.formSync.Service.JwtService;
+import com.api.formSync.Service.UserDetailsServiceImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;

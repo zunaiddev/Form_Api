@@ -1,7 +1,6 @@
-package com.api.formSync.service;
+package com.api.formSync.Service;
 
 import com.api.formSync.Principal.ApiKeyPrincipal;
-import com.api.formSync.dto.FormResponse;
 import com.api.formSync.exception.InvalidApiKeyException;
 import com.api.formSync.exception.TodayLimitReachedException;
 import com.api.formSync.model.ApiKey;
@@ -14,28 +13,20 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.time.LocalDate;
-import java.util.Base64;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ApiKeyService {
-    private static final SecureRandom secureRandom = new SecureRandom();
-    private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder().withoutPadding();
     private final ApiKeyRepository repo;
 
     public ApiKey create(User user) {
-        String generatedKey = generateKey();
-        ApiKey apiKey = new ApiKey(user, generatedKey);
+        ApiKey apiKey = new ApiKey(user);
         return repo.save(apiKey);
     }
 
 
     public Authentication getAuthentication(String key) {
-//        String encryptedKey = encryption.encrypt(key);
-//        Log.blue("Encrypted User Key: ", encryptedKey);
         ApiKey matchedKey = repo.findByApiKey(key)
                 .orElseThrow(() -> new InvalidApiKeyException("Invalid API Key"));
 
@@ -64,16 +55,9 @@ public class ApiKeyService {
         );
     }
 
-    private String generateKey() {
-        byte[] bytes = new byte[32];
-        secureRandom.nextBytes(bytes);
-        return base64Encoder.encodeToString(bytes);
-    }
-
     public User getUser(String key) {
         ApiKey apiKey = repo.findByApiKey(key).orElseThrow(() -> new InvalidApiKeyException("Invalid Api key"));
         System.out.println(apiKey.getId());
         return apiKey.getUser();
     }
-
 }

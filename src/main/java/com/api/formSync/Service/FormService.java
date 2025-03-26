@@ -1,4 +1,4 @@
-package com.api.formSync.service;
+package com.api.formSync.Service;
 
 import com.api.formSync.Email.EmailService;
 import com.api.formSync.Email.EmailTemplate;

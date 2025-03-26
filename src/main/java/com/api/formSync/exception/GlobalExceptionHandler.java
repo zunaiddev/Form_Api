@@ -2,6 +2,7 @@ package com.api.formSync.exception;
 
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -31,6 +32,12 @@ public class GlobalExceptionHandler {
             log.error("Validation Failed for {} Cause {}", error.getField(), error.getDefaultMessage());
         }
         return errors;
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleValidatorException(ValidationException exp) {
+        return new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), exp.getMessage());
     }
 
     @ExceptionHandler(DuplicateEntrypointEmailException.class)

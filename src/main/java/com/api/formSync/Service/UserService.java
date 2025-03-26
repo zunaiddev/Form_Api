@@ -1,9 +1,8 @@
-package com.api.formSync.service;
+package com.api.formSync.Service;
 
 import com.api.formSync.dto.FormResponse;
 import com.api.formSync.dto.UserInfo;
 import com.api.formSync.exception.DuplicateEntrypointEmailException;
-import com.api.formSync.model.TempUser;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,31 +25,33 @@ public class UserService {
     private final PasswordEncoder encoder;
     private final TokenService tokenService;
 
-    public User create(TempUser tempUser) {
+    public List<User> get() {
+        return repo.findAll();
+    }
 
-        if (repo.findByEmail(tempUser.getEmail()).isPresent()) {
-            throw new DuplicateEntrypointEmailException(String.format("User with %s email Already Exists", tempUser.getEmail()));
+    public User get(String email) {
+        return repo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Invalid Email Address"));
+    }
+
+    public User get(Long id) {
+        System.out.println(repo.findById(id));
+        return repo.findById(id).orElseThrow(() -> new EntityNotFoundException("User not Found With id: " + id));
+    }
+
+    public User save(User user) {
+        if (repo.findByEmail(user.getEmail()).isPresent()) {
+            throw new DuplicateEntrypointEmailException(String.format("User with %s email Already Exists", user.getEmail()));
         }
-
-        User user = new User(tempUser.getName(), tempUser.getEmail(), tempUser.getPassword());
 
         return repo.save(user);
     }
 
-    public User getByEmail(String email) {
-        return repo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Invalid Email Address"));
+    public User update(User user) {
+        return repo.save(user);
     }
 
-    public User getById(Long id) {
-        return repo.findById(id).orElseThrow(() -> new EntityNotFoundException("User not Found"));
-    }
-
-    public void save(User user) {
-        repo.save(user);
-    }
-
-    public void delete(Authentication auth) {
-        User user = getByEmail(auth.getName());
+    public void delete(Long id) {
+        repo.deleteById(id);
     }
 
     public UserInfo getUser(Authentication auth) {
@@ -58,7 +59,7 @@ public class UserService {
             throw new UsernameNotFoundException("Unauthorized");
         }
 
-        User user = getByEmail(auth.getName());
+        User user = get(auth.getName());
 
         return new UserInfo(user);
     }
@@ -68,7 +69,7 @@ public class UserService {
             throw new UsernameNotFoundException("Unauthorized");
         }
 
-        User user = getByEmail(auth.getName());
+        User user = get(auth.getName());
 
         return formService.get(user);
     }
@@ -78,7 +79,7 @@ public class UserService {
             throw new UsernameNotFoundException("Unauthorised");
         }
 
-        User user = getByEmail(auth.getName());
+        User user = get(auth.getName());
         formService.delete(id, user);
     }
 
@@ -93,5 +94,11 @@ public class UserService {
     public boolean isAvailable(String email) {
         User user = repo.findByEmail(email).orElse(null);
         return user == null;
+    }
+
+    public void changePassword(Long id, String newPassword) {
+        User user = get(id);
+        user.setPassword(encoder.encode(newPassword));
+        repo.save(user);
     }
 }

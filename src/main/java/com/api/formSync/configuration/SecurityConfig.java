@@ -3,7 +3,7 @@ package com.api.formSync.configuration;
 import com.api.formSync.Filter.ApiKeyAuthFilter;
 import com.api.formSync.Filter.JwtAuthFilter;
 import com.api.formSync.Security.CustomAuthenticationEntryPoint;
-import com.api.formSync.service.UserDetailsServiceImpl;
+import com.api.formSync.Service.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
