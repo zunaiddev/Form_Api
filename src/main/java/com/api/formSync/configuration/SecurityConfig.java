@@ -2,6 +2,7 @@ package com.api.formSync.configuration;
 
 import com.api.formSync.Filter.ApiKeyAuthFilter;
 import com.api.formSync.Filter.JwtAuthFilter;
+import com.api.formSync.Filter.VerificationFilter;
 import com.api.formSync.Security.CustomAuthenticationEntryPoint;
 import com.api.formSync.Service.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,7 @@ public class SecurityConfig {
     private final ApiKeyAuthFilter apiKeyAuthFilter;
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomAuthenticationEntryPoint authEntryPoint;
+    private final VerificationFilter verificationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,6 +48,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthFilter, ApiKeyAuthFilter.class)
+                .addFilterAfter(verificationFilter, JwtAuthFilter.class)
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(AbstractHttpConfigurer::disable);
 

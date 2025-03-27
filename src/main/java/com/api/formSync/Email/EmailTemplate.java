@@ -1,5 +1,7 @@
 package com.api.formSync.Email;
 
+import jakarta.validation.constraints.NotNull;
+
 public class EmailTemplate {
     public static String tokenBody(String name, String link) {
         return """
@@ -22,7 +24,8 @@ public class EmailTemplate {
                       padding: 20px;
                       background-color: #ffffff;
                       border-radius: 8px;
-                      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                      border: 2px solid white;
+                      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
                     }
                     .button {
                       display: inline-block;
@@ -33,7 +36,10 @@ public class EmailTemplate {
                       background-color: #007bff;
                       text-decoration: none;
                       border-radius: 5px;
-                    }
+                     }
+                     a{
+                        word-break: break-all;
+                     }
                   </style>
                 </head>
                 <body>
@@ -50,7 +56,7 @@ public class EmailTemplate {
                   </div>
                 </body>
                 </html>
-                """.replace("$NAME", name).replace("$LINK", link);
+                \s""".replace("$NAME", name).replace("$LINK", link);
     }
 
     public static String adminBody(String name) {
@@ -138,5 +144,115 @@ public class EmailTemplate {
                 "    </div>\n" +
                 "</body>\n" +
                 "</html>";
+    }
+
+    public static String resetPassword(String name, String link) {
+        return """
+                <html lang="en">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Email Verification</title>
+                  <style>
+                    body {
+                      font-family: Arial, sans-serif;
+                      line-height: 1.6;
+                      margin: 0;
+                      padding: 0;
+                      background-color: #000000;
+                      color: #ffffff;
+                    }
+                    .email-container {
+                      max-width: 600px;
+                      margin: 20px auto;
+                      padding: 20px;
+                      border-radius: 8px;
+                      border: 2px solid white;
+                      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+                    }
+                    .button {
+                      display: inline-block;
+                      padding: 10px 20px;
+                      margin: 20px auto;
+                      font-size: 16px;
+                      color: #ffffff;
+                      background-color: #007bff;
+                      text-decoration: none;
+                      border-radius: 5px;
+                     }
+                     a{
+                        word-break: break-all;
+                     }
+                  </style>
+                </head>
+                <body>
+                  <div class="email-container">
+                    <h2>Reset Your Password</h2>
+                    <p>Dear $NAME,</p>
+                    <p>We received a request to reset your password. Click the button below to reset it:</p>
+                    <a href="$LINK" class="button">Reset Password</a>
+                    <p>If the button above doesn’t work, you can copy and paste the following URL into your browser:</p>
+                    <p><a href="$LINK">$LINK</a></p>
+                    <p>Please note that this link will expire in <b>15 minutes</b>, so be sure to verify your email soon.</p>
+                    <p>If you did not request this, please ignore this email or contact our support team for assistance.</p>
+                  </div>
+                </body>
+                </html>
+                \s""".replace("$NAME", name).replace("$LINK", link);
+    }
+
+    public static String updateEmail(@NotNull String name, String url) {
+        return """
+                <html lang="en">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Email Verification</title>
+                  <style>
+                    body {
+                      font-family: Arial, sans-serif;
+                      line-height: 1.6;
+                      margin: 0;
+                      padding: 0;
+                      background-color: #000000;
+                      color: #ffffff;
+                    }
+                    .email-container {
+                      max-width: 600px;
+                      margin: 20px auto;
+                      padding: 20px;
+                      border-radius: 8px;
+                      border: 2px solid white;
+                      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+                    }
+                    .button {
+                      display: inline-block;
+                      padding: 10px 20px;
+                      margin: 20px auto;
+                      font-size: 16px;
+                      color: #ffffff;
+                      background-color: #007bff;
+                      text-decoration: none;
+                      border-radius: 5px;
+                     }
+                     a{
+                        word-break: break-all;
+                     }
+                  </style>
+                </head>
+                <body>
+                  <div class="email-container">
+                    <h2>Verify Your Email</h2>
+                    <p>Dear $NAME,</p>
+                    <p>We received a request to update your Email. Click the button below to update it:</p>
+                    <a href="$LINK" class="button">Update Email</a>
+                    <p>If the button above doesn’t work, you can copy and paste the following URL into your browser:</p>
+                    <p><a href="$LINK">$LINK</a></p>
+                    <p>Please note that this link will expire in <b>15 minutes</b>, so be sure to verify your email soon.</p>
+                    <small>If you did not request this, please ignore this email or contact our support team for assistance.</small>
+                  </div>
+                </body>
+                </html>
+                \s""".replace("$NAME", name).replace("$LINK", url);
     }
 }

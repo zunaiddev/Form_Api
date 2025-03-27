@@ -1,15 +1,10 @@
 package com.api.formSync.repository;
 
-import com.api.formSync.model.TempUser;
-import com.api.formSync.model.Token;
+import com.api.formSync.model.UsedToken;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
-public interface TokenRepository extends JpaRepository<Token, Long> {
-    Optional<Token> findByToken(String token);
-
-    Optional<Token> findByUser(TempUser user);
+public interface TokenRepository extends JpaRepository<UsedToken, Long> {
+    Optional<UsedToken> findByToken(String token);
 }

@@ -6,6 +6,7 @@ import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -136,6 +137,24 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleInternalAuthenticationServiceException(InternalAuthenticationServiceException exp) {
         return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exp.getMessage());
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleDisabledException(DisabledException exp) {
+        return new ErrorResponse(HttpStatus.FORBIDDEN.value(), "User is Disabled. Please Verify Your Email.");
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleForbiddenException(ForbiddenException exp) {
+        return new ErrorResponse(HttpStatus.FORBIDDEN.value(), exp.getMessage());
+    }
+
+    @ExceptionHandler(UnauthorisedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleDisabledException(UnauthorisedException exp) {
+        return new ErrorResponse(HttpStatus.FORBIDDEN.value(), exp.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

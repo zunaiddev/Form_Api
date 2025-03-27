@@ -101,6 +101,6 @@ public class AdminService {
     }
 
     public void deleteUser(Long id) {
-        userService.delete(id);
+        userService.deleteImmediately(id);
     }
 }

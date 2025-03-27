@@ -21,6 +21,9 @@ public class UserInfo {
         this.email = user.getEmail();
         this.role = user.getRole();
         this.createdAt = user.getCreatedAt();
-        this.keyInfo = new ApiKeyDto(user.getKey());
+        if (!(user.getKey() == null)) {
+            this.keyInfo = new ApiKeyDto(user.getKey());
+        }
+        System.out.println("passed");
     }
 }

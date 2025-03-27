@@ -38,7 +38,14 @@ public class User {
     private boolean locked = false;
 
     @NotNull
-    private boolean enabled = true;
+    private boolean enabled = false;
+
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
+    @Column(name = "delete_at")
+    private LocalDateTime deleteAt;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

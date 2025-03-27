@@ -1,30 +1,27 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 @Service
 public class JwtService {
+    @Value("${SECRET_KEY}")
+    private String secretKey;
 
-    public String generateToken(User user, long expiry) {
-
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getRole());
-
+    public String generateToken(String email, Map<String, Object> claims, long expiry) {
         return Jwts.builder()
                 .claims(claims)
-                .subject(user.getEmail())
+                .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiry * 1000))
                 .signWith(getKey()).compact();
@@ -32,6 +29,10 @@ public class JwtService {
 
     public String extractEmail(String token) {
         return extractClaims(token, Claims::getSubject);
+    }
+
+    public Claims extractClaims(String token) {
+        return extractAllClaims(token);
     }
 
     public boolean validateToken(String token, UserDetails details) {
@@ -61,7 +62,6 @@ public class JwtService {
     }
 
     private SecretKey getKey() {
-        String secretKey = "fc92e7de782d3542a5778e53a3589cd342af4835a422f18b04f963f3eeab1c2b2445a3b679b00b3849ad43120a9b8c03f3796aec4eef649fffa7e40e9eb5c713";
         byte[] bytes = Base64.getEncoder().withoutPadding().encode(secretKey.getBytes());
         return Keys.hmacShaKeyFor(bytes);
     }
