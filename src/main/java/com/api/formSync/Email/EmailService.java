@@ -39,7 +39,7 @@ public class EmailService {
             helper.setText(body, true);
             message.addHeader("List-Unsubscribe", "<mailto:unsubscribe@zunaiddev@gmail.com>, <https://formsync.com/unsubscribe>");
         } catch (MessagingException e) {
-            throw new EmailSenderFailException();
+            throw new EmailSenderFailException("Unable To Send Email.");
         }
         mailSender.send(message);
     }

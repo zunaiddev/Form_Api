@@ -44,7 +44,7 @@ public class UserService {
 
         if (user != null) {
             if (user.isEnabled()) {
-                throw new DuplicateEntrypointEmailException("user with email already exist.");
+                throw new DuplicateEntrypointEmailException("User With email " + email + " exists.");
             }
 
             user.setName(name);
@@ -64,7 +64,7 @@ public class UserService {
     }
 
     public User get(String email) {
-        return repo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Invalid Email Address"));
+        return repo.findByEmail(email).orElseThrow(() -> new UnauthorisedException("Could Not Found Any Account With Email " + email));
     }
 
     public User get(Long id) {

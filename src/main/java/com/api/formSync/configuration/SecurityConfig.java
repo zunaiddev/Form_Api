@@ -73,7 +73,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
         CorsConfiguration publicCorsConfig = new CorsConfiguration();
-        publicCorsConfig.setAllowedOrigins(List.of("*")); // ✅ Allow all origins for public
+        publicCorsConfig.setAllowedOrigins(List.of("*"));
         publicCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         publicCorsConfig.setAllowedHeaders(List.of("*"));
         source.registerCorsConfiguration("/public/**", publicCorsConfig);
@@ -85,10 +85,11 @@ public class SecurityConfig {
         ));
         privateCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         privateCorsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        privateCorsConfig.setAllowCredentials(true); // Needed for authentication
+        privateCorsConfig.setAllowCredentials(true);
 
         source.registerCorsConfiguration("/auth/**", privateCorsConfig);
         source.registerCorsConfiguration("/user/**", privateCorsConfig);
+        source.registerCorsConfiguration("/verify/**", privateCorsConfig);
 
         return source;
     }

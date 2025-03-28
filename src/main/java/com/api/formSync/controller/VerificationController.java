@@ -2,7 +2,9 @@ package com.api.formSync.controller;
 
 import com.api.formSync.Service.VerificationService;
 import com.api.formSync.dto.ResetPasswordRequest;
-import com.api.formSync.dto.Response;
+import com.api.formSync.dto.SuccessResponse;
+import com.api.formSync.exception.RequestBodyIsMissingException;
+import com.api.formSync.exception.SomethingWentWrongException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
@@ -21,24 +23,24 @@ public class VerificationController {
     private final VerificationService service;
 
     @PostMapping
-    private ResponseEntity<Response> verify(HttpServletRequest http, @PathParam("token") String token,
-                                            @RequestBody(required = false) @Valid ResetPasswordRequest req) {
+    private ResponseEntity<SuccessResponse> verify(HttpServletRequest http, @PathParam("token") String token,
+                                                   @RequestBody(required = false) @Valid ResetPasswordRequest req) {
         String purpose = http.getAttribute("purpose").toString();
         String email = http.getAttribute("email").toString();
         System.out.println(req);
 
         if (purpose.equals("reset_password") && req == null) {
-            return new ResponseEntity<>(Response.build(HttpStatus.BAD_REQUEST, "new password is Missing"), HttpStatus.BAD_REQUEST);
+            throw new RequestBodyIsMissingException("Please Provide new Password.");
         }
 
         return switch (purpose) {
-            case "verify_user" -> ResponseEntity.ok(Response.build(HttpStatus.OK, service.verifyUser(email, token)));
+            case "verify_user" ->
+                    ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "User Verified Successfully", service.verifyUser(email, token)));
             case "reset_password" ->
-                    ResponseEntity.ok(Response.build(HttpStatus.OK, service.resetPassword(email, req.getPassword(), token)));
+                    ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Password Reset Successfully", service.resetPassword(email, req.getPassword(), token)));
             case "update_email" ->
-                    ResponseEntity.ok(Response.build(HttpStatus.OK, service.updateEmail(email, http.getAttribute("newEmail").toString(), token)));
-            default ->
-                    new ResponseEntity<>(Response.build(HttpStatus.BAD_REQUEST, "Something Went Wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
+                    ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Email Updated", service.updateEmail(email, http.getAttribute("newEmail").toString(), token)));
+            default -> throw new SomethingWentWrongException("Something Went Wrong.");
         };
     }
 }

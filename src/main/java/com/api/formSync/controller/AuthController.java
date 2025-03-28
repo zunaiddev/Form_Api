@@ -1,7 +1,10 @@
 package com.api.formSync.controller;
 
 import com.api.formSync.Service.AuthService;
-import com.api.formSync.dto.*;
+import com.api.formSync.dto.EmailRequest;
+import com.api.formSync.dto.LoginRequest;
+import com.api.formSync.dto.SignupRequest;
+import com.api.formSync.dto.SuccessResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,34 +19,26 @@ public class AuthController {
     private final AuthService service;
 
     @PostMapping("/signup")
-    public ResponseEntity<Response> register(@Valid @RequestBody SignupRequest req) {
+    public ResponseEntity<SuccessResponse> register(@Valid @RequestBody SignupRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Response.build(HttpStatus.CREATED, service.register(req)));
+                .body(SuccessResponse.build(HttpStatus.CREATED, "User created Successfully.", service.register(req)));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Response> login(@Valid @RequestBody LoginRequest req, HttpServletResponse response) {
-        return ResponseEntity.ok(Response.build(HttpStatus.OK, service.authenticate(req, response)));
-    }
-
-    @GetMapping("/available")
-    public ResponseEntity<Response> isAvailable(@RequestBody @Valid EmailRequest req) {
-        return ResponseEntity.ok(Response.build(HttpStatus.OK, service.isAvailable(req.getEmail())));
+    public ResponseEntity<SuccessResponse> login(@Valid @RequestBody LoginRequest req, HttpServletResponse response) {
+        return ResponseEntity
+                .ok(SuccessResponse.build(HttpStatus.OK, "Authentication Success.", service.authenticate(req, response)));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Response> refreshToken(@CookieValue("refreshToken") String refreshToken) {
-        LoginResponse response = service.refreshToken(refreshToken);
-
-        if (response == null) {
-            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or Expired Refresh Token");
-        }
-
-        return ResponseEntity.ok(Response.build(HttpStatus.OK, response));
+    public ResponseEntity<SuccessResponse> refreshToken(@CookieValue("refreshToken") String refreshToken) {
+        return ResponseEntity
+                .ok(SuccessResponse.build(HttpStatus.OK, "Token Refreshed Successfully.", service.refreshToken(refreshToken)));
     }
 
     @PostMapping("/forget-password")
-    public ResponseEntity<Response> forgetPassword(@RequestBody @Valid EmailRequest req) {
-        return ResponseEntity.ok(Response.build(HttpStatus.OK, service.resetPassword(req.getEmail())));
+    public ResponseEntity<SuccessResponse> forgetPassword(@RequestBody @Valid EmailRequest req) {
+        return ResponseEntity
+                .ok(SuccessResponse.build(HttpStatus.OK, "Password Reset Email Sent.", service.resetPassword(req.getEmail())));
     }
 }
