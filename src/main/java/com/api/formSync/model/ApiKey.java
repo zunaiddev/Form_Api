@@ -1,6 +1,7 @@
 package com.api.formSync.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -8,6 +9,7 @@ import lombok.ToString;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Base64;
+import java.util.List;
 
 @Data
 @Entity
@@ -32,9 +34,13 @@ public class ApiKey {
     @Column(name = "last_used", nullable = false)
     private LocalDate lastReset = LocalDate.now();
 
-    public ApiKey(User user) {
+    @NotNull
+    private List<String> domains;
+
+    public ApiKey(User user, List<String> domains) {
         this.user = user;
         this.apiKey = generate();
+        this.domains = domains;
     }
 
     public void reGenerate() {

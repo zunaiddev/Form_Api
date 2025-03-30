@@ -3,6 +3,7 @@ package com.api.formSync.Filter;
 import com.api.formSync.Service.JwtService;
 import com.api.formSync.Service.TokenService;
 import com.api.formSync.Service.UserDetailsServiceImpl;
+import com.api.formSync.dto.ErrorResponse;
 import com.api.formSync.util.Common;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -42,7 +43,9 @@ public class VerificationFilter extends OncePerRequestFilter {
         String token = req.getParameter("token");
 
         if (token == null) {
-            Common.sendErrorResponse(res, HttpStatus.BAD_REQUEST, "token is missing");
+            log.error("Verification Failed. {}", "Jwt token is missing");
+            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.BAD_REQUEST, "Verification Token is Missing"));
+            return;
         }
 
         try {
@@ -52,7 +55,7 @@ public class VerificationFilter extends OncePerRequestFilter {
 
             if (jwtService.validateToken(token, userDetails)) {
                 if (tokenService.isTokenUsed(token)) {
-                    Common.sendErrorResponse(res, HttpStatus.IM_USED, "Url Already used.");
+                    Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.IM_USED, "Url Already used."));
                     return;
                 }
 
@@ -69,15 +72,20 @@ public class VerificationFilter extends OncePerRequestFilter {
                 chain.doFilter(req, res);
             }
         } catch (ExpiredJwtException e) {
-            Common.sendErrorResponse(res, HttpStatus.UNAUTHORIZED, "Token has expired");
+            log.warn("Token has expired. Message {}", "Expired Jwt token.");
+            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.UNAUTHORIZED, "Token has expired"));
         } catch (MalformedJwtException | UnsupportedJwtException e) {
-            Common.sendErrorResponse(res, HttpStatus.BAD_REQUEST, "Invalid token format");
+            log.error("Invalid token Format. Message {}", "Someone change the token");
+            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.BAD_REQUEST, "Invalid token format"));
         } catch (SignatureException e) {
-            Common.sendErrorResponse(res, HttpStatus.UNAUTHORIZED, "Invalid token signature");
+            log.error("Invalid Token Signature. Message {}", "Invalid Jwt token Signature.");
+            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.UNAUTHORIZED, "Invalid token signature"));
         } catch (IllegalArgumentException e) {
-            Common.sendErrorResponse(res, HttpStatus.BAD_REQUEST, "Token cannot be null or empty");
+            log.error("Token is null or Empty.");
+            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.BAD_REQUEST, "Token cannot be null or empty"));
         } catch (Exception e) {
-            Common.sendErrorResponse(res, HttpStatus.BAD_REQUEST, "Invalid Token");
+            log.error("Invalid Token.");
+            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.BAD_REQUEST, "Invalid Token"));
         }
     }
 }

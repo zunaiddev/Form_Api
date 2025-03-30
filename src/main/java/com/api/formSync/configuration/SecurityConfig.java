@@ -3,16 +3,13 @@ package com.api.formSync.configuration;
 import com.api.formSync.Filter.ApiKeyAuthFilter;
 import com.api.formSync.Filter.JwtAuthFilter;
 import com.api.formSync.Filter.VerificationFilter;
-import com.api.formSync.Security.CustomAuthenticationEntryPoint;
 import com.api.formSync.Service.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -28,12 +25,11 @@ import java.util.List;
 @Configuration
 @AllArgsConstructor
 public class SecurityConfig {
-    private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder encoder;
     private final ApiKeyAuthFilter apiKeyAuthFilter;
     private final JwtAuthFilter jwtAuthFilter;
-    private final CustomAuthenticationEntryPoint authEntryPoint;
     private final VerificationFilter verificationFilter;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -64,17 +60,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
         CorsConfiguration publicCorsConfig = new CorsConfiguration();
         publicCorsConfig.setAllowedOrigins(List.of("*"));
-        publicCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        publicCorsConfig.setAllowedMethods(List.of("POST"));
         publicCorsConfig.setAllowedHeaders(List.of("*"));
         source.registerCorsConfiguration("/public/**", publicCorsConfig);
 
@@ -90,6 +81,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/auth/**", privateCorsConfig);
         source.registerCorsConfiguration("/user/**", privateCorsConfig);
         source.registerCorsConfiguration("/verify/**", privateCorsConfig);
+        source.registerCorsConfiguration("/admin/**", privateCorsConfig);
 
         return source;
     }

@@ -27,7 +27,6 @@ public class VerificationController {
                                                    @RequestBody(required = false) @Valid ResetPasswordRequest req) {
         String purpose = http.getAttribute("purpose").toString();
         String email = http.getAttribute("email").toString();
-        System.out.println(req);
 
         if (purpose.equals("reset_password") && req == null) {
             throw new RequestBodyIsMissingException("Please Provide new Password.");

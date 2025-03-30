@@ -2,6 +2,7 @@ package com.api.formSync.dto;
 
 import com.api.formSync.model.User;
 import com.api.formSync.util.Role;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -12,8 +13,8 @@ public class UserInfo {
     private String name;
     private String email;
     private Role role;
+    @JsonFormat(pattern = "dd-MMM-yyyy hh-mm")
     private LocalDateTime createdAt;
-    private ApiKeyDto keyInfo;
 
     public UserInfo(User user) {
         this.id = user.getId();
@@ -21,9 +22,5 @@ public class UserInfo {
         this.email = user.getEmail();
         this.role = user.getRole();
         this.createdAt = user.getCreatedAt();
-        if (!(user.getKey() == null)) {
-            this.keyInfo = new ApiKeyDto(user.getKey());
-        }
-        System.out.println("passed");
     }
 }

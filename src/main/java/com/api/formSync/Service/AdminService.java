@@ -15,24 +15,24 @@ import java.util.Map;
 @Service
 @AllArgsConstructor
 public class AdminService {
-    private UserService userService;
+    private UserInfoService userService;
     private PasswordEncoder encoder;
 
     public List<UserInfo> getUsers() {
-        return userService.get().stream()
+        return userService.load().stream()
                 .map(UserInfo::new).toList();
     }
 
     public UserInfo getUser(Long id) {
-        return new UserInfo(userService.get(id));
+        return new UserInfo(userService.load(id));
     }
 
     public UserInfo getUser(String email) {
-        return new UserInfo(userService.get(email));
+        return new UserInfo(userService.load(email));
     }
 
     public UserInfo updateUser(Long id, Map<String, Object> updates) {
-        User user = userService.get(id);
+        User user = userService.load(id);
         System.out.println(user);
 
         updates.forEach((key, value) -> {
@@ -101,6 +101,6 @@ public class AdminService {
     }
 
     public void deleteUser(Long id) {
-        userService.deleteImmediately(id);
+        userService.delete(id);
     }
 }

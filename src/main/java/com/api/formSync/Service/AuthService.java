@@ -24,15 +24,14 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserService userService;
+    private final UserInfoService userInfo;
     private final EmailService emailService;
-    private final ApiKeyService apiKeyService;
     private final JwtService jwtService;
     @Value("${BASE_URL}")
     private String BASE_URL;
 
     public SignupResponse register(SignupRequest req) {
-        User user = userService.create(req.getName(), req.getEmail(), req.getPassword());
+        User user = userInfo.create(req.getName(), req.getEmail(), req.getPassword());
         String token = jwtService.generateToken(user.getEmail(), Map.of("purpose", "verify_user", "id", user.getId()), 900);
 
         emailService.sendEmail(user.getEmail(), "Please Verify Your Email.", EmailTemplate.tokenBody(user.getName(), "http://localhost:5173/verify?token=" + token));
@@ -41,17 +40,17 @@ public class AuthService {
     }
 
     public LoginResponse authenticate(LoginRequest req, HttpServletResponse response) {
-        Authentication auth = userService.getAuthentication(req.getEmail(), req.getPassword());
+        Authentication auth = userInfo.getAuthentication(req.getEmail(), req.getPassword());
         if (!auth.isAuthenticated()) {
             throw new UnauthorisedException("Authentication Failed in Controller.");
         }
 
-        User user = userService.get(req.getEmail());
+        User user = userInfo.load(req.getEmail());
 
         if (user.isDeleted()) {
             user.setDeleted(false);
             user.setDeleteAt(null);
-            userService.update(user);
+            userInfo.update(user);
         }
 
         String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole()), 900);
@@ -74,7 +73,7 @@ public class AuthService {
 
         String email = jwtService.extractEmail(refreshToken);
 
-        User user = userService.get(email);
+        User user = userInfo.load(email);
 
         if (!jwtService.validateToken(refreshToken, new UserPrincipal(user))) {
             throw new InvalidTokenException("Invalid Token.");
@@ -86,7 +85,7 @@ public class AuthService {
     }
 
     public String resetPassword(String email) {
-        User user = userService.get(email);
+        User user = userInfo.load(email);
         if (!user.isEnabled()) {
             throw new UnverifiedEmailException("Please Verify Your Email: " + email);
         }

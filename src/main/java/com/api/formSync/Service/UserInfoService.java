@@ -1,0 +1,81 @@
+package com.api.formSync.Service;
+
+import com.api.formSync.exception.DuplicateEntrypointEmailException;
+import com.api.formSync.exception.UserNotFoundException;
+import com.api.formSync.model.User;
+import com.api.formSync.repository.UserRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+public class UserInfoService {
+    private final UserRepository repo;
+    private final PasswordEncoder encoder;
+    private final AuthenticationManager authManager;
+
+    public List<User> load() {
+        return repo.findAll();
+    }
+
+    public User load(Long id) {
+        return repo.findById(id).orElseThrow(() -> new UserNotFoundException("Invalid username or password"));
+    }
+
+    public User load(String email) {
+        return repo.findByEmail(email).orElseThrow(() -> new UserNotFoundException("Invalid username or password"));
+    }
+
+    public User save(User user) {
+        if (repo.findByEmail(user.getEmail()).isPresent()) {
+            throw new DuplicateEntrypointEmailException(String.format("User with %s email Already Exists", user.getEmail()));
+        }
+
+        return repo.save(user);
+    }
+
+    public User create(String name, String email, String password) {
+        User user = repo.findByEmail(email).orElse(null);
+        String encodedPassword = encoder.encode(password);
+
+        if (user != null) {
+            if (user.isEnabled()) {
+                throw new DuplicateEntrypointEmailException("User With email " + email + " exists.");
+            }
+
+            user.setName(name);
+            user.setEmail(email);
+            user.setPassword(encodedPassword);
+            user.setCreatedAt(LocalDateTime.now());
+            return repo.save(user);
+        }
+
+        user = new User(name, email, encodedPassword);
+
+        return repo.save(user);
+    }
+
+    public User update(User user) {
+        return repo.save(user);
+    }
+
+    public Authentication getAuthentication(String email, String password) {
+        return authManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+    }
+
+    public void delete(Long id) {
+        repo.deleteById(id);
+    }
+
+    public boolean isExists(String newEmail) {
+        User user = repo.findByEmail(newEmail).orElse(null);
+        return user != null && user.isEnabled();
+    }
+}

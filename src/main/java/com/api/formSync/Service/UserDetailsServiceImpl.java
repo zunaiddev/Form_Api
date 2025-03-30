@@ -1,7 +1,7 @@
 package com.api.formSync.Service;
 
 import com.api.formSync.Principal.UserPrincipal;
-import com.api.formSync.exception.NoUserFoundException;
+import com.api.formSync.exception.UserNotFoundException;
 import com.api.formSync.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +17,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) {
         return repo.findByEmail(email)
                 .map(UserPrincipal::new)
-                .orElseThrow(() -> new NoUserFoundException("Invalid username or password"));
+                .orElseThrow(() -> new UserNotFoundException("Invalid username or password"));
     }
 }

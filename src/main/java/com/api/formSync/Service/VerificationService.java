@@ -9,12 +9,12 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class VerificationService {
-    private final UserService userService;
+    private final UserInfoService userService;
     private final PasswordEncoder encoder;
     private final TokenService tokenService;
 
     public String verifyUser(String email, String token) {
-        User user = userService.get(email);
+        User user = userService.load(email);
         user.setEnabled(true);
         userService.update(user);
         tokenService.saveUsedToken(token);
@@ -22,7 +22,7 @@ public class VerificationService {
     }
 
     public String updateEmail(String email, String newEmail, String token) {
-        User user = userService.get(email);
+        User user = userService.load(email);
 
         if (userService.isExists(newEmail)) {
             throw new DuplicateEntrypointEmailException("user already have been verified by this email.");
@@ -36,7 +36,7 @@ public class VerificationService {
     }
 
     public String resetPassword(String email, String password, String token) {
-        User user = userService.get(email);
+        User user = userService.load(email);
         user.setPassword(encoder.encode(password));
         userService.update(user);
 

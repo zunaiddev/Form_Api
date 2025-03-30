@@ -14,14 +14,15 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ApiKeyService {
     private final ApiKeyRepository repo;
 
-    public ApiKey create(User user) {
-        ApiKey apiKey = new ApiKey(user);
+    public ApiKey create(User user, List<String> domains) {
+        ApiKey apiKey = new ApiKey(user, domains);
         return repo.save(apiKey);
     }
 

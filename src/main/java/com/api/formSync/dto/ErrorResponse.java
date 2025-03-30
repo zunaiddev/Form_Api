@@ -2,6 +2,7 @@ package com.api.formSync.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.http.HttpStatus;
 
 import java.util.Map;
 
@@ -12,7 +13,7 @@ public class ErrorResponse {
     private String message;
     private Map<String, Object> error;
 
-    public static ErrorResponse build(String message, int code, String details) {
-        return new ErrorResponse("error", message, Map.of("code", code, "details", details));
+    public static ErrorResponse build(String message, HttpStatus status, String details) {
+        return new ErrorResponse("error", message, Map.of("code", status.value(), "details", details));
     }
 }

@@ -1,8 +1,8 @@
 package com.api.formSync.controller;
 
+import com.api.formSync.Service.FormService;
 import com.api.formSync.dto.FormRequest;
 import com.api.formSync.dto.FormResponse;
-import com.api.formSync.Service.FormService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -21,10 +21,5 @@ public class FormController {
     @PostMapping("/submit")
     public ResponseEntity<FormResponse> submit(@Valid @RequestBody FormRequest req, HttpServletRequest http) {
         return ResponseEntity.ok(service.submit(req, http));
-    }
-
-    @PostMapping("/test")
-    public String test(@Valid @RequestBody FormRequest req, HttpServletRequest http) {
-        return "no error";
     }
 }
