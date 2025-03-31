@@ -26,7 +26,6 @@ public class UserController {
 
     @PutMapping("/info")
     public ResponseEntity<SuccessResponse> update(@AuthenticationPrincipal UserPrincipal details, @RequestBody @Valid UserUpdateRequest req) {
-        System.out.println("Request Recieved.");
         return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "success", service.update(details, req)));
     }
 

@@ -87,7 +87,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     private ErrorResponse handle(MethodArgumentNotValidException exp) {
         log.warn("Invalid Method Argument. {}", exp.getMessage());
 
@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
             errors.put(error.getField(), error.getDefaultMessage());
             log.warn("Validation Failed for {} Cause {}", error.getField(), error.getDefaultMessage());
         }
-        return ErrorResponse.build("Invalid Argument.", HttpStatus.BAD_REQUEST, errors.toString());
+        return ErrorResponse.build("Invalid Argument.", HttpStatus.UNPROCESSABLE_ENTITY, errors.toString());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
