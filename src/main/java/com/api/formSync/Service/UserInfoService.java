@@ -63,6 +63,10 @@ public class UserInfoService {
     }
 
     public User update(User user) {
+        if (!repo.existsById(user.getId())) {
+            throw new UserNotFoundException("Could not found user with email " + user.getEmail());
+        }
+
         return repo.save(user);
     }
 

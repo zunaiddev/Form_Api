@@ -19,9 +19,9 @@ public class UserUpdateRequest {
             message = "password length must be between 8 and 20 and contain at least 1 uppercase, 1 lowercase, 1 special character, and 1 digit")
     private String password;
 
-    public boolean isValid() {
-        return name != null ||
-                (email != null && currentPassword != null) ||
-                (password != null && currentPassword != null);
+    public boolean isInvalid() {
+        return name == null &&
+                email == null &&
+                password == null;
     }
 }

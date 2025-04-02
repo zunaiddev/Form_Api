@@ -2,6 +2,7 @@ package com.api.formSync.controller;
 
 import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.Service.UserService;
+import com.api.formSync.dto.PasswordRequest;
 import com.api.formSync.dto.SuccessResponse;
 import com.api.formSync.dto.UserUpdateRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,6 +28,11 @@ public class UserController {
     @PutMapping("/info")
     public ResponseEntity<SuccessResponse> update(@AuthenticationPrincipal UserPrincipal details, @RequestBody @Valid UserUpdateRequest req) {
         return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "success", service.update(details, req)));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<SuccessResponse> deleteUser(@AuthenticationPrincipal UserPrincipal details, @RequestBody @Valid PasswordRequest req, HttpServletResponse res) {
+        return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Success", service.markAsDeleted(details, req, res)));
     }
 
     @GetMapping("/logout")

@@ -41,8 +41,9 @@ public class AuthService {
 
     public LoginResponse authenticate(LoginRequest req, HttpServletResponse response) {
         Authentication auth = userInfo.getAuthentication(req.getEmail(), req.getPassword());
+
         if (!auth.isAuthenticated()) {
-            throw new UnauthorisedException("Authentication Failed in Controller.");
+            throw new UnauthorisedException("Authentication Failed.");
         }
 
         User user = userInfo.load(req.getEmail());
