@@ -6,10 +6,12 @@ import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mail.MailSendException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -62,7 +64,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     private ErrorResponse handle(UnauthorisedException exp) {
         log.error("Authentication Failed. Message {}", exp.getMessage());
-        return ErrorResponse.build("Authentication Failed.", HttpStatus.UNAUTHORIZED, "Bad credentials Provided.");
+        return ErrorResponse.build("Authentication Failed.", HttpStatus.UNAUTHORIZED, exp.getMessage());
     }
 
     @ExceptionHandler(CouldNotFoundCookie.class)
@@ -107,9 +109,8 @@ public class GlobalExceptionHandler {
         return ErrorResponse.build("Request Body is Missing.", HttpStatus.BAD_REQUEST, "Request Body is Missing");
     }
 
-
-    @ExceptionHandler(InvalidApiKeyException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(InvalidTokenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     private ErrorResponse handle(InvalidTokenException exp) {
         log.error("Token Invalid After Check {}", exp.getMessage());
         return ErrorResponse.build("Authentication Failed.", HttpStatus.BAD_REQUEST, exp.getMessage());
@@ -143,6 +144,47 @@ public class GlobalExceptionHandler {
         return ErrorResponse.build("Invalid Format.", HttpStatus.UNPROCESSABLE_ENTITY, exp.getMessage());
     }
 
+    @ExceptionHandler(DuplicatePasswordException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    private ErrorResponse handle(DuplicatePasswordException exp) {
+        log.error("Same Password As previous {}", exp.getMessage());
+        return ErrorResponse.build("Bad credentials.", HttpStatus.BAD_REQUEST, exp.getMessage());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    private ErrorResponse handle(HttpRequestMethodNotSupportedException exp) {
+        log.error("Bad Request Method. Message {}", exp.getMessage());
+        return ErrorResponse.build("Bad Request.", HttpStatus.BAD_REQUEST, exp.getMessage());
+    }
+
+    @ExceptionHandler(MailSendException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    private ErrorResponse handle(MailSendException exp) {
+        log.error("Email Send Fail {}", exp.getMessage());
+        return ErrorResponse.build("Something Went Wrong", HttpStatus.INTERNAL_SERVER_ERROR, "Could Not send Email");
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    private ErrorResponse handle(UserNotFoundException exp) {
+        log.error("User Not Found {}", exp.getMessage());
+        return ErrorResponse.build("Something Went Wrong", HttpStatus.BAD_REQUEST, exp.getMessage());
+    }
+
+    @ExceptionHandler(InvalidApiKeyException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    private ErrorResponse handle(InvalidApiKeyException exp) {
+        log.error("Invalid Api key {}", exp.getMessage());
+        return ErrorResponse.build("Something Went Wrong", HttpStatus.UNAUTHORIZED, exp.getMessage());
+    }
+
+    @ExceptionHandler(KeyCreatedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    private ErrorResponse handle(KeyCreatedException exp) {
+        log.error("Duplicate key generate. {}", exp.getMessage());
+        return ErrorResponse.build("Something Went Wrong", HttpStatus.CONFLICT, exp.getMessage());
+    }
 
     //Jwt Exceptions
     @ExceptionHandler(SignatureException.class)

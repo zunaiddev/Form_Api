@@ -4,7 +4,8 @@ import com.api.formSync.Filter.ApiKeyAuthFilter;
 import com.api.formSync.Filter.JwtAuthFilter;
 import com.api.formSync.Filter.VerificationFilter;
 import com.api.formSync.Service.UserDetailsServiceImpl;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -23,13 +24,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig {
     private final PasswordEncoder encoder;
     private final ApiKeyAuthFilter apiKeyAuthFilter;
     private final JwtAuthFilter jwtAuthFilter;
     private final VerificationFilter verificationFilter;
     private final UserDetailsServiceImpl userDetailsService;
+    @Value("${BASE_URL}")
+    private String BASE_URL;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -69,10 +72,10 @@ public class SecurityConfig {
         publicCorsConfig.setAllowedHeaders(List.of("*"));
         source.registerCorsConfiguration("/public/**", publicCorsConfig);
 
-
         CorsConfiguration privateCorsConfig = new CorsConfiguration();
         privateCorsConfig.setAllowedOrigins(List.of(
-                "http://localhost:5173"
+                "http://localhost:3000",
+                BASE_URL
         ));
         privateCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         privateCorsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type"));

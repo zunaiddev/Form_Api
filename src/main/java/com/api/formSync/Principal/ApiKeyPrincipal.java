@@ -1,6 +1,6 @@
 package com.api.formSync.Principal;
 
-import com.api.formSync.util.Role;
+import com.api.formSync.model.ApiKey;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -10,12 +10,11 @@ import java.util.Collection;
 
 @AllArgsConstructor
 public class ApiKeyPrincipal implements UserDetails {
-    private final Long id;
-    private final Role role;
+    private final ApiKey apiKey;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return AuthorityUtils.createAuthorityList(role.name());
+        return AuthorityUtils.createAuthorityList(apiKey.getRole().name());
     }
 
     @Override
@@ -25,7 +24,7 @@ public class ApiKeyPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return id.toString();
+        return apiKey.getApiKey();
     }
 
     @Override
@@ -35,7 +34,7 @@ public class ApiKeyPrincipal implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !apiKey.isLocked();
     }
 
     @Override
@@ -45,6 +44,6 @@ public class ApiKeyPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return apiKey.isEnable();
     }
 }

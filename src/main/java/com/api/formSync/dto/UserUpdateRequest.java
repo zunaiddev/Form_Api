@@ -20,8 +20,7 @@ public class UserUpdateRequest {
     private String password;
 
     public boolean isInvalid() {
-        return name == null &&
-                email == null &&
-                password == null;
+        return (name == null && email == null && password == null) ||
+                (email != null && currentPassword == null) || (password != null && currentPassword == null);
     }
 }

@@ -1,5 +1,6 @@
 package com.api.formSync.model;
 
+import com.api.formSync.util.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -31,16 +32,27 @@ public class ApiKey {
     @Column(name = "request_count", nullable = false)
     private Integer requestCount = 0;
 
-    @Column(name = "last_used", nullable = false)
+    @Column(name = "last_reset", nullable = false)
     private LocalDate lastReset = LocalDate.now();
 
     @NotNull
-    private List<String> domains;
+    private Role role;
 
-    public ApiKey(User user, List<String> domains) {
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "domain_id")
+    private List<Domain> domains;
+
+    @NotNull
+    private boolean locked;
+
+    @NotNull
+    private boolean enable;
+
+    public ApiKey(User user, Domain domain) {
         this.user = user;
         this.apiKey = generate();
-        this.domains = domains;
+        this.role = user.getRole();
+        this.domains = List.of(domain);
     }
 
     public void reGenerate() {
@@ -49,10 +61,17 @@ public class ApiKey {
 
     private String generate() {
         SecureRandom secureRandom = new SecureRandom();
-        byte[] keyBytes = new byte[24];
+        byte[] keyBytes = new byte[25];
         secureRandom.nextBytes(keyBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(keyBytes)
+                .replaceAll("[^a-zA-Z0-9 ]", "");
+    }
 
-        String apiKey = Base64.getUrlEncoder().withoutPadding().encodeToString(keyBytes);
-        return apiKey.toUpperCase().replaceAll("(.{4})", "$1-").substring(0, 35);
+    public void addDomain(Domain domain) {
+        this.domains.add(domain);
+    }
+
+    public void removeDomain(Domain domain) {
+        this.domains.remove(domain);
     }
 }

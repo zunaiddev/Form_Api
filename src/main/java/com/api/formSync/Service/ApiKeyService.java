@@ -4,6 +4,7 @@ import com.api.formSync.Principal.ApiKeyPrincipal;
 import com.api.formSync.exception.InvalidApiKeyException;
 import com.api.formSync.exception.TodayLimitReachedException;
 import com.api.formSync.model.ApiKey;
+import com.api.formSync.model.Domain;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.ApiKeyRepository;
 import com.api.formSync.util.Role;
@@ -21,15 +22,18 @@ import java.util.List;
 public class ApiKeyService {
     private final ApiKeyRepository repo;
 
-    public ApiKey create(User user, List<String> domains) {
-        ApiKey apiKey = new ApiKey(user, domains);
+    public ApiKey create(User user, Domain domain) {
+        ApiKey apiKey = new ApiKey(user, domain);
         return repo.save(apiKey);
     }
-
 
     public Authentication getAuthentication(String key) {
         ApiKey matchedKey = repo.findByApiKey(key)
                 .orElseThrow(() -> new InvalidApiKeyException("Invalid API Key"));
+
+        if (!matchedKey.isEnable()) {
+            throw new InvalidApiKeyException("Api key is inactive");
+        }
 
         User user = matchedKey.getUser();
 
@@ -50,7 +54,7 @@ public class ApiKeyService {
 
         repo.save(matchedKey);
         return new UsernamePasswordAuthenticationToken(
-                new ApiKeyPrincipal(user.getId(), user.getRole()),
+                new ApiKeyPrincipal(matchedKey),
                 null,
                 AuthorityUtils.createAuthorityList(user.getRole().name())
         );
@@ -60,5 +64,15 @@ public class ApiKeyService {
         ApiKey apiKey = repo.findByApiKey(key).orElseThrow(() -> new InvalidApiKeyException("Invalid Api key"));
         System.out.println(apiKey.getId());
         return apiKey.getUser();
+    }
+
+    public ApiKey update(ApiKey apiKey) {
+        return repo.save(apiKey);
+    }
+
+    public List<Domain> getDomains(Long id) {
+        ApiKey key = repo.findById(id)
+                .orElseThrow(() -> new InvalidApiKeyException("Could Not Found Api key With id" + id));
+        return key.getDomains();
     }
 }

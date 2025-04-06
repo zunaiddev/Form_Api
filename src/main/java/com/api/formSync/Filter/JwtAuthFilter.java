@@ -4,6 +4,7 @@ import com.api.formSync.Service.JwtService;
 import com.api.formSync.Service.UserDetailsServiceImpl;
 import com.api.formSync.dto.ErrorResponse;
 import com.api.formSync.util.Common;
+import com.api.formSync.util.Purpose;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -11,7 +12,6 @@ import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -34,11 +34,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest req) {
         final String URI = req.getRequestURI();
-        return !URI.startsWith("/api/user") && !URI.startsWith("/api/admin");
+        return !URI.startsWith("/api/user") && !URI.startsWith("/api/key");
     }
 
     @Override
-    protected void doFilterInternal(@NotNull HttpServletRequest req, @NotNull HttpServletResponse res, @NotNull FilterChain chain) throws IOException {
+    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {
         String authHeader = req.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -60,6 +60,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             if (service.validateToken(token, userDetails)) {
+
+                if (service.extractClaims(token).get("purpose") == null || !service.extractClaims(token).get("purpose").equals(Purpose.auth.name())) {
+                    log.warn("Purpose is missing or not found");
+                    Common.sendErrorResponse(res, ErrorResponse.build("Authentication Failed", HttpStatus.FORBIDDEN, "Invalid token type for authentication"));
+                    return;
+                }
+
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
                 );

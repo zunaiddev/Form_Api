@@ -40,25 +40,27 @@ public class VerificationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {
-        String token = req.getParameter("token");
+        String authHeader = req.getHeader("Authorization");
 
-        if (token == null) {
-            log.error("Verification Failed. {}", "Jwt token is missing");
-            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.BAD_REQUEST, "Verification Token is Missing"));
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.warn("Missing Or In valid Header, {}", authHeader);
+            Common.sendErrorResponse(res, ErrorResponse.build("Authentication Failed", HttpStatus.UNAUTHORIZED, "Missing or Invalid Authorization Header"));
             return;
         }
 
+        String token = authHeader.substring(7);
+        log.info(token);
         try {
             String email = jwtService.extractEmail(token);
+
+            if (tokenService.isTokenUsed(authHeader)) {
+                Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.IM_USED, "Url Already used."));
+                return;
+            }
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
             if (jwtService.validateToken(token, userDetails)) {
-                if (tokenService.isTokenUsed(token)) {
-                    Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.IM_USED, "Url Already used."));
-                    return;
-                }
-
                 Claims claims = jwtService.extractClaims(token);
                 req.setAttribute("email", email);
                 req.setAttribute("purpose", claims.get("purpose"));
@@ -72,7 +74,7 @@ public class VerificationFilter extends OncePerRequestFilter {
                 chain.doFilter(req, res);
             }
         } catch (ExpiredJwtException e) {
-            log.warn("Token has expired. Message {}", "Expired Jwt token.");
+            log.warn("Token has expired. Message {}", e.getMessage());
             Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.UNAUTHORIZED, "Token has expired"));
         } catch (MalformedJwtException | UnsupportedJwtException e) {
             log.error("Invalid token Format. Message {}", "Someone change the token");
@@ -84,7 +86,7 @@ public class VerificationFilter extends OncePerRequestFilter {
             log.error("Token is null or Empty.");
             Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.BAD_REQUEST, "Token cannot be null or empty"));
         } catch (Exception e) {
-            log.error("Invalid Token.");
+            log.error("Invalid Token. {}", e.getMessage());
             Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.BAD_REQUEST, "Invalid Token"));
         }
     }

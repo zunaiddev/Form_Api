@@ -31,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<SuccessResponse> refreshToken(@CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<SuccessResponse> refreshToken(@CookieValue("refresh_token") String refreshToken) {
         return ResponseEntity
                 .ok(SuccessResponse.build(HttpStatus.OK, "Token Refreshed Successfully.", service.refreshToken(refreshToken)));
     }
@@ -40,5 +40,11 @@ public class AuthController {
     public ResponseEntity<SuccessResponse> forgetPassword(@RequestBody @Valid EmailRequest req) {
         return ResponseEntity
                 .ok(SuccessResponse.build(HttpStatus.OK, "Password Reset Email Sent.", service.resetPassword(req.getEmail())));
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<SuccessResponse> logout(HttpServletResponse response) {
+        service.logout(response);
+        return ResponseEntity.noContent().build();
     }
 }

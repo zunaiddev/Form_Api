@@ -2,6 +2,7 @@ package com.api.formSync.controller;
 
 import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.Service.UserService;
+import com.api.formSync.dto.DomainRequest;
 import com.api.formSync.dto.PasswordRequest;
 import com.api.formSync.dto.SuccessResponse;
 import com.api.formSync.dto.UserUpdateRequest;
@@ -35,8 +36,42 @@ public class UserController {
         return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Success", service.markAsDeleted(details, req, res)));
     }
 
-    @GetMapping("/logout")
-    public ResponseEntity<SuccessResponse> logout(HttpServletResponse response) {
-        return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Success", service.logout(response)));
+    @GetMapping("/key")
+    public ResponseEntity<SuccessResponse> keyInfo(@AuthenticationPrincipal UserPrincipal details) {
+        return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "key info",
+                service.getKeyInfo(details.getUser())));
+    }
+
+    @PostMapping("/key")
+    public ResponseEntity<SuccessResponse> generate(@AuthenticationPrincipal UserPrincipal details,
+                                                    @RequestBody @Valid DomainRequest req) {
+        return new ResponseEntity<>(SuccessResponse.build(HttpStatus.CREATED, "api key generated",
+                service.generateKey(details.getUser(), req.getDomain())), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/key")
+    public ResponseEntity<SuccessResponse> regenerate(@AuthenticationPrincipal UserPrincipal details) {
+        return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "api key regenerated",
+                service.regenerateKey(details.getUser())));
+    }
+
+    @PutMapping("/key/domain")
+    public ResponseEntity<SuccessResponse> addDomain(@AuthenticationPrincipal UserPrincipal details,
+                                                     @RequestBody @Valid DomainRequest req) {
+        return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Domain Added Successfully",
+                service.addDomain(details.getUser(), req.getDomain())));
+    }
+
+    @DeleteMapping("/key/domain")
+    public ResponseEntity<SuccessResponse> deleteDomain(@AuthenticationPrincipal UserPrincipal details,
+                                                        @RequestBody @Valid DomainRequest req) {
+        return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Deleted",
+                service.deleteDomain(details.getUser(), req.getDomain())));
+    }
+
+    @DeleteMapping("/key")
+    public ResponseEntity<SuccessResponse> addDomain(@AuthenticationPrincipal UserPrincipal details) {
+        return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Deleted",
+                service.deleteKey(details.getUser())));
     }
 }

@@ -12,9 +12,11 @@ import com.api.formSync.exception.InvalidTokenException;
 import com.api.formSync.exception.UnauthorisedException;
 import com.api.formSync.exception.UnverifiedEmailException;
 import com.api.formSync.model.User;
+import com.api.formSync.util.Purpose;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthService {
     private final UserInfoService userInfo;
@@ -34,8 +37,8 @@ public class AuthService {
         User user = userInfo.create(req.getName(), req.getEmail(), req.getPassword());
         String token = jwtService.generateToken(user.getEmail(), Map.of("purpose", "verify_user", "id", user.getId()), 900);
 
-        emailService.sendEmail(user.getEmail(), "Please Verify Your Email.", EmailTemplate.tokenBody(user.getName(), "http://localhost:5173/verify?token=" + token));
-        System.out.println("Email sent to: " + user.getEmail());
+        emailService.sendEmail(user.getEmail(), "Please Verify Your Email.", EmailTemplate.tokenBody(user.getName(), BASE_URL + "/verify?token=" + token));
+        log.info("Verification Email Sent to: {}", user.getEmail());
         return new SignupResponse(user.getName(), user.getEmail());
     }
 
@@ -54,10 +57,10 @@ public class AuthService {
             userInfo.update(user);
         }
 
-        String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole()), 900);
-        String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getEmail()), 2_592_000);
+        String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole(), "purpose", Purpose.auth), 900);
+        String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("purpose", Purpose.refresh_token), 2_592_000);
 
-        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        Cookie cookie = new Cookie("refresh_token", refreshToken);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
@@ -80,7 +83,12 @@ public class AuthService {
             throw new InvalidTokenException("Invalid Token.");
         }
 
-        String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole()), 900);
+        if (jwtService.extractClaims(refreshToken).get("purpose") == null || !jwtService.extractClaims(refreshToken).get("purpose").equals(Purpose.refresh_token.name())) {
+            log.warn("Purpose is missing or not found");
+            throw new InvalidTokenException("Invalid Token Type or Token type is missing");
+        }
+
+        String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole(), "purpose", Purpose.auth), 900);
 
         return new LoginResponse(accessToken);
     }
@@ -91,9 +99,18 @@ public class AuthService {
             throw new UnverifiedEmailException("Please Verify Your Email: " + email);
         }
 
-        String token = jwtService.generateToken(email, Map.of("purpose", "reset_password"), 900);
+        String token = jwtService.generateToken(email, Map.of("purpose", Purpose.reset_password), 900);
 
         emailService.sendEmail(email, "Reset Your Password", EmailTemplate.resetPassword(user.getName(), "http://" + BASE_URL + "/api/auth/verify/reset-password?token=" + token));
         return "Reset Password Email Sent";
+    }
+
+    public void logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("refresh_token", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 }
