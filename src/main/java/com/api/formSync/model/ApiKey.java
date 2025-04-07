@@ -43,10 +43,10 @@ public class ApiKey {
     private List<Domain> domains;
 
     @NotNull
-    private boolean locked;
+    private boolean locked = false;
 
     @NotNull
-    private boolean enable;
+    private boolean enabled = true;
 
     public ApiKey(User user, Domain domain) {
         this.user = user;

@@ -1,12 +1,16 @@
 package com.api.formSync.Filter;
 
-import com.api.formSync.exception.TodayLimitReachedException;
 import com.api.formSync.Service.ApiKeyService;
+import com.api.formSync.dto.ErrorResponse;
+import com.api.formSync.exception.ForbiddenException;
+import com.api.formSync.exception.TodayLimitReachedException;
+import com.api.formSync.util.Common;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,7 +18,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.net.URI;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
@@ -34,15 +40,33 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             return;
         }
 
+        String origin = request.getHeader("Origin");
+        String referer = request.getHeader("Referer");
+
+        String domain = extractDomain(origin != null ? origin : referer);
+        System.out.println("domain" + domain);
         try {
-            Authentication auth = keyService.getAuthentication(API_KEY);
+            Authentication auth = keyService.getAuthentication(API_KEY, domain);
             SecurityContextHolder.getContext().setAuthentication(auth);
             filterChain.doFilter(request, response);
         } catch (TodayLimitReachedException exp) {
-            response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), exp.getMessage());
+            Common.sendErrorResponse(response, ErrorResponse.build("Limit Reached.", HttpStatus.TOO_MANY_REQUESTS, exp.getMessage()));
+        } catch (ForbiddenException exp) {
+            Common.sendErrorResponse(response, ErrorResponse.build("Forbidden", HttpStatus.FORBIDDEN, exp.getMessage()));
         } catch (Exception exp) {
+            log.warn(exp.getMessage());
             response.sendError(HttpStatus.UNAUTHORIZED.value(), exp.getMessage());
         }
 
+    }
+
+    private String extractDomain(String url) {
+        if (url == null) return null;
+        try {
+            URI uri = new URI(url);
+            return uri.getHost();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

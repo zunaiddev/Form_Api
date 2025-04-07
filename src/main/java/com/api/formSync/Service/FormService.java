@@ -2,30 +2,26 @@ package com.api.formSync.Service;
 
 import com.api.formSync.Email.EmailService;
 import com.api.formSync.Email.EmailTemplate;
+import com.api.formSync.Principal.ApiKeyPrincipal;
 import com.api.formSync.dto.FormRequest;
 import com.api.formSync.dto.FormResponse;
-import com.api.formSync.exception.ResourceNotFoundException;
 import com.api.formSync.model.Form;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.FormRepository;
 import com.api.formSync.util.Role;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class FormService {
     private final FormRepository repo;
-    private final ApiKeyService keyService;
     private final EmailService emailService;
 
-    public FormResponse submit(FormRequest req, HttpServletRequest http) {
-        User user = keyService.getUser(getKey(http));
+    public FormResponse submit(FormRequest req, ApiKeyPrincipal details) {
+        User user = details.getUser();
         Form form = new Form(req.getName(), req.getSubject(), req.getEmail(), req.getMessage(), user);
         Form submittedForm = repo.save(form);
 
@@ -39,25 +35,6 @@ public class FormService {
     public List<FormResponse> get(User user) {
         return repo.findAllByUser(user).stream()
                 .map(FormResponse::new)
-                .collect(Collectors.toList());
-    }
-
-    public void delete(Long id, User user) {
-        Form form = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Form not found."));
-
-        if (!form.getUser().equals(user)) {
-            throw new AccessDeniedException("You are not authorized to delete this form");
-        }
-
-        repo.delete(form);
-    }
-
-    private String getKey(HttpServletRequest http) {
-        return http.getHeader("X-API-KEY");
-    }
-
-    public List<FormResponse> get() {
-        return repo.findAll().stream().map(FormResponse::new).toList();
+                .toList();
     }
 }

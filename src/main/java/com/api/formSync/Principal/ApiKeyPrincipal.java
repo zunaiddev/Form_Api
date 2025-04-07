@@ -1,6 +1,7 @@
 package com.api.formSync.Principal;
 
 import com.api.formSync.model.ApiKey;
+import com.api.formSync.model.User;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -44,6 +45,10 @@ public class ApiKeyPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return apiKey.isEnable();
+        return apiKey.isEnabled();
+    }
+
+    public User getUser() {
+        return apiKey.getUser();
     }
 }

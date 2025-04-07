@@ -1,6 +1,7 @@
 package com.api.formSync.Service;
 
 import com.api.formSync.Principal.ApiKeyPrincipal;
+import com.api.formSync.exception.ForbiddenException;
 import com.api.formSync.exception.InvalidApiKeyException;
 import com.api.formSync.exception.TodayLimitReachedException;
 import com.api.formSync.model.ApiKey;
@@ -27,12 +28,16 @@ public class ApiKeyService {
         return repo.save(apiKey);
     }
 
-    public Authentication getAuthentication(String key) {
+    public Authentication getAuthentication(String key, String domain) {
         ApiKey matchedKey = repo.findByApiKey(key)
                 .orElseThrow(() -> new InvalidApiKeyException("Invalid API Key"));
 
-        if (!matchedKey.isEnable()) {
-            throw new InvalidApiKeyException("Api key is inactive");
+        if (matchedKey.isLocked()) {
+            throw new TodayLimitReachedException("Today Limit Reached. Api key is locked");
+        }
+
+        if (domain != null && !matchedKey.getDomains().stream().map(Domain::getDomain).toList().contains(domain)) {
+            throw new ForbiddenException("You are not allowed to access this resources");
         }
 
         User user = matchedKey.getUser();
@@ -45,8 +50,8 @@ public class ApiKeyService {
         if (!user.getRole().equals(Role.ADMIN) && !user.getRole().equals(Role.ULTIMATE)) {
             final int DAILY_LIMIT = 10;
 
-            if (matchedKey.getRequestCount() >= DAILY_LIMIT) {
-                throw new TodayLimitReachedException("Today Limit Reached");
+            if (matchedKey.getRequestCount() == DAILY_LIMIT) {
+                matchedKey.setLocked(true);
             }
 
             matchedKey.setRequestCount(matchedKey.getRequestCount() + 1);

@@ -17,6 +17,6 @@ public class KeyInfo {
         this.key = key.getApiKey();
         this.domains = key.getDomains().stream().map(Domain::getDomain).toList();
         this.requests = key.getRequestCount();
-        this.isActive = key.isEnable();
+        this.isActive = key.isEnabled();
     }
 }

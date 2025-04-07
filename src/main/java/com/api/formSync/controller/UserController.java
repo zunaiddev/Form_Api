@@ -74,4 +74,10 @@ public class UserController {
         return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Deleted",
                 service.deleteKey(details.getUser())));
     }
+
+    @GetMapping("/forms")
+    public ResponseEntity<SuccessResponse> getForms(@AuthenticationPrincipal UserPrincipal details) {
+        return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Success",
+                service.getForms(details.getUser())));
+    }
 }

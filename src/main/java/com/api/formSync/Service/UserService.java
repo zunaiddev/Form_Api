@@ -3,10 +3,7 @@ package com.api.formSync.Service;
 import com.api.formSync.Email.EmailService;
 import com.api.formSync.Email.EmailTemplate;
 import com.api.formSync.Principal.UserPrincipal;
-import com.api.formSync.dto.KeyInfo;
-import com.api.formSync.dto.PasswordRequest;
-import com.api.formSync.dto.UserInfo;
-import com.api.formSync.dto.UserUpdateRequest;
+import com.api.formSync.dto.*;
 import com.api.formSync.exception.*;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Domain;
@@ -20,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -31,6 +29,7 @@ public class UserService {
     private final JwtService jwtService;
     private final ApiKeyService keyService;
     private final DomainService domainService;
+    private final FormService formService;
 
     public UserInfo update(UserPrincipal details, UserUpdateRequest req) {
         if (req.isInvalid()) {
@@ -154,5 +153,9 @@ public class UserService {
         ApiKey key = user.getKey();
 
         return new KeyInfo(key);
+    }
+
+    public List<FormResponse> getForms(User user) {
+        return formService.get(user);
     }
 }
