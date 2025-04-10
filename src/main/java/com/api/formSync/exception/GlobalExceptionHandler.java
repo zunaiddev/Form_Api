@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     private ErrorResponse handle(LockedException exp) {
         log.warn("Locked User is trying To login. Message {}", exp.getMessage());
-        return ErrorResponse.build("Authentication Failed.", HttpStatus.FORBIDDEN, "Your temporary disabled. please contact to admin.");
+        return ErrorResponse.build("Authentication Failed.", HttpStatus.FORBIDDEN, "You are temporary disabled. please contact to admin.");
     }
 
     @ExceptionHandler(UnauthorisedException.class)
@@ -192,5 +192,12 @@ public class GlobalExceptionHandler {
     private ErrorResponse handle(SignatureException exp) {
         log.error("Token Signature is Invalid {}", exp.getMessage());
         return ErrorResponse.build("Authentication Failed.", HttpStatus.BAD_REQUEST, "Invalid Token Signature.");
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    private ErrorResponse handle(ForbiddenException exp) {
+        log.error("Unauthorised access {}", exp.getMessage());
+        return ErrorResponse.build("Forbidden.", HttpStatus.FORBIDDEN, exp.getMessage());
     }
 }

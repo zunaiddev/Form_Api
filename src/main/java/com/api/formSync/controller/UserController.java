@@ -80,4 +80,10 @@ public class UserController {
         return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Success",
                 service.getForms(details.getUser())));
     }
+
+    @DeleteMapping("/forms/{id}")
+    public ResponseEntity<SuccessResponse> deleteForm(@AuthenticationPrincipal UserPrincipal details, @PathVariable Long id) {
+        service.deleteForm(details, id);
+        return ResponseEntity.noContent().build();
+    }
 }
