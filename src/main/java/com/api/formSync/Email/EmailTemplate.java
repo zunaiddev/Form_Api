@@ -255,4 +255,34 @@ public class EmailTemplate {
                 </html>
                 \s""".replace("$NAME", name).replace("$LINK", url);
     }
+
+    public static String formResponse(String username, String submitterName, String email, String subject, String message) {
+        return "<html lang=\"en\">"
+                + "<head>"
+                + "<meta charset=\"UTF-8\">"
+                + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+                + "<title>Form Submission Notification</title>"
+                + "<style>"
+                + "body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f2f4f8; padding: 20px; }"
+                + ".container { max-width: 600px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }"
+                + "h2 { color: #2e7d32; }"
+                + "p { font-size: 16px; line-height: 1.6; color: #333333; }"
+                + ".info { background-color: #f0f0f0; padding: 10px 15px; border-left: 4px solid #2e7d32; margin: 10px 0; border-radius: 5px; }"
+                + ".footer { font-size: 13px; color: #777777; margin-top: 30px; text-align: center; }"
+                + "</style>"
+                + "</head>"
+                + "<body>"
+                + "<div class=\"container\">"
+                + "<h2>Hey " + username + ", 👋</h2>"
+                + "<p>Someone just submitted a form on your website. Here's the info:</p>"
+                + "<div class=\"info\"><strong>Name:</strong> " + submitterName + "</div>"
+                + "<div class=\"info\"><strong>Email:</strong> " + email + "</div>"
+                + "<div class=\"info\"><strong>Subject:</strong> " + subject + "</div>"
+                + "<div class=\"info\"><strong>Message:</strong><br>" + message + "</div>"
+                + "<p class=\"footer\">This message was sent to you by FormSync. If you didn't expect it, you can ignore it.</p>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
+    }
+
 }

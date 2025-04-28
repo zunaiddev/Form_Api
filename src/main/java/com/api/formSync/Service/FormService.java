@@ -28,6 +28,8 @@ public class FormService {
         Form form = new Form(req.getName(), req.getSubject(), req.getEmail(), req.getMessage(), user);
         Form submittedForm = repo.save(form);
 
+        emailService.sendEmailAsync(user.getEmail(), "New Form Submission Received.", EmailTemplate.formResponse(user.getName(), form.getName(), form.getEmail(), form.getSubject(), form.getMessage()));
+
         if (user.getRole().equals(Role.ADMIN)) {
             emailService.sendEmailAsync(req.getEmail(), "Thank You for Contacting Zunaid", EmailTemplate.adminBody(req.getName()));
         }
