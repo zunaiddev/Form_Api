@@ -2,6 +2,7 @@ package com.api.formSync.configuration;
 
 import com.api.formSync.Filter.ApiKeyAuthFilter;
 import com.api.formSync.Filter.JwtAuthFilter;
+import com.api.formSync.Filter.RateLimitFilter;
 import com.api.formSync.Filter.VerificationFilter;
 import com.api.formSync.Service.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final VerificationFilter verificationFilter;
     private final UserDetailsServiceImpl userDetailsService;
+    private final RateLimitFilter rateLimitFilter;
     @Value("${BASE_URL}")
     private String BASE_URL;
 
@@ -45,7 +47,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 ).sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(apiKeyAuthFilter, RateLimitFilter.class)
                 .addFilterAfter(jwtAuthFilter, ApiKeyAuthFilter.class)
                 .addFilterAfter(verificationFilter, JwtAuthFilter.class)
                 .httpBasic(Customizer.withDefaults())

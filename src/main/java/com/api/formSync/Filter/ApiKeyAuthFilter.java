@@ -45,10 +45,10 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
         String domain = extractDomain(origin != null ? origin : referer);
 
-        if (domain == null) {
-            Common.sendErrorResponse(response, ErrorResponse.build("Invalid Domain.", HttpStatus.BAD_REQUEST, "Domain is null please use direct js."));
-            return;
-        }
+//        if (domain == null) {
+//            Common.sendErrorResponse(response, ErrorResponse.build("Invalid Domain.", HttpStatus.BAD_REQUEST, "Domain is null please use direct js."));
+//            return;
+//        }
 
         try {
             Authentication auth = keyService.getAuthentication(API_KEY, domain);

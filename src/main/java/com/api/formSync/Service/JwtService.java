@@ -18,13 +18,22 @@ public class JwtService {
     @Value("${SECRET_KEY}")
     private String secretKey;
 
+    @Value("${ENVIRONMENT}")
+    private String environment;
+
     public String generateToken(String email, Map<String, Object> claims, long expiry) {
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .claims(claims)
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiry * 1000))
                 .signWith(getKey()).compact();
+        
+        if (environment.equals("local")) {
+            System.out.println("Token Generated: " + token);
+        }
+
+        return token;
     }
 
     public String extractEmail(String token) {

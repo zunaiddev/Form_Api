@@ -32,23 +32,27 @@ public class ApiKeyService {
         ApiKey matchedKey = repo.findByApiKey(key)
                 .orElseThrow(() -> new InvalidApiKeyException("Invalid API Key"));
 
-        if (matchedKey.isLocked()) {
-            throw new TodayLimitReachedException("Today Limit Reached. Api key is locked");
-        }
+        System.out.println("req no.: " + matchedKey.getRequestCount());
 
         if (domain != null && !matchedKey.getDomains().stream().map(Domain::getDomain).toList().contains(domain)) {
-            throw new ForbiddenException("You are not allowed to access this resources");
+            throw new ForbiddenException("You are not allowed to access this resource");
         }
 
         User user = matchedKey.getUser();
 
         if (matchedKey.getLastReset().isBefore(LocalDate.now())) {
+            System.out.println("Resetting Key");
             matchedKey.setRequestCount(0);
             matchedKey.setLastReset(LocalDate.now());
+            matchedKey.setLocked(false);
         }
 
         if (!user.getRole().equals(Role.ADMIN) && !user.getRole().equals(Role.ULTIMATE)) {
-            final int DAILY_LIMIT = 10;
+            if (matchedKey.isLocked()) {
+                throw new TodayLimitReachedException("Today Limit Reached. Api key is locked");
+            }
+
+            final int DAILY_LIMIT = 9;
 
             if (matchedKey.getRequestCount() == DAILY_LIMIT) {
                 matchedKey.setLocked(true);
@@ -77,7 +81,7 @@ public class ApiKeyService {
 
     public List<Domain> getDomains(Long id) {
         ApiKey key = repo.findById(id)
-                .orElseThrow(() -> new InvalidApiKeyException("Could Not Found Api key With id" + id));
+                .orElseThrow(() -> new InvalidApiKeyException("Could Not Found Api key With id: " + id));
         return key.getDomains();
     }
 }

@@ -159,8 +159,12 @@ public class UserService {
         return formService.get(user);
     }
 
-    public void deleteForm(UserPrincipal details, Long id) {
-        formService.delete(details.getUser(), id);
+    public void deleteForms(UserPrincipal details, List<Long> ids) {
+
+        for (long id : ids) {
+            formService.delete(details.getUser(), id);
+        }
+
         System.out.println("deleted");
     }
 }

@@ -2,10 +2,7 @@ package com.api.formSync.controller;
 
 import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.Service.UserService;
-import com.api.formSync.dto.DomainRequest;
-import com.api.formSync.dto.PasswordRequest;
-import com.api.formSync.dto.SuccessResponse;
-import com.api.formSync.dto.UserUpdateRequest;
+import com.api.formSync.dto.*;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -81,9 +78,10 @@ public class UserController {
                 service.getForms(details.getUser())));
     }
 
-    @DeleteMapping("/forms/{id}")
-    public ResponseEntity<SuccessResponse> deleteForm(@AuthenticationPrincipal UserPrincipal details, @PathVariable Long id) {
-        service.deleteForm(details, id);
+    @DeleteMapping("/forms")
+    public ResponseEntity<SuccessResponse> deleteForm(@AuthenticationPrincipal UserPrincipal details,
+                                                      @Valid @RequestBody FormDeleteReq req) {
+        service.deleteForms(details, req.getId());
         return ResponseEntity.noContent().build();
     }
 }

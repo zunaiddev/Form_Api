@@ -21,6 +21,9 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String FROM;
 
+    @Value("${ENVIRONMENT}")
+    private String environment;
+
     @Async
     public void sendEmailAsync(String to, String subject, String body) {
         sendEmail(to, subject, body);
@@ -28,6 +31,11 @@ public class EmailService {
     }
 
     public void sendEmail(String to, String subject, String body) {
+        if (environment.equals("local")) {
+            System.out.println("Email sent from Local Environment");
+            return;
+        }
+
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = null;
         try {

@@ -36,6 +36,7 @@ public class ApiKey {
     private LocalDate lastReset = LocalDate.now();
 
     @NotNull
+    @Enumerated(value = EnumType.STRING)
     private Role role;
 
     @OneToMany(fetch = FetchType.EAGER)
