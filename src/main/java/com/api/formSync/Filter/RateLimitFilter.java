@@ -26,6 +26,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
         String ip = req.getRemoteAddr();
+        System.out.println("Req come from " + ip);
 
         Bucket bucket = buckets.computeIfAbsent(ip, k -> createNewBucket());
 
