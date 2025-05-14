@@ -24,6 +24,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest req) {
+        final String URI = req.getRequestURI();
+        return !(URI.startsWith("/api/auth") || URI.startsWith("/api/public"));
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
         String ip = req.getRemoteAddr();
         System.out.println("Req come from " + ip);
