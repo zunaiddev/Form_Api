@@ -64,9 +64,10 @@ public class AuthService {
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
+        cookie.setDomain("formsync.netlify.app");
         cookie.setMaxAge(2_592_000);
 
-        response.addCookie(cookie);
+        response.setHeader("Set-Cookie", String.format("refresh_token=%s; Max_Age=%d; Path=/; Secure; HttpOnly; SameSite=None", refreshToken, 2_592_000));
         return new LoginResponse(accessToken);
     }
 
