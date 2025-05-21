@@ -60,14 +60,14 @@ public class AuthService {
         String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole(), "purpose", Purpose.auth), 900);
         String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("purpose", Purpose.refresh_token), 2_592_000);
 
-        Cookie cookie = new Cookie("refresh_token", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setDomain("formsync.netlify.app");
-        cookie.setMaxAge(2_592_000);
+//        Cookie cookie = new Cookie("refresh_token", refreshToken);
+//        cookie.setHttpOnly(true);
+//        cookie.setSecure(true);
+//        cookie.setPath("/");
+//        cookie.setMaxAge(2_592_000);
 
-        response.setHeader("Set-Cookie", String.format("refresh_token=%s; Max_Age=%d; Path=/; Secure; HttpOnly; SameSite=None", refreshToken, 2_592_000));
+        response.setHeader("Set-Cookie",
+                String.format("refresh_token=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None", refreshToken, 2_592_000));
         return new LoginResponse(accessToken);
     }
 
