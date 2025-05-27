@@ -3,8 +3,8 @@ package com.api.formSync.Service;
 import com.api.formSync.dto.LoginResponse;
 import com.api.formSync.exception.DuplicateEntrypointEmailException;
 import com.api.formSync.model.User;
+import com.api.formSync.util.Common;
 import com.api.formSync.util.Purpose;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,13 +29,7 @@ public class VerificationService {
         String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole(), "purpose", Purpose.auth), 900);
         String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("purpose", Purpose.refresh_token), 2_592_000);
 
-        Cookie cookie = new Cookie("refresh_token", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(2_592_000);
-
-        response.addCookie(cookie);
+        Common.setCookie(response, refreshToken);
 
         return new LoginResponse(accessToken);
     }

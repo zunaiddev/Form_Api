@@ -18,4 +18,9 @@ public class Common {
         writer.write(mapper.writeValueAsString(error));
         writer.flush();
     }
+
+    public static void setCookie(HttpServletResponse res, String token) {
+        res.setHeader("Set-Cookie",
+                String.format("refresh_token=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None", token, 2_592_000));
+    }
 }

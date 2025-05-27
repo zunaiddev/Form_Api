@@ -49,7 +49,7 @@ public class VerificationFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        log.info(token);
+
         try {
             String email = jwtService.extractEmail(token);
 

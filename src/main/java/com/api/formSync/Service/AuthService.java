@@ -12,8 +12,8 @@ import com.api.formSync.exception.InvalidTokenException;
 import com.api.formSync.exception.UnauthorisedException;
 import com.api.formSync.exception.UnverifiedEmailException;
 import com.api.formSync.model.User;
+import com.api.formSync.util.Common;
 import com.api.formSync.util.Purpose;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,8 +66,7 @@ public class AuthService {
 //        cookie.setPath("/");
 //        cookie.setMaxAge(2_592_000);
 
-        response.setHeader("Set-Cookie",
-                String.format("refresh_token=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None", refreshToken, 2_592_000));
+        Common.setCookie(response, refreshToken);
         return new LoginResponse(accessToken);
     }
 
@@ -107,11 +106,7 @@ public class AuthService {
     }
 
     public void logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("refresh_token", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        response.setHeader("Set-Cookie",
+                String.format("refresh_token=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None", null, 0));
     }
 }
