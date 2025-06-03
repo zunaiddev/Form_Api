@@ -151,6 +151,7 @@ public class UserService {
         }
 
         ApiKey key = user.getKey();
+        key.setRole(user.getRole());
 
         return new KeyInfo(key);
     }

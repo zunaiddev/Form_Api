@@ -8,7 +8,6 @@ import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Domain;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.ApiKeyRepository;
-import com.api.formSync.util.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,8 +31,6 @@ public class ApiKeyService {
         ApiKey matchedKey = repo.findByApiKey(key)
                 .orElseThrow(() -> new InvalidApiKeyException("Invalid API Key"));
 
-        System.out.println("req no.: " + matchedKey.getRequestCount());
-
         if (domain != null && !matchedKey.getDomains().stream().map(Domain::getDomain).toList().contains(domain)) {
             throw new ForbiddenException("You are not allowed to access this resource");
         }
@@ -41,32 +38,25 @@ public class ApiKeyService {
         User user = matchedKey.getUser();
 
         if (matchedKey.getLastReset().isBefore(LocalDate.now())) {
-            System.out.println("Resetting Key");
             matchedKey.setRequestCount(0);
             matchedKey.setLastReset(LocalDate.now());
             matchedKey.setLocked(false);
+            update(matchedKey);
         }
 
-        if (!user.getRole().equals(Role.ADMIN) && !user.getRole().equals(Role.ULTIMATE)) {
-            if (matchedKey.isLocked()) {
-                throw new TodayLimitReachedException("Today Limit Reached. Api key is locked");
-            }
-
-            final int DAILY_LIMIT = 9;
-
-            if (matchedKey.getRequestCount() == DAILY_LIMIT) {
-                matchedKey.setLocked(true);
-            }
-
-            matchedKey.setRequestCount(matchedKey.getRequestCount() + 1);
+        if (matchedKey.isLocked()) {
+            throw new TodayLimitReachedException("Today Limit Reached. Api key is locked");
         }
 
-        repo.save(matchedKey);
         return new UsernamePasswordAuthenticationToken(
                 new ApiKeyPrincipal(matchedKey),
                 null,
                 AuthorityUtils.createAuthorityList(user.getRole().name())
         );
+    }
+
+    public ApiKey findByUser(User user) {
+        return repo.findByUser(user).orElseThrow(() -> new InvalidApiKeyException("Invalid API Key"));
     }
 
     public User getUser(String key) {
