@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface FormRepository extends JpaRepository<Form, Long> {
     List<Form> findAllByUser(User user);
+
+    void deleteAllByUser(User user);
 }

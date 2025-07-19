@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -71,19 +70,21 @@ public class UserService {
         return new UserInfo(userInfoService.update(user));
     }
 
-    public String markAsDeleted(UserPrincipal details, PasswordRequest req, HttpServletResponse res) {
+    public String deleteUser(UserPrincipal details, PasswordRequest req, HttpServletResponse res) {
         User user = details.getUser();
 
         if (!encoder.matches(req.getPassword(), user.getPassword())) {
             throw new UnauthorisedException("Invalid password");
         }
 
-        user.setDeleted(true);
-        user.setDeleteAt(LocalDateTime.now().plusDays(15));
+        formService.deleteAll(user);
+        ApiKey apiKey = user.getKey();
+        domainService.deleteAll(apiKey.getDomains());
+        keyService.delete(user);
+        userInfoService.delete(user.getId());
 
-        userInfoService.update(user);
         logout(res);
-        return "Mark as deleted Delete in 15 Working days";
+        return "User Deleted";
     }
 
     public void logout(HttpServletResponse response) {

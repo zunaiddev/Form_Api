@@ -30,7 +30,7 @@ public class UserController {
 
     @DeleteMapping
     public ResponseEntity<SuccessResponse> deleteUser(@AuthenticationPrincipal UserPrincipal details, @RequestBody @Valid PasswordRequest req, HttpServletResponse res) {
-        return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Success", service.markAsDeleted(details, req, res)));
+        return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Success", service.deleteUser(details, req, res)));
     }
 
     @GetMapping("/key")
@@ -67,7 +67,7 @@ public class UserController {
     }
 
     @DeleteMapping("/key")
-    public ResponseEntity<SuccessResponse> addDomain(@AuthenticationPrincipal UserPrincipal details) {
+    public ResponseEntity<SuccessResponse> deleteKey(@AuthenticationPrincipal UserPrincipal details) {
         return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Deleted",
                 service.deleteKey(details.getUser())));
     }

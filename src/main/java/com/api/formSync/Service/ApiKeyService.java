@@ -35,8 +35,6 @@ public class ApiKeyService {
             throw new ForbiddenException("You are not allowed to access this resource");
         }
 
-        User user = matchedKey.getUser();
-
         if (matchedKey.getLastReset().isBefore(LocalDate.now())) {
             matchedKey.setRequestCount(0);
             matchedKey.setLastReset(LocalDate.now());
@@ -51,7 +49,7 @@ public class ApiKeyService {
         return new UsernamePasswordAuthenticationToken(
                 new ApiKeyPrincipal(matchedKey),
                 null,
-                AuthorityUtils.createAuthorityList(user.getRole().name())
+                AuthorityUtils.createAuthorityList(matchedKey.getRole().name())
         );
     }
 
@@ -73,5 +71,14 @@ public class ApiKeyService {
         ApiKey key = repo.findById(id)
                 .orElseThrow(() -> new InvalidApiKeyException("Could Not Found Api key With id: " + id));
         return key.getDomains();
+    }
+
+    public void delete(User user) {
+        ApiKey apiKey = findByUser(user);
+
+        apiKey.setUser(null);
+        update(apiKey);
+
+        repo.delete(apiKey);
     }
 }

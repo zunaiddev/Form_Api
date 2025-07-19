@@ -88,8 +88,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             log.warn("Null or Empty Token. {}", e.getMessage());
             Common.sendErrorResponse(res, ErrorResponse.build("Authentication Failed", HttpStatus.BAD_REQUEST, "Token cannot be null or empty"));
         } catch (Exception e) {
-            log.warn("Invalid Token. {}", e.getMessage());
-            Common.sendErrorResponse(res, ErrorResponse.build("Authentication Failed", HttpStatus.BAD_REQUEST, "Invalid Token"));
+            log.warn("Something went wrong. {}", e.getMessage());
+            Common.sendErrorResponse(res, ErrorResponse.build("Authentication Failed", HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong."));
         }
     }
 }

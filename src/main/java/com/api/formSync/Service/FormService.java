@@ -64,10 +64,13 @@ public class FormService {
                 .orElseThrow(() -> new EntityNotFoundException("Could not found any form with id " + id));
 
         if (!Objects.equals(form.getUser().getId(), user.getId())) {
-            System.out.println("Inside if");
             throw new ForbiddenException("You are not allowed to delete this form.");
         }
 
         repo.deleteById(form.getId());
+    }
+
+    public void deleteAll(User user) {
+        repo.deleteAllByUser(user);
     }
 }
