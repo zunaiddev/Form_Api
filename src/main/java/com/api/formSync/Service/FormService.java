@@ -71,6 +71,7 @@ public class FormService {
     }
 
     public void deleteAll(User user) {
-        repo.deleteAllByUser(user);
+        repo.deleteAllByUserId(user.getId());
+        System.out.println("forms deleted");
     }
 }

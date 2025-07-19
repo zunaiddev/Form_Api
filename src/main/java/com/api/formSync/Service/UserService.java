@@ -11,6 +11,7 @@ import com.api.formSync.model.User;
 import com.api.formSync.util.Purpose;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -70,6 +71,7 @@ public class UserService {
         return new UserInfo(userInfoService.update(user));
     }
 
+    @Transactional
     public String deleteUser(UserPrincipal details, PasswordRequest req, HttpServletResponse res) {
         User user = details.getUser();
 
@@ -78,8 +80,7 @@ public class UserService {
         }
 
         formService.deleteAll(user);
-        ApiKey apiKey = user.getKey();
-        domainService.deleteAll(apiKey.getDomains());
+        domainService.deleteAll(user);
         keyService.delete(user);
         userInfoService.delete(user.getId());
 

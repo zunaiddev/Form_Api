@@ -1,11 +1,10 @@
 package com.api.formSync.Service;
 
 import com.api.formSync.model.Domain;
+import com.api.formSync.model.User;
 import com.api.formSync.repository.DomainRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -16,8 +15,8 @@ public class DomainService {
         return repo.save(new Domain(domain));
     }
 
-    public void deleteAll(List<Domain> domains) {
-        repo.deleteAll(domains);
+    public void deleteAll(User user) {
+        repo.deleteAllByUserId(user.getId());
     }
 
     public void delete(Domain domain) {
