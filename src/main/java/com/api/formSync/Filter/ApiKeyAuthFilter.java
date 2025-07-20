@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +26,8 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
     private final ApiKeyService keyService;
+    @Value("${ENVIRONMENT}")
+    private String environment;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -44,11 +47,11 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
         String referer = request.getHeader("Referer");
 
         String domain = extractDomain(origin != null ? origin : referer);
-
-//        if (domain == null) {
-//            Common.sendErrorResponse(response, ErrorResponse.build("Invalid Domain.", HttpStatus.BAD_REQUEST, "Domain is null please use direct js."));
-//            return;
-//        }
+        
+        if (!environment.equalsIgnoreCase("local") && domain == null) {
+            Common.sendErrorResponse(response, ErrorResponse.build("Invalid Domain.", HttpStatus.BAD_REQUEST, "Domain is null please use direct js."));
+            return;
+        }
 
         try {
             Authentication auth = keyService.getAuthentication(API_KEY, domain);

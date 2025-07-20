@@ -73,6 +73,7 @@ public class UserService {
 
     @Transactional
     public String deleteUser(UserPrincipal details, PasswordRequest req, HttpServletResponse res) {
+
         User user = details.getUser();
 
         if (!encoder.matches(req.getPassword(), user.getPassword())) {
