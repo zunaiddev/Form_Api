@@ -36,10 +36,7 @@ public class ApiKeyService {
         }
 
         if (matchedKey.getLastReset().isBefore(LocalDate.now())) {
-            matchedKey.setRequestCount(0);
-            matchedKey.setLastReset(LocalDate.now());
-            matchedKey.setLocked(false);
-            update(matchedKey);
+            matchedKey = resetRequestCount(matchedKey);
         }
 
         if (matchedKey.isLocked()) {
@@ -80,5 +77,12 @@ public class ApiKeyService {
         update(apiKey);
 
         repo.delete(apiKey);
+    }
+
+    public ApiKey resetRequestCount(ApiKey apiKey) {
+        apiKey.setRequestCount(0);
+        apiKey.setLastReset(LocalDate.now());
+        apiKey.setLocked(false);
+        return update(apiKey);
     }
 }

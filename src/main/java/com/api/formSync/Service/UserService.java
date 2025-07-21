@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public class UserService {
     private final PasswordEncoder encoder;
     private final EmailService emailService;
     private final JwtService jwtService;
-    private final ApiKeyService keyService;
+    private final ApiKeyService apiKeyService;
     private final DomainService domainService;
     private final FormService formService;
 
@@ -82,7 +83,7 @@ public class UserService {
 
         formService.deleteAll(user);
         domainService.deleteAll(user);
-        keyService.delete(user);
+        apiKeyService.delete(user);
         userInfoService.delete(user.getId());
 
         logout(res);
@@ -109,7 +110,7 @@ public class UserService {
         }
 
         Domain savedDomain = domainService.create(domain);
-        ApiKey apiKey = keyService.create(user, savedDomain);
+        ApiKey apiKey = apiKeyService.create(user, savedDomain);
         user.setKey(apiKey);
         userInfoService.update(user);
         return new KeyInfo(apiKey);
@@ -123,7 +124,7 @@ public class UserService {
         ApiKey key = user.getKey();
         key.reGenerate();
 
-        return new KeyInfo(keyService.update(key));
+        return new KeyInfo(apiKeyService.update(key));
     }
 
     public KeyInfo addDomain(User user, String domain) {
@@ -131,7 +132,7 @@ public class UserService {
         Domain savedDomain = domainService.create(domain);
         key.addDomain(savedDomain);
 
-        return new KeyInfo(keyService.update(key));
+        return new KeyInfo(apiKeyService.update(key));
     }
 
     public String deleteKey(User user) {
@@ -145,7 +146,7 @@ public class UserService {
         Domain savedDomain = new Domain(domain);
 
         key.removeDomain(savedDomain);
-        return new KeyInfo(keyService.update(key));
+        return new KeyInfo(apiKeyService.update(key));
     }
 
     public KeyInfo getKeyInfo(User user) {
@@ -156,6 +157,10 @@ public class UserService {
         ApiKey key = user.getKey();
         key.setRole(user.getRole());
 
+        if (key.getLastReset().isBefore(LocalDate.now())) {
+            key = apiKeyService.resetRequestCount(key);
+        }
+
         return new KeyInfo(key);
     }
 
@@ -164,11 +169,8 @@ public class UserService {
     }
 
     public void deleteForms(UserPrincipal details, List<Long> ids) {
-
         for (long id : ids) {
             formService.delete(details.getUser(), id);
         }
-
-        System.out.println("deleted");
     }
 }
