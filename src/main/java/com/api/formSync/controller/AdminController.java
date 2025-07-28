@@ -20,6 +20,7 @@ public class AdminController {
 
     @GetMapping("/users")
     public ResponseEntity<List<UserInfo>> getAll() {
+        System.out.println("request reswed ");
         return ResponseEntity.ok(service.getUsers());
     }
 

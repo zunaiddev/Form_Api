@@ -12,22 +12,33 @@ import com.api.formSync.model.User;
 import com.api.formSync.repository.FormRepository;
 import com.api.formSync.util.Role;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FormService {
     private final FormRepository repo;
     private final EmailService emailService;
     private final ApiKeyService keyService;
 
+    @Value("${TEST_API_KEY}")
+    private String testKey;
+
     public FormResponse submit(FormRequest req, ApiKeyPrincipal details) {
+        if (details.getUsername().equals(testKey)) {
+            return new FormResponse(new Random().nextLong(1000), req.getName(), req.getEmail(), req.getSubject(), req.getMessage(), LocalDateTime.now());
+        }
+
         User user = details.getUser();
         Form form = new Form(req.getName(), req.getSubject(), req.getEmail(), req.getMessage(), user);
+
         Form submittedForm = repo.save(form);
 
         Role role = user.getRole();
