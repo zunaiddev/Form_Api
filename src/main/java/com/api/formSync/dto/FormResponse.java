@@ -17,7 +17,7 @@ public class FormResponse {
     private String email;
     private String subject;
     private String message;
-    @JsonFormat(pattern = "dd-MM-yyyy hh:mma")
+    @JsonFormat(pattern = "dd-MM-yyyy hh:mm:ssa", timezone = "Asia/Kolkata")
     private LocalDateTime submittedAt;
 
     public FormResponse(Form form) {

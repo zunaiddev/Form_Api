@@ -13,7 +13,7 @@ public class UserInfo {
     private String name;
     private String email;
     private Role role;
-    @JsonFormat(pattern = "dd-MMM-yyyy hh-mm")
+    @JsonFormat(pattern = "dd-MMM-yyyy hh-mm", timezone = "Asia/Kolkata")
     private LocalDateTime createdAt;
 
     public UserInfo(User user) {
