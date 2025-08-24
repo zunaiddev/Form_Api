@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -129,6 +130,11 @@ public class UserService {
 
     public KeyInfo addDomain(User user, String domain) {
         ApiKey key = user.getKey();
+
+        if (!key.getDomains().stream().filter(d -> d.getDomain().equals(domain)).toList().isEmpty()) {
+            throw new DomainAlreadyExistsException("this domain is already exists");
+        }
+
         Domain savedDomain = domainService.create(domain);
         key.addDomain(savedDomain);
 
@@ -141,12 +147,13 @@ public class UserService {
         return "Key Deleted Successfully";
     }
 
-    public KeyInfo deleteDomain(User user, String domain) {
-        ApiKey key = user.getKey();
-        Domain savedDomain = new Domain(domain);
+    public void deleteDomain(User user, Long id) {
+        ApiKey apiKey = user.getKey();
 
-        key.removeDomain(savedDomain);
-        return new KeyInfo(apiKeyService.update(key));
+        Domain domain = apiKey.getDomains().stream().filter(d -> Objects.equals(d.getId(), id))
+                .findFirst().orElseThrow(() -> new DomainNotFoundException("Cound Not Found Domain With id " + id));
+
+        domainService.delete(domain);
     }
 
     public KeyInfo getKeyInfo(User user) {

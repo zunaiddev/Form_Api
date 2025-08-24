@@ -186,6 +186,20 @@ public class GlobalExceptionHandler {
         return ErrorResponse.build("Something Went Wrong", HttpStatus.CONFLICT, exp.getMessage());
     }
 
+    @ExceptionHandler(DomainAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    private ErrorResponse handle(DomainAlreadyExistsException exp) {
+        log.error("Duplicate Domain name. {}", exp.getMessage());
+        return ErrorResponse.build("Duplicate Domain name", HttpStatus.CONFLICT, exp.getMessage());
+    }
+
+    @ExceptionHandler(DomainNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    private ErrorResponse handle(DomainNotFoundException exp) {
+        log.error("Not Found Domain name. {}", exp.getMessage());
+        return ErrorResponse.build("Domain name not found", HttpStatus.NOT_FOUND, exp.getMessage());
+    }
+
     //Jwt Exceptions
     @ExceptionHandler(SignatureException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)

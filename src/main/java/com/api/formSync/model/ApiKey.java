@@ -39,7 +39,7 @@ public class ApiKey {
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "domain_id")
     private List<Domain> domains;
 

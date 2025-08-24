@@ -5,6 +5,7 @@ import com.api.formSync.Service.UserService;
 import com.api.formSync.dto.*;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,11 +60,11 @@ public class UserController {
                 service.addDomain(details.getUser(), req.getDomain())));
     }
 
-    @DeleteMapping("/key/domain")
-    public ResponseEntity<SuccessResponse> deleteDomain(@AuthenticationPrincipal UserPrincipal details,
-                                                        @RequestBody @Valid DomainRequest req) {
-        return ResponseEntity.ok(SuccessResponse.build(HttpStatus.OK, "Deleted",
-                service.deleteDomain(details.getUser(), req.getDomain())));
+    @DeleteMapping("/key/domain/{id}")
+    public ResponseEntity<?> deleteDomain(@AuthenticationPrincipal UserPrincipal details,
+                                          @NotNull(message = "id could not be null") @PathVariable("id") Long id) {
+        service.deleteDomain(details.getUser(), id);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/key")
