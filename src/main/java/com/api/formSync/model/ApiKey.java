@@ -24,30 +24,28 @@ public class ApiKey {
     @Column(nullable = false, unique = true)
     private String apiKey;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    @ToString.Exclude
-    private User user;
-
     @Column(name = "request_count", nullable = false)
     private Integer requestCount = 0;
 
     @Column(name = "last_reset", nullable = false)
-    private LocalDate lastReset = LocalDate.now();
+    private LocalDate lastReset;
 
     @NotNull
     @Enumerated(value = EnumType.STRING)
     private Role role;
-
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "domain_id")
-    private List<Domain> domains;
 
     @NotNull
     private boolean locked = false;
 
     @NotNull
     private boolean enabled = true;
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "key", cascade = CascadeType.REMOVE)
+    @ToString.Exclude
+    private User user;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<Domain> domains;
 
     public ApiKey(User user, Domain domain) {
         this.user = user;
@@ -70,9 +68,5 @@ public class ApiKey {
 
     public void addDomain(Domain domain) {
         this.domains.add(domain);
-    }
-
-    public void removeDomain(Domain domain) {
-        this.domains.remove(domain);
     }
 }

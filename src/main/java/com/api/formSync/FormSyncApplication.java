@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableAsync
 public class FormSyncApplication {
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.run(FormSyncApplication.class, args);
     }
 }

@@ -7,14 +7,14 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class KeyInfo {
+public class ApiKeyInfo {
     private String key;
     private List<DomainInfo> domains;
     private int requests;
     private Role role;
     private boolean isActive;
 
-    public KeyInfo(ApiKey key) {
+    public ApiKeyInfo(ApiKey key) {
         this.key = key.getApiKey();
         this.domains = key.getDomains().stream().map(DomainInfo::new).toList();
         this.requests = key.getRequestCount();

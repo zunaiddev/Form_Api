@@ -75,7 +75,6 @@ public class UserService {
 
     @Transactional
     public String deleteUser(UserPrincipal details, PasswordRequest req, HttpServletResponse res) {
-
         User user = details.getUser();
 
         if (!encoder.matches(req.getPassword(), user.getPassword())) {
@@ -83,7 +82,6 @@ public class UserService {
         }
 
         formService.deleteAll(user);
-        domainService.deleteAll(user);
         apiKeyService.delete(user);
         userInfoService.delete(user.getId());
 
@@ -105,7 +103,7 @@ public class UserService {
         return new UserInfo(details.getUser());
     }
 
-    public KeyInfo generateKey(User user, String domain) {
+    public ApiKeyInfo generateKey(User user, String domain) {
         if (user.getKey() != null) {
             throw new KeyCreatedException("Key is Already created. Please regenerate the key.");
         }
@@ -114,10 +112,10 @@ public class UserService {
         ApiKey apiKey = apiKeyService.create(user, savedDomain);
         user.setKey(apiKey);
         userInfoService.update(user);
-        return new KeyInfo(apiKey);
+        return new ApiKeyInfo(apiKey);
     }
 
-    public KeyInfo regenerateKey(User user) {
+    public ApiKeyInfo regenerateKey(User user) {
         if (user.getKey() == null) {
             throw new InvalidApiKeyException("Could Not Found Api Key.");
         }
@@ -125,26 +123,25 @@ public class UserService {
         ApiKey key = user.getKey();
         key.reGenerate();
 
-        return new KeyInfo(apiKeyService.update(key));
+        return new ApiKeyInfo(apiKeyService.update(key));
     }
 
-    public KeyInfo addDomain(User user, String domain) {
+    public ApiKeyInfo addDomain(User user, String domain) {
         ApiKey key = user.getKey();
 
-        if (!key.getDomains().stream().filter(d -> d.getDomain().equals(domain)).toList().isEmpty()) {
+        if (!key.getDomains().stream().filter(d -> d.getName().equals(domain)).toList().isEmpty()) {
             throw new DomainAlreadyExistsException("this domain is already exists");
         }
 
         Domain savedDomain = domainService.create(domain);
         key.addDomain(savedDomain);
 
-        return new KeyInfo(apiKeyService.update(key));
+        return new ApiKeyInfo(apiKeyService.update(key));
     }
 
-    public String deleteKey(User user) {
+    public void deleteKey(User user) {
         user.setKey(null);
         userInfoService.update(user);
-        return "Key Deleted Successfully";
     }
 
     public void deleteDomain(User user, Long id) {
@@ -153,10 +150,10 @@ public class UserService {
         Domain domain = apiKey.getDomains().stream().filter(d -> Objects.equals(d.getId(), id))
                 .findFirst().orElseThrow(() -> new DomainNotFoundException("Cound Not Found Domain With id " + id));
 
-        domainService.delete(domain);
+        domainService.delete(domain, apiKey);
     }
 
-    public KeyInfo getKeyInfo(User user) {
+    public ApiKeyInfo getKeyInfo(User user) {
         if (user.getKey() == null) {
             return null;
         }
@@ -168,7 +165,7 @@ public class UserService {
             key = apiKeyService.resetRequestCount(key);
         }
 
-        return new KeyInfo(key);
+        return new ApiKeyInfo(key);
     }
 
     public List<FormResponse> getForms(User user) {

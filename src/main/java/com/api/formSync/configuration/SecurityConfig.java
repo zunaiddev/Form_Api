@@ -59,8 +59,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(encoder);
         return provider;
     }
@@ -87,7 +86,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/auth/**", privateCorsConfig);
         source.registerCorsConfiguration("/user/**", privateCorsConfig);
         source.registerCorsConfiguration("/verify/**", privateCorsConfig);
-        source.registerCorsConfiguration("/admin/**", privateCorsConfig);
+//        source.registerCorsConfiguration("/admin/**", privateCorsConfig);
 
         return source;
     }

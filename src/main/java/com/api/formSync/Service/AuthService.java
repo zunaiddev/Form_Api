@@ -51,8 +51,7 @@ public class AuthService {
 
         User user = userInfo.load(req.getEmail());
 
-        if (user.isDeleted()) {
-            user.setDeleted(false);
+        if (user.getDeleteAt() != null) {
             user.setDeleteAt(null);
             userInfo.update(user);
         }

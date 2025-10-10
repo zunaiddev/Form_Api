@@ -4,9 +4,9 @@ import com.api.formSync.Principal.ApiKeyPrincipal;
 import com.api.formSync.Service.FormService;
 import com.api.formSync.dto.FormRequest;
 import com.api.formSync.dto.FormResponse;
+import com.api.formSync.dto.SuccessRes;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +20,8 @@ public class FormController {
     private final FormService service;
 
     @PostMapping("/submit")
-    public ResponseEntity<FormResponse> submit(@AuthenticationPrincipal ApiKeyPrincipal details, @Valid @RequestBody FormRequest req) {
-        return ResponseEntity.ok(service.submit(req, details));
+    public SuccessRes<FormResponse> submit(@AuthenticationPrincipal ApiKeyPrincipal details,
+                                           @Valid @RequestBody FormRequest req) {
+        return SuccessRes.build(service.submit(req, details));
     }
 }

@@ -31,7 +31,7 @@ public class ApiKeyService {
         ApiKey matchedKey = repo.findByApiKey(key)
                 .orElseThrow(() -> new InvalidApiKeyException("Invalid API Key"));
 
-        if (domain != null && !matchedKey.getDomains().stream().map(Domain::getDomain).toList().contains(domain)) {
+        if (domain != null && !matchedKey.getDomains().stream().map(Domain::getName).toList().contains(domain)) {
             throw new ForbiddenException("You are not allowed to access this resource");
         }
 

@@ -1,15 +1,11 @@
 package com.api.formSync.controller;
 
 import com.api.formSync.Service.AuthService;
-import com.api.formSync.dto.EmailRequest;
-import com.api.formSync.dto.LoginRequest;
-import com.api.formSync.dto.SignupRequest;
-import com.api.formSync.dto.SuccessResponse;
+import com.api.formSync.dto.*;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,32 +15,29 @@ public class AuthController {
     private final AuthService service;
 
     @PostMapping("/signup")
-    public ResponseEntity<SuccessResponse> register(@Valid @RequestBody SignupRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(SuccessResponse.build(HttpStatus.CREATED, "User created Successfully.", service.register(req)));
+    @ResponseStatus(HttpStatus.CREATED)
+    public SuccessRes<SignupResponse> register(@Valid @RequestBody SignupRequest req) {
+        return SuccessRes.build(HttpStatus.CREATED, service.register(req));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<SuccessResponse> login(@Valid @RequestBody LoginRequest req, HttpServletResponse response) {
-        return ResponseEntity
-                .ok(SuccessResponse.build(HttpStatus.OK, "Authentication Success.", service.authenticate(req, response)));
+    public SuccessRes<LoginResponse> login(@Valid @RequestBody LoginRequest req, HttpServletResponse response) {
+        return SuccessRes.build(service.authenticate(req, response));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<SuccessResponse> refreshToken(@CookieValue("refresh_token") String refreshToken) {
-        return ResponseEntity
-                .ok(SuccessResponse.build(HttpStatus.OK, "Token Refreshed Successfully.", service.refreshToken(refreshToken)));
+    public SuccessRes<LoginResponse> refreshToken(@CookieValue("refresh_token") String refreshToken) {
+        return SuccessRes.build(service.refreshToken(refreshToken));
     }
 
     @PostMapping("/forget-password")
-    public ResponseEntity<SuccessResponse> forgetPassword(@RequestBody @Valid EmailRequest req) {
-        return ResponseEntity
-                .ok(SuccessResponse.build(HttpStatus.OK, "Password Reset Email Sent.", service.resetPassword(req.getEmail())));
+    public SuccessRes<String> forgetPassword(@RequestBody @Valid EmailRequest req) {
+        return SuccessRes.build(service.resetPassword(req.getEmail()));
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<SuccessResponse> logout(HttpServletResponse response) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(HttpServletResponse response) {
         service.logout(response);
-        return ResponseEntity.noContent().build();
     }
 }

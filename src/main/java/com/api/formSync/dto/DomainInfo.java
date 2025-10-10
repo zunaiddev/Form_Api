@@ -10,6 +10,6 @@ public class DomainInfo {
 
     public DomainInfo(Domain domain) {
         this.id = domain.getId();
-        this.domain = domain.getDomain();
+        this.domain = domain.getName();
     }
 }

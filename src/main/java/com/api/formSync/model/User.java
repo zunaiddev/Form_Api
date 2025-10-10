@@ -32,16 +32,13 @@ public class User {
 
     @NotNull
     @Enumerated(value = EnumType.STRING)
-    private Role role = Role.USER;
+    private Role role;
 
     @NotNull
-    private boolean locked = false;
+    private boolean locked;
 
     @NotNull
-    private boolean enabled = false;
-
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
+    private boolean enabled;
 
     @Column(name = "delete_at")
     private LocalDateTime deleteAt;
@@ -49,8 +46,7 @@ public class User {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @OneToOne
-    @JoinColumn(name = "key_id")
+    @OneToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     private ApiKey key;
 
@@ -58,5 +54,8 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = Role.USER;
+        this.locked = false;
+        this.enabled = false;
     }
 }

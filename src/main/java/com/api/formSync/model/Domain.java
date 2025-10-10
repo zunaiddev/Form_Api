@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -15,10 +17,13 @@ public class Domain {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String domain;
+    @Column(nullable = false, unique = true)
+    private String name;
 
-    public Domain(String domain) {
-        this.domain = domain;
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "domains")
+    private List<ApiKey> apiKeys;
+
+    public Domain(String name) {
+        this.name = name;
     }
 }
