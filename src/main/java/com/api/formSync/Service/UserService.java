@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,12 +34,10 @@ public class UserService {
     private final DomainService domainService;
     private final FormService formService;
 
-    public UserInfo update(UserPrincipal details, UserUpdateRequest req) {
+    public UserInfo update(User user, UserUpdateRequest req) {
         if (req.isInvalid()) {
             throw new ValidationException("The request must contain at least one field to update. Updating the name does not require a password, but updating the email or password requires providing the current password.");
         }
-
-        User user = details.getUser();
 
         if (req.getName() != null) {
             user.setName(req.getName());
@@ -57,7 +56,7 @@ public class UserService {
                 throw new DuplicateEntrypointEmailException("A User is Already Registered by this email.");
             }
 
-            String token = jwtService.generateToken(user.getEmail(), Map.of("purpose", Purpose.update_email, "newEmail", req.getEmail()), 900);
+            String token = jwtService.generateToken(user.getEmail(), Map.of("purpose", Purpose.UPDATE_EMAIL, "newEmail", req.getEmail()), 900);
             System.out.println(token);
             emailService.sendEmail(req.getEmail(), "Please Verify Your Email To update", EmailTemplate.updateEmail(user.getName(), "http://localhost:8080/api/verify?token=" + token));
         }
@@ -75,17 +74,6 @@ public class UserService {
 
     @Transactional
     public String deleteUser(UserPrincipal details, PasswordRequest req, HttpServletResponse res) {
-        User user = details.getUser();
-
-        if (!encoder.matches(req.getPassword(), user.getPassword())) {
-            throw new UnauthorisedException("Invalid password");
-        }
-
-        formService.deleteAll(user);
-        apiKeyService.delete(user);
-        userInfoService.delete(user.getId());
-
-        logout(res);
         return "User Deleted";
     }
 
@@ -116,65 +104,74 @@ public class UserService {
     }
 
     public ApiKeyInfo regenerateKey(User user) {
-        if (user.getKey() == null) {
+        ApiKey apiKey = user.getKey();
+
+        if (apiKey == null) {
             throw new InvalidApiKeyException("Could Not Found Api Key.");
         }
 
-        ApiKey key = user.getKey();
-        key.reGenerate();
+        apiKey.reGenerate();
 
-        return new ApiKeyInfo(apiKeyService.update(key));
+        return new ApiKeyInfo(apiKeyService.update(apiKey));
     }
 
     public ApiKeyInfo addDomain(User user, String domain) {
-        ApiKey key = user.getKey();
+        User savedUser = userInfoService.load(user.getId());
+        ApiKey apiKey = savedUser.getKey();
+        List<Domain> domains = apiKey.getDomains();
 
-        if (!key.getDomains().stream().filter(d -> d.getName().equals(domain)).toList().isEmpty()) {
+        if (!domains.stream().filter(d -> Objects.equals(d.getName(), domain)).toList().isEmpty()) {
             throw new DomainAlreadyExistsException("this domain is already exists");
         }
 
-        Domain savedDomain = domainService.create(domain);
-        key.addDomain(savedDomain);
+        domains.add(domainService.create(domain));
+        apiKey.setDomains(domains);
 
-        return new ApiKeyInfo(apiKeyService.update(key));
+        return new ApiKeyInfo(apiKeyService.update(apiKey));
     }
 
-    public void deleteKey(User user) {
-        user.setKey(null);
-        userInfoService.update(user);
+    public void deleteApiKey(User user) {
+//        user.setKey(null);
+//        userInfoService.update(user);
     }
 
     public void deleteDomain(User user, Long id) {
-        ApiKey apiKey = user.getKey();
+        User savedUser = userInfoService.load(user.getId());
+        ApiKey apiKey = savedUser.getKey();
+        List<Domain> domains = apiKey.getDomains();
 
-        Domain domain = apiKey.getDomains().stream().filter(d -> Objects.equals(d.getId(), id))
+        //++++++++++++++++++++++++ Needs To fix it ++++++++++++++++++++++++++++++
+        Domain domain = domains.stream().filter(d -> Objects.equals(d.getId(), id))
                 .findFirst().orElseThrow(() -> new DomainNotFoundException("Cound Not Found Domain With id " + id));
 
-        domainService.delete(domain, apiKey);
+        apiKey.setDomains(domains.stream().filter(d -> !d.getId()
+                .equals(id)).collect(Collectors.toList()));
+
+        apiKeyService.update(apiKey);
     }
 
     public ApiKeyInfo getKeyInfo(User user) {
-        if (user.getKey() == null) {
-            return null;
+        User savedUser = userInfoService.load(user.getId());
+        ApiKey apiKey = savedUser.getKey();
+
+        if (apiKey == null) return null;
+
+        apiKey.setRole(user.getRole());
+
+        if (apiKey.getLastReset().isBefore(LocalDate.now())) {
+            apiKey = apiKeyService.resetRequestCount(apiKey);
         }
 
-        ApiKey key = user.getKey();
-        key.setRole(user.getRole());
-
-        if (key.getLastReset().isBefore(LocalDate.now())) {
-            key = apiKeyService.resetRequestCount(key);
-        }
-
-        return new ApiKeyInfo(key);
+        return new ApiKeyInfo(apiKey);
     }
 
     public List<FormResponse> getForms(User user) {
-        return formService.get(user);
+        User savedUser = userInfoService.load(user.getId());
+
+        return savedUser.getForms().stream().map(FormResponse::new).toList();
     }
 
-    public void deleteForms(UserPrincipal details, List<Long> ids) {
-        for (long id : ids) {
-            formService.delete(details.getUser(), id);
-        }
+    public void deleteForms(User user, List<Long> ids) {
+        formService.delete(user, ids);
     }
 }

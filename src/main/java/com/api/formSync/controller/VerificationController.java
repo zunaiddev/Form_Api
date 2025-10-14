@@ -25,14 +25,14 @@ public class VerificationController {
         Purpose purpose = Purpose.valueOf(http.getAttribute("purpose").toString());
         String email = http.getAttribute("email").toString();
 
-        if (purpose.equals(Purpose.reset_password) && req == null) {
+        if (purpose.equals(Purpose.RESET_PASSWORD) && req == null) {
             throw new RequestBodyIsMissingException("Please Provide new Password.");
         }
 
         return switch (purpose) {
-            case Purpose.verify_user -> SuccessRes.build(service.verifyUser(email, token, res));
-            case Purpose.reset_password -> SuccessRes.build(service.resetPassword(email, req.getPassword(), token));
-            case Purpose.update_email -> SuccessRes.build(service.updateEmail(email,
+            case Purpose.VERIFY_USER -> SuccessRes.build(service.verifyUser(email, token, res));
+            case Purpose.RESET_PASSWORD -> SuccessRes.build(service.resetPassword(email, req.getPassword(), token));
+            case Purpose.UPDATE_EMAIL -> SuccessRes.build(service.updateEmail(email,
                     http.getAttribute("newEmail").toString(), token));
 
             default -> throw new InvalidTokenException("Invalid Token Type.");

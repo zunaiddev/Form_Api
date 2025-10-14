@@ -10,6 +10,7 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -49,6 +50,9 @@ public class User {
     @OneToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     private ApiKey key;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Form> forms;
 
     public User(String name, String email, String password) {
         this.name = name;

@@ -28,7 +28,7 @@ public class ApiKey {
     private Integer requestCount = 0;
 
     @Column(name = "last_reset", nullable = false)
-    private LocalDate lastReset;
+    private LocalDate lastReset = LocalDate.now();
 
     @NotNull
     @Enumerated(value = EnumType.STRING)
@@ -64,9 +64,5 @@ public class ApiKey {
         secureRandom.nextBytes(keyBytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(keyBytes)
                 .replaceAll("[^a-zA-Z0-9 ]", "");
-    }
-
-    public void addDomain(Domain domain) {
-        this.domains.add(domain);
     }
 }

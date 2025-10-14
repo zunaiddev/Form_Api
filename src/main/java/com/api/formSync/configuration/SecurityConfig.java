@@ -84,7 +84,7 @@ public class SecurityConfig {
         privateCorsConfig.setAllowCredentials(true);
 
         source.registerCorsConfiguration("/auth/**", privateCorsConfig);
-        source.registerCorsConfiguration("/user/**", privateCorsConfig);
+        source.registerCorsConfiguration("/users/**", privateCorsConfig);
         source.registerCorsConfiguration("/verify/**", privateCorsConfig);
 //        source.registerCorsConfiguration("/admin/**", privateCorsConfig);
 

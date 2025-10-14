@@ -61,7 +61,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if (service.validateToken(token, userDetails)) {
 
-                if (service.extractClaims(token).get("purpose") == null || !service.extractClaims(token).get("purpose").equals(Purpose.auth.name())) {
+                if (service.extractClaims(token).get("purpose") == null || !service.extractClaims(token).get("purpose").equals(Purpose.AUTH.name())) {
                     log.warn("Purpose is missing or not found");
                     Common.sendErrorResponse(res, ErrorResponse.build("Authentication Failed", HttpStatus.FORBIDDEN, "Invalid token type for authentication"));
                     return;

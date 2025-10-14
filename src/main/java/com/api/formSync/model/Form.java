@@ -29,8 +29,7 @@ public class Form {
     @NotNull
     private String message;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private User user;
 
     @CreationTimestamp

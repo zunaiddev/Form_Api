@@ -1,9 +1,9 @@
 package com.api.formSync.util;
 
 public enum Purpose {
-    auth,
-    reset_password,
-    verify_user,
-    refresh_token,
-    update_email
+    AUTH,
+    RESET_PASSWORD,
+    VERIFY_USER,
+    REFRESH_TOKEN,
+    UPDATE_EMAIL
 }

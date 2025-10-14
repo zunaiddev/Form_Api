@@ -29,8 +29,6 @@ class DomainServiceTest {
         Domain domain2 = new Domain(1L, "www.google.com2", null);
         Domain domain3 = new Domain(1L, "www.google.com3", null);
         Domain domain4 = new Domain(1L, "www.google.com4", null);
-
-
     }
 
     @Test

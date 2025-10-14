@@ -26,8 +26,8 @@ public class VerificationService {
         userService.update(user);
         tokenService.saveUsedToken(token);
 
-        String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole(), "purpose", Purpose.auth), 900);
-        String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("purpose", Purpose.refresh_token), 2_592_000);
+        String accessToken = tokenService;
+        String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("purpose", Purpose.REFRESH_TOKEN), 2_592_000);
 
         Common.setCookie(response, refreshToken);
 

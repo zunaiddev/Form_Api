@@ -5,20 +5,17 @@ import com.api.formSync.Email.EmailTemplate;
 import com.api.formSync.Principal.ApiKeyPrincipal;
 import com.api.formSync.dto.FormRequest;
 import com.api.formSync.dto.FormResponse;
-import com.api.formSync.exception.ForbiddenException;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Form;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.FormRepository;
 import com.api.formSync.util.Role;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 
 @Service
@@ -70,19 +67,7 @@ public class FormService {
                 .toList();
     }
 
-    public void delete(User user, Long id) {
-        Form form = repo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Could not found any form with id " + id));
-
-        if (!Objects.equals(form.getUser().getId(), user.getId())) {
-            throw new ForbiddenException("You are not allowed to delete this form.");
-        }
-
-        repo.deleteById(form.getId());
-    }
-
-    public void deleteAll(User user) {
-        repo.deleteAllByUserId(user.getId());
-        System.out.println("forms deleted");
+    public void delete(User user, List<Long> ids) {
+        repo.deleteAllByIdInAndUser(ids, user);
     }
 }

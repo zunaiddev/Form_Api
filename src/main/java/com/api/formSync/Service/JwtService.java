@@ -21,10 +21,10 @@ public class JwtService {
     @Value("${ENVIRONMENT}")
     private String environment;
 
-    public String generateToken(String email, Map<String, Object> claims, long expiry) {
+    public String generateToken(Long id, Map<String, Object> claims, long expiry) {
         String token = Jwts.builder()
                 .claims(claims)
-                .subject(email)
+                .subject(id.toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiry * 1000))
                 .signWith(getKey()).compact();

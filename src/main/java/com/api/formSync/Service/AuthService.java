@@ -21,8 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -30,12 +28,13 @@ public class AuthService {
     private final UserInfoService userInfo;
     private final EmailService emailService;
     private final JwtService jwtService;
+    private final GenerateTokenService tokenService;
     @Value("${BASE_URL}")
     private String BASE_URL;
 
     public SignupResponse register(SignupRequest req) {
         User user = userInfo.create(req.getName(), req.getEmail(), req.getPassword());
-        String token = jwtService.generateToken(user.getEmail(), Map.of("purpose", "verify_user", "id", user.getId()), 900);
+        String token = tokenService.verifyUser(user);
 
         emailService.sendEmail(user.getEmail(), "Please Verify Your Email.", EmailTemplate.tokenBody(user.getName(), BASE_URL + "/verify?token=" + token));
         log.info("Verification Email Sent to: {}", user.getEmail());
@@ -56,14 +55,8 @@ public class AuthService {
             userInfo.update(user);
         }
 
-        String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole(), "purpose", Purpose.auth), 900);
-        String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("purpose", Purpose.refresh_token), 2_592_000);
-
-//        Cookie cookie = new Cookie("refresh_token", refreshToken);
-//        cookie.setHttpOnly(true);
-//        cookie.setSecure(true);
-//        cookie.setPath("/");
-//        cookie.setMaxAge(2_592_000);
+        String accessToken = tokenService.auth(user);
+        String refreshToken = tokenService.refresh(user);
 
         Common.setCookie(response, refreshToken);
         return new LoginResponse(accessToken);
@@ -82,23 +75,24 @@ public class AuthService {
             throw new InvalidTokenException("Invalid Token.");
         }
 
-        if (jwtService.extractClaims(refreshToken).get("purpose") == null || !jwtService.extractClaims(refreshToken).get("purpose").equals(Purpose.refresh_token.name())) {
+        if (jwtService.extractClaims(refreshToken).get("purpose") == null || !jwtService.extractClaims(refreshToken).get("purpose").equals(Purpose.REFRESH_TOKEN.name())) {
             log.warn("Purpose is missing or not found");
             throw new InvalidTokenException("Invalid Token Type or Token type is missing");
         }
 
-        String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole(), "purpose", Purpose.auth), 900);
+        String accessToken = tokenService.auth(user);
 
         return new LoginResponse(accessToken);
     }
 
-    public String resetPassword(String email) {
+    public String forgetPassword(String email) {
         User user = userInfo.load(email);
+
         if (!user.isEnabled()) {
             throw new UnverifiedEmailException("Please Verify Your Email: " + email);
         }
 
-        String token = jwtService.generateToken(email, Map.of("purpose", Purpose.reset_password), 900);
+        String token = tokenService.resetPassword();
 
         emailService.sendEmail(email, "Reset Your Password", EmailTemplate.resetPassword(user.getName(), "http://" + BASE_URL + "/api/auth/verify/reset-password?token=" + token));
         return "Reset Password Email Sent";

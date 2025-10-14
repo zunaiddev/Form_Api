@@ -32,7 +32,7 @@ public class AuthController {
 
     @PostMapping("/forget-password")
     public SuccessRes<String> forgetPassword(@RequestBody @Valid EmailRequest req) {
-        return SuccessRes.build(service.resetPassword(req.getEmail()));
+        return SuccessRes.build(service.forgetPassword(req.getEmail()));
     }
 
     @GetMapping("/logout")
