@@ -12,13 +12,13 @@ import java.util.Map;
 public class GenerateTokenService {
     private final JwtService jwtService;
 
-    public String auth(User user) {
+    public String accessToken(User user) {
         return jwtService.generateToken(user.getId(),
                 Map.of("email", user.getEmail(), "role", user.getRole(),
                         "purpose", Purpose.AUTH), 900);
     }
 
-    public String refresh(User user) {
+    public String refreshToken(User user) {
         return jwtService.generateToken(user.getId(),
                 Map.of("purpose", Purpose.REFRESH_TOKEN), 2_592_000);
     }
@@ -30,6 +30,8 @@ public class GenerateTokenService {
 
     public String verifyUser(User user) {
         return jwtService.generateToken(user.getId(),
-                Map.of("email", user.getEmail(), "role", user.getRole(), "purpose", Purpose.VERIFY_USER), 900);
+                Map.of("email", user.getEmail(),
+                        "role", user.getRole(),
+                        "purpose", Purpose.VERIFY_USER), 900);
     }
 }

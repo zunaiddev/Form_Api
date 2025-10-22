@@ -51,7 +51,7 @@ public class VerificationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         try {
-            String email = jwtService.extractEmail(token);
+            String email = jwtService.extractSubject(token);
 
             if (tokenService.isTokenUsed(authHeader)) {
                 Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.IM_USED, "Url Already used."));

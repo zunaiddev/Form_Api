@@ -36,7 +36,7 @@ public class JwtService {
         return token;
     }
 
-    public String extractEmail(String token) {
+    public String extractSubject(String token) {
         return extractClaims(token, Claims::getSubject);
     }
 
@@ -44,8 +44,9 @@ public class JwtService {
         return extractAllClaims(token);
     }
 
+    @Deprecated
     public boolean validateToken(String token, UserDetails details) {
-        final String userId = extractEmail(token);
+        final String userId = extractSubject(token);
         return (userId.equals(details.getUsername()) && !isTokenExpired(token));
     }
 
@@ -62,7 +63,7 @@ public class JwtService {
                 .getPayload();
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 

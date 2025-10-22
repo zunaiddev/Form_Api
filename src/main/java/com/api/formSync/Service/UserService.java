@@ -1,25 +1,24 @@
 package com.api.formSync.Service;
 
 import com.api.formSync.Email.EmailService;
-import com.api.formSync.Email.EmailTemplate;
 import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.dto.*;
-import com.api.formSync.exception.*;
+import com.api.formSync.exception.DomainAlreadyExistsException;
+import com.api.formSync.exception.DomainNotFoundException;
+import com.api.formSync.exception.InvalidApiKeyException;
+import com.api.formSync.exception.KeyCreatedException;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Domain;
 import com.api.formSync.model.User;
-import com.api.formSync.util.Purpose;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -34,42 +33,11 @@ public class UserService {
     private final DomainService domainService;
     private final FormService formService;
 
-    public UserInfo update(User user, UserUpdateRequest req) {
-        if (req.isInvalid()) {
-            throw new ValidationException("The request must contain at least one field to update. Updating the name does not require a password, but updating the email or password requires providing the current password.");
-        }
+    public UserInfo update(Long id, UserUpdateRequest req) {
+        User user = userInfoService.load(id);
+        user.setName(req.getName());
 
-        if (req.getName() != null) {
-            user.setName(req.getName());
-        }
-
-        if (req.getCurrentPassword() != null && !encoder.matches(req.getCurrentPassword(), user.getPassword())) {
-            throw new UnauthorisedException("Invalid Password");
-        }
-
-        if (req.getEmail() != null) {
-            if (req.getEmail().equals(user.getEmail())) {
-                throw new DuplicateEntrypointEmailException("Email is Same As previous.");
-            }
-
-            if (userInfoService.isExists(req.getEmail())) {
-                throw new DuplicateEntrypointEmailException("A User is Already Registered by this email.");
-            }
-
-            String token = jwtService.generateToken(user.getEmail(), Map.of("purpose", Purpose.UPDATE_EMAIL, "newEmail", req.getEmail()), 900);
-            System.out.println(token);
-            emailService.sendEmail(req.getEmail(), "Please Verify Your Email To update", EmailTemplate.updateEmail(user.getName(), "http://localhost:8080/api/verify?token=" + token));
-        }
-
-        if (req.getPassword() != null) {
-            if (encoder.matches(req.getPassword(), user.getPassword())) {
-                throw new DuplicatePasswordException("Password has already been used");
-            }
-
-            user.setPassword(encoder.encode(req.getPassword()));
-        }
-
-        return new UserInfo(userInfoService.update(user));
+        return new UserInfo(userInfoService.save(user));
     }
 
     @Transactional
@@ -87,13 +55,16 @@ public class UserService {
         response.addCookie(cookie);
     }
 
-    public UserInfo getInfo(UserPrincipal details) {
-        return new UserInfo(details.getUser());
+    public UserInfo getInfo(Long id) {
+        return new UserInfo(userInfoService.load(id));
     }
 
-    public ApiKeyInfo generateKey(User user, String domain) {
+    @Transactional
+    public ApiKeyInfo generateKey(Long id, String domain) {
+        User user = userInfoService.load(id);
+
         if (user.getKey() != null) {
-            throw new KeyCreatedException("Key is Already created. Please regenerate the key.");
+            throw new KeyCreatedException("Api Key is Already created. Please regenerate the key.");
         }
 
         Domain savedDomain = domainService.create(domain);
@@ -103,7 +74,9 @@ public class UserService {
         return new ApiKeyInfo(apiKey);
     }
 
+    @Transactional
     public ApiKeyInfo regenerateKey(User user) {
+
         ApiKey apiKey = user.getKey();
 
         if (apiKey == null) {

@@ -50,7 +50,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String username;
 
         try {
-            username = service.extractEmail(token);
+            username = service.extractSubject(token);
 
             if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
                 Common.sendErrorResponse(res, ErrorResponse.build("Authentication Failed", HttpStatus.BAD_REQUEST, "Invalid Token"));

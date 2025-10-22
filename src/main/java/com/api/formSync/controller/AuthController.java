@@ -16,13 +16,14 @@ public class AuthController {
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public SuccessRes<SignupResponse> register(@Valid @RequestBody SignupRequest req) {
-        return SuccessRes.build(HttpStatus.CREATED, service.register(req));
+    public SuccessRes<SignupResponse> signup(@Valid @RequestBody SignupRequest req) {
+        return SuccessRes.build(HttpStatus.CREATED, service.signup(req));
     }
 
     @PostMapping("/login")
-    public SuccessRes<LoginResponse> login(@Valid @RequestBody LoginRequest req, HttpServletResponse response) {
-        return SuccessRes.build(service.authenticate(req, response));
+    public SuccessRes<LoginResponse> signIn(@Valid @RequestBody LoginRequest req,
+                                            HttpServletResponse response) {
+        return SuccessRes.build(service.signIn(req, response));
     }
 
     @PostMapping("/refresh")

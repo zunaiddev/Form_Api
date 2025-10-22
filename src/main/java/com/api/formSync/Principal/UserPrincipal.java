@@ -2,7 +2,6 @@ package com.api.formSync.Principal;
 
 import com.api.formSync.model.User;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
-@Getter
 @AllArgsConstructor
 public class UserPrincipal implements UserDetails {
     private User user;
@@ -49,5 +47,9 @@ public class UserPrincipal implements UserDetails {
     @Override
     public boolean isEnabled() {
         return user.isEnabled();
+    }
+
+    public Long getId() {
+        return user.getId();
     }
 }

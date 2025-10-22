@@ -32,7 +32,7 @@ public class AuthService {
     @Value("${BASE_URL}")
     private String BASE_URL;
 
-    public SignupResponse register(SignupRequest req) {
+    public SignupResponse signup(SignupRequest req) {
         User user = userInfo.create(req.getName(), req.getEmail(), req.getPassword());
         String token = tokenService.verifyUser(user);
 
@@ -41,46 +41,49 @@ public class AuthService {
         return new SignupResponse(user.getName(), user.getEmail());
     }
 
-    public LoginResponse authenticate(LoginRequest req, HttpServletResponse response) {
+    public LoginResponse signIn(LoginRequest req, HttpServletResponse response) {
         Authentication auth = userInfo.getAuthentication(req.getEmail(), req.getPassword());
 
         if (!auth.isAuthenticated()) {
             throw new UnauthorisedException("Authentication Failed.");
         }
 
-        User user = userInfo.load(req.getEmail());
+        User user = ((UserPrincipal) auth.getPrincipal()).getUser();
 
         if (user.getDeleteAt() != null) {
             user.setDeleteAt(null);
             userInfo.update(user);
         }
 
-        String accessToken = tokenService.auth(user);
-        String refreshToken = tokenService.refresh(user);
+        String accessToken = tokenService.accessToken(user);
+        String refreshToken = tokenService.refreshToken(user);
 
         Common.setCookie(response, refreshToken);
         return new LoginResponse(accessToken);
     }
 
-    public LoginResponse refreshToken(String refreshToken) {
-        if (refreshToken == null) {
+    public LoginResponse refreshToken(String token) {
+        if (token == null) {
             throw new CouldNotFoundCookie("refresh token Cookie is null.");
         }
 
-        String email = jwtService.extractEmail(refreshToken);
+        long id = Long.parseLong(jwtService.extractSubject(token));
 
-        User user = userInfo.load(email);
+        User user = userInfo.load(id);
 
-        if (!jwtService.validateToken(refreshToken, new UserPrincipal(user))) {
-            throw new InvalidTokenException("Invalid Token.");
+        if (jwtService.isTokenExpired(token)) {
+            throw new InvalidTokenException("Token has expired.");
         }
 
-        if (jwtService.extractClaims(refreshToken).get("purpose") == null || !jwtService.extractClaims(refreshToken).get("purpose").equals(Purpose.REFRESH_TOKEN.name())) {
+        Purpose purpose = jwtService.extractClaims(token)
+                .get("purpose", Purpose.class);
+
+        if (purpose == null || !purpose.equals(Purpose.REFRESH_TOKEN)) {
             log.warn("Purpose is missing or not found");
             throw new InvalidTokenException("Invalid Token Type or Token type is missing");
         }
 
-        String accessToken = tokenService.auth(user);
+        String accessToken = tokenService.accessToken(user);
 
         return new LoginResponse(accessToken);
     }
@@ -92,7 +95,7 @@ public class AuthService {
             throw new UnverifiedEmailException("Please Verify Your Email: " + email);
         }
 
-        String token = tokenService.resetPassword();
+        String token = tokenService.resetPassword(user);
 
         emailService.sendEmail(email, "Reset Your Password", EmailTemplate.resetPassword(user.getName(), "http://" + BASE_URL + "/api/auth/verify/reset-password?token=" + token));
         return "Reset Password Email Sent";

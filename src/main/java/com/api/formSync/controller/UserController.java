@@ -21,13 +21,13 @@ public class UserController {
 
     @GetMapping
     public SuccessRes<UserInfo> info(@AuthenticationPrincipal UserPrincipal details) {
-        return SuccessRes.build(service.getInfo(details));
+        return SuccessRes.build(service.getInfo(details.getId()));
     }
 
     @PatchMapping
     public SuccessRes<UserInfo> update(@AuthenticationPrincipal UserPrincipal details,
                                        @RequestBody @Valid UserUpdateRequest req) {
-        return SuccessRes.build(service.update(details.getUser(), req));
+        return SuccessRes.build(service.update(details.getId(), req));
     }
 
     @DeleteMapping
@@ -37,25 +37,25 @@ public class UserController {
 
     @GetMapping("/api-key")
     public SuccessRes<ApiKeyInfo> keyInfo(@AuthenticationPrincipal UserPrincipal details) {
-        return SuccessRes.build(service.getKeyInfo(details.getUser()));
+        return SuccessRes.build(service.getKeyInfo(details.getId()));
     }
 
     @PostMapping("/api-key")
     @ResponseStatus(HttpStatus.CREATED)
     public SuccessRes<ApiKeyInfo> generate(@AuthenticationPrincipal UserPrincipal details,
                                            @RequestBody @Valid DomainRequest req) {
-        return SuccessRes.build(HttpStatus.CREATED, service.generateKey(details.getUser(), req.getDomain()));
+        return SuccessRes.build(HttpStatus.CREATED, service.generateKey(details.getId(), req.getDomain()));
     }
 
     @PutMapping("/api-key")
     public SuccessRes<ApiKeyInfo> regenerate(@AuthenticationPrincipal UserPrincipal details) {
-        return SuccessRes.build(service.regenerateKey(details.getUser()));
+        return SuccessRes.build(service.regenerateKey(details.getId()));
     }
 
     @PostMapping("/api-key/domain")
     public SuccessRes<ApiKeyInfo> addDomain(@AuthenticationPrincipal UserPrincipal details,
                                             @RequestBody @Valid DomainRequest req) {
-        return SuccessRes.build(service.addDomain(details.getUser(),
+        return SuccessRes.build(service.addDomain(details.getId(),
                 req.getDomain()));
     }
 
@@ -63,7 +63,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteDomain(@AuthenticationPrincipal UserPrincipal details,
                                           @NotNull(message = "id could not be null") @PathVariable("id") Long id) {
-        service.deleteDomain(details.getUser(), id);
+        service.deleteDomain(details.getId(), id);
     }
 
 //    @DeleteMapping("/api-key")

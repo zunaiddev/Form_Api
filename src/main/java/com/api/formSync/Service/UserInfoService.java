@@ -30,7 +30,8 @@ public class UserInfoService {
     }
 
     public User load(String email) {
-        return repo.findByEmail(email).orElseThrow(() -> new UserNotFoundException("Invalid username or password"));
+        return repo.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Invalid username or password"));
     }
 
     public User save(User user) {
@@ -43,21 +44,20 @@ public class UserInfoService {
 
     public User create(String name, String email, String password) {
         User user = repo.findByEmail(email).orElse(null);
-        String encodedPassword = encoder.encode(password);
 
         if (user != null) {
             if (user.isEnabled()) {
-                throw new DuplicateEntrypointEmailException("User With email " + email + " exists.");
+                throw new DuplicateEntrypointEmailException("User With email " + email + " already exists.");
             }
 
             user.setName(name);
             user.setEmail(email);
-            user.setPassword(encodedPassword);
+            user.setPassword(encoder.encode(password));
             user.setCreatedAt(LocalDateTime.now());
             return repo.save(user);
         }
 
-        user = new User(name, email, encodedPassword);
+        user = new User(name, email, encoder.encode(password));
 
         return repo.save(user);
     }

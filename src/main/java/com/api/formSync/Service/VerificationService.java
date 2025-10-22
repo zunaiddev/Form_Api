@@ -4,13 +4,10 @@ import com.api.formSync.dto.LoginResponse;
 import com.api.formSync.exception.DuplicateEntrypointEmailException;
 import com.api.formSync.model.User;
 import com.api.formSync.util.Common;
-import com.api.formSync.util.Purpose;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +15,7 @@ public class VerificationService {
     private final UserInfoService userService;
     private final PasswordEncoder encoder;
     private final TokenService tokenService;
+    private final GenerateTokenService generateTokenService;
     private final JwtService jwtService;
 
     public LoginResponse verifyUser(String email, String token, HttpServletResponse response) {
@@ -26,8 +24,8 @@ public class VerificationService {
         userService.update(user);
         tokenService.saveUsedToken(token);
 
-        String accessToken = tokenService;
-        String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("purpose", Purpose.REFRESH_TOKEN), 2_592_000);
+        String accessToken = generateTokenService.accessToken(user);
+        String refreshToken = generateTokenService.refreshToken(user);
 
         Common.setCookie(response, refreshToken);
 
