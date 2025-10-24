@@ -61,7 +61,7 @@ public class UserService {
 
     @Transactional
     public ApiKeyInfo generateKey(Long id, String domain) {
-        User user = userInfoService.load(id);
+        User user = userInfoService.loadWithKey(id);
 
         if (user.getKey() != null) {
             throw new KeyCreatedException("Api Key is Already created. Please regenerate the key.");
@@ -75,8 +75,8 @@ public class UserService {
     }
 
     @Transactional
-    public ApiKeyInfo regenerateKey(User user) {
-
+    public ApiKeyInfo regenerateKey(Long id) {
+        User user = userInfoService.loadWithKey(id);
         ApiKey apiKey = user.getKey();
 
         if (apiKey == null) {
@@ -88,8 +88,8 @@ public class UserService {
         return new ApiKeyInfo(apiKeyService.update(apiKey));
     }
 
-    public ApiKeyInfo addDomain(User user, String domain) {
-        User savedUser = userInfoService.load(user.getId());
+    public ApiKeyInfo addDomain(Long id, String domain) {
+        User savedUser = userInfoService.load(id);
         ApiKey apiKey = savedUser.getKey();
         List<Domain> domains = apiKey.getDomains();
 
@@ -108,8 +108,8 @@ public class UserService {
 //        userInfoService.update(user);
     }
 
-    public void deleteDomain(User user, Long id) {
-        User savedUser = userInfoService.load(user.getId());
+    public void deleteDomain(Long id, Long domainId) {
+        User savedUser = userInfoService.load(id);
         ApiKey apiKey = savedUser.getKey();
         List<Domain> domains = apiKey.getDomains();
 
@@ -123,9 +123,9 @@ public class UserService {
         apiKeyService.update(apiKey);
     }
 
-    public ApiKeyInfo getKeyInfo(User user) {
-        User savedUser = userInfoService.load(user.getId());
-        ApiKey apiKey = savedUser.getKey();
+    public ApiKeyInfo getKeyInfo(Long id) {
+        User user = userInfoService.loadWithKey(id);
+        ApiKey apiKey = user.getKey();
 
         if (apiKey == null) return null;
 
@@ -138,13 +138,14 @@ public class UserService {
         return new ApiKeyInfo(apiKey);
     }
 
-    public List<FormResponse> getForms(User user) {
-        User savedUser = userInfoService.load(user.getId());
+    @Transactional
+    public List<FormResponse> getForms(Long id) {
+        User savedUser = userInfoService.loadWithForms(id);
 
         return savedUser.getForms().stream().map(FormResponse::new).toList();
     }
 
-    public void deleteForms(User user, List<Long> ids) {
-        formService.delete(user, ids);
+    public void deleteForms(Long id, List<Long> ids) {
+//        formService.delete(user, ids);
     }
 }

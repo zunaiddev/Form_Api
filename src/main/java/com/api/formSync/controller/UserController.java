@@ -74,13 +74,13 @@ public class UserController {
 
     @GetMapping("/forms")
     public SuccessRes<List<FormResponse>> getForms(@AuthenticationPrincipal UserPrincipal details) {
-        return SuccessRes.build(service.getForms(details.getUser()));
+        return SuccessRes.build(service.getForms(details.getId()));
     }
 
     @DeleteMapping("/forms")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteForm(@AuthenticationPrincipal UserPrincipal details,
                            @RequestBody List<Long> ids) {
-        service.deleteForms(details.getUser(), ids);
+        service.deleteForms(details.getId(), ids);
     }
 }

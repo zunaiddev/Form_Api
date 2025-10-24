@@ -26,7 +26,8 @@ public class UserInfoService {
     }
 
     public User load(Long id) {
-        return repo.findById(id).orElseThrow(() -> new UserNotFoundException("Invalid username or password"));
+        return repo.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Invalid username or password"));
     }
 
     public User load(String email) {
@@ -63,8 +64,8 @@ public class UserInfoService {
     }
 
     public User update(User user) {
-        if (!repo.existsById(user.getId())) {
-            throw new UserNotFoundException("Could not found user with email " + user.getEmail());
+        if (user.getId() != null) {
+            throw new RuntimeException("User id is provided in update function");
         }
 
         return repo.save(user);
@@ -78,8 +79,18 @@ public class UserInfoService {
         repo.deleteById(id);
     }
 
+    public User loadWithKey(Long id) {
+        return repo.findWithKeyById(id)
+                .orElseThrow(() -> new UserNotFoundException("User Not found"));
+    }
+
     public boolean isExists(String newEmail) {
         User user = repo.findByEmail(newEmail).orElse(null);
         return user != null && user.isEnabled();
+    }
+
+    public User loadWithForms(Long id) {
+        return repo.findWithFormsById(id)
+                .orElseThrow(() -> new UserNotFoundException("User Not Found Exception"));
     }
 }
