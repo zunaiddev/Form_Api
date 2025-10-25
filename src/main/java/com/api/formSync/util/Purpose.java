@@ -5,5 +5,6 @@ public enum Purpose {
     RESET_PASSWORD,
     VERIFY_USER,
     REFRESH_TOKEN,
-    UPDATE_EMAIL
+    UPDATE_EMAIL,
+    REACTIVATE_USER
 }

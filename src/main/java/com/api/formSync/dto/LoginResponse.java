@@ -1,5 +1,6 @@
 package com.api.formSync.dto;
 
+import com.api.formSync.util.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -7,4 +8,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class LoginResponse {
     private String token;
+    private UserStatus status;
 }

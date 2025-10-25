@@ -9,7 +9,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,24 +25,9 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateEntrypointEmailException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
     private ErrorResponse handle(DuplicateEntrypointEmailException exp) {
         log.warn("Duplicate Entry For Email Exception. Message {}", exp.getMessage());
         return ErrorResponse.build("Invalid Email.", HttpStatus.CONFLICT, exp.getMessage());
-    }
-
-    @ExceptionHandler(EmailSenderFailException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    private ErrorResponse handle(EmailSenderFailException exp) {
-        log.warn("Email Send Fail while Signup. Message {}", exp.getMessage());
-        return ErrorResponse.build("Could Not Send Email.", HttpStatus.CONFLICT, exp.getMessage());
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    private ErrorResponse handle(AuthenticationException exp) {
-        log.warn("Authentication Failed. Message {}", exp.getMessage());
-        return ErrorResponse.build("Authentication Failed.", HttpStatus.UNAUTHORIZED, "Invalid Username or Password.");
     }
 
     @ExceptionHandler(DisabledException.class)
@@ -54,7 +38,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(LockedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.LOCKED)
     private ErrorResponse handle(LockedException exp) {
         log.warn("Locked User is trying To login. Message {}", exp.getMessage());
         return ErrorResponse.build("Authentication Failed.", HttpStatus.FORBIDDEN, "You are temporary disabled. please contact to admin.");
@@ -68,7 +52,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CouldNotFoundCookie.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     private ErrorResponse handle(CouldNotFoundCookie exp) {
         log.warn("Unable To find Cookie. {}", exp.getMessage());
         return ErrorResponse.build("Authentication Failed.", HttpStatus.UNAUTHORIZED, exp.getMessage());
@@ -79,13 +63,6 @@ public class GlobalExceptionHandler {
     private ErrorResponse handle(UnverifiedEmailException exp) {
         log.warn("User Email Not Verified and trying to login. {}", exp.getMessage());
         return ErrorResponse.build("Authentication Failed.", HttpStatus.UNAUTHORIZED, exp.getMessage());
-    }
-
-    @ExceptionHandler(SomethingWentWrongException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    private ErrorResponse handle(SomethingWentWrongException exp) {
-        log.error("An Unexpected Error Occurred. {}", exp.getMessage());
-        return ErrorResponse.build("Something Went Wrong.", HttpStatus.INTERNAL_SERVER_ERROR, "Could Not found Cause.");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -110,7 +87,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidTokenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     private ErrorResponse handle(InvalidTokenException exp) {
         log.error("Token Invalid After Check {}", exp.getMessage());
         return ErrorResponse.build("Authentication Failed.", HttpStatus.BAD_REQUEST, exp.getMessage());

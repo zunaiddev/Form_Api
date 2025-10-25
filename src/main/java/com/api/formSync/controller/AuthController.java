@@ -31,8 +31,8 @@ public class AuthController {
         return SuccessRes.build(service.refreshToken(refreshToken));
     }
 
-    @PostMapping("/forget-password")
-    public SuccessRes<String> forgetPassword(@RequestBody @Valid EmailRequest req) {
+    @GetMapping("/forget-password")
+    public SuccessRes<EmailResponse> forgetPassword(@RequestBody @Valid EmailRequest req) {
         return SuccessRes.build(service.forgetPassword(req.getEmail()));
     }
 

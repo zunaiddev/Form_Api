@@ -27,12 +27,12 @@ public class UserInfoService {
 
     public User load(Long id) {
         return repo.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Invalid username or password"));
+                .orElseThrow(() -> new UserNotFoundException("User Not Found"));
     }
 
     public User load(String email) {
         return repo.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Invalid username or password"));
+                .orElseThrow(() -> new UserNotFoundException("User Not Found"));
     }
 
     public User save(User user) {

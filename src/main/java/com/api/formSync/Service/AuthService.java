@@ -3,10 +3,7 @@ package com.api.formSync.Service;
 import com.api.formSync.Email.EmailService;
 import com.api.formSync.Email.EmailTemplate;
 import com.api.formSync.Principal.UserPrincipal;
-import com.api.formSync.dto.LoginRequest;
-import com.api.formSync.dto.LoginResponse;
-import com.api.formSync.dto.SignupRequest;
-import com.api.formSync.dto.SignupResponse;
+import com.api.formSync.dto.*;
 import com.api.formSync.exception.CouldNotFoundCookie;
 import com.api.formSync.exception.InvalidTokenException;
 import com.api.formSync.exception.UnauthorisedException;
@@ -14,6 +11,7 @@ import com.api.formSync.exception.UnverifiedEmailException;
 import com.api.formSync.model.User;
 import com.api.formSync.util.Common;
 import com.api.formSync.util.Purpose;
+import com.api.formSync.util.UserStatus;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,17 +49,19 @@ public class AuthService {
         User user = ((UserPrincipal) auth.getPrincipal()).getUser();
 
         if (user.getDeleteAt() != null) {
-            user.setDeleteAt(null);
-            userInfo.update(user);
+            String token = tokenService.reactivateToken(user);
+            return new LoginResponse(token, UserStatus.PENDING_DELETION);
         }
 
         String accessToken = tokenService.accessToken(user);
         String refreshToken = tokenService.refreshToken(user);
 
         Common.setCookie(response, refreshToken);
-        return new LoginResponse(accessToken);
+        return new LoginResponse(accessToken, UserStatus.ACTIVE);
     }
 
+
+    //Take care of account deleted, marks as deleted, locked or other cases
     public LoginResponse refreshToken(String token) {
         if (token == null) {
             throw new CouldNotFoundCookie("refresh token Cookie is null.");
@@ -85,10 +85,10 @@ public class AuthService {
 
         String accessToken = tokenService.accessToken(user);
 
-        return new LoginResponse(accessToken);
+        return new LoginResponse(accessToken, UserStatus.ACTIVE);
     }
 
-    public String forgetPassword(String email) {
+    public EmailResponse forgetPassword(String email) {
         User user = userInfo.load(email);
 
         if (!user.isEnabled()) {
@@ -98,7 +98,7 @@ public class AuthService {
         String token = tokenService.resetPassword(user);
 
         emailService.sendEmail(email, "Reset Your Password", EmailTemplate.resetPassword(user.getName(), "http://" + BASE_URL + "/api/auth/verify/reset-password?token=" + token));
-        return "Reset Password Email Sent";
+        return new EmailResponse(email);
     }
 
     public void logout(HttpServletResponse response) {

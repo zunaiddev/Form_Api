@@ -34,4 +34,11 @@ public class GenerateTokenService {
                         "role", user.getRole(),
                         "purpose", Purpose.VERIFY_USER), 900);
     }
+
+    public String reactivateToken(User user) {
+        return jwtService.generateToken(user.getId(),
+                Map.of("email", user.getEmail(),
+                        "role", user.getRole(),
+                        "purpose", Purpose.REACTIVATE_USER), 900);
+    }
 }
