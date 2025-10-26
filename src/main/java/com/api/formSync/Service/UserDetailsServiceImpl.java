@@ -17,6 +17,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) {
         return repo.findByEmail(email)
                 .map(UserPrincipal::new)
-                .orElseThrow(() -> new UserNotFoundException("Invalid username or password"));
+                .orElseThrow(() -> new UserNotFoundException("Invalid username"));
     }
 }

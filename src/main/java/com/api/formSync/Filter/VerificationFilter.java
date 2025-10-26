@@ -19,7 +19,7 @@ import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,7 +34,7 @@ import java.util.Set;
 
 @Slf4j
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class VerificationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsServiceImpl userDetailsService;
@@ -63,6 +63,7 @@ public class VerificationFilter extends OncePerRequestFilter {
             Claims claims = jwtService.extractClaims(token);
 
             Purpose purpose = Purpose.from(claims.get("purpose"));
+
             Set<Purpose> verifyPurposes = Set.of(Purpose.VERIFY_USER, Purpose.RESET_PASSWORD,
                     Purpose.REACTIVATE_USER, Purpose.UPDATE_EMAIL);
 
@@ -70,22 +71,23 @@ public class VerificationFilter extends OncePerRequestFilter {
                 throw new InvalidPurposeException("Invalid Token Purpose");
             }
 
-            String email = "";
+            String email = claims.getSubject();
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            if (!jwtService.isTokenExpired(token)) {
-                VerificationToken tokenData = new VerificationToken(email, claims.get("newEmail", String.class),
-                        Role.valueOf(claims.get("role", String.class)),
-                        Purpose.valueOf(claims.get("purpose", String.class)));
+            VerificationToken tokenData =
+                    new VerificationToken(email, claims.get("newEmail", String.class),
+                            Role.valueOf(claims.get("role", String.class)),
+                            Purpose.valueOf(claims.get("purpose", String.class)));
 
-                req.setAttribute("tokenData", tokenData);
+            req.setAttribute("claims", tokenData);
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, AuthorityUtils.NO_AUTHORITIES);
 
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, AuthorityUtils.NO_AUTHORITIES
-                );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            chain.doFilter(req, res);
 
-                SecurityContextHolder.getContext().setAuthentication(auth);
-                chain.doFilter(req, res);
+            if (res.getStatus() >= 200 && res.getStatus() < 300) {
+                //mark the token as used
             }
         } catch (ExpiredJwtException e) {
             log.warn("Token has expired. Message {}", e.getMessage());

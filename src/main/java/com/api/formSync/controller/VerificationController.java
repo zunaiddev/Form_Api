@@ -3,6 +3,7 @@ package com.api.formSync.controller;
 import com.api.formSync.Service.VerificationService;
 import com.api.formSync.dto.ResetPasswordRequest;
 import com.api.formSync.dto.SuccessRes;
+import com.api.formSync.util.VerificationToken;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +16,9 @@ public class VerificationController {
     private final VerificationService service;
 
     @GetMapping
-    private SuccessRes<Object> verify(@RequestAttribute String newEmail,
+    private SuccessRes<Object> verify(@RequestAttribute VerificationToken claims,
                                       @RequestBody(required = false) @Valid ResetPasswordRequest req,
                                       HttpServletResponse res) {
-        return SuccessRes.build(service.verify(newEmail, req, res));
+        return SuccessRes.build(service.verify(claims, req, res));
     }
 }
