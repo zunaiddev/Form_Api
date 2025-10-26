@@ -1,6 +1,6 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.dto.PasswordRequest;
+import com.api.formSync.dto.ResetPasswordRequest;
 import com.api.formSync.dto.SignInResponse;
 import com.api.formSync.exception.DuplicateEntrypointEmailException;
 import com.api.formSync.exception.InvalidPurposeException;
@@ -22,7 +22,7 @@ public class VerificationService {
     private final PasswordEncoder encoder;
     private final GenerateTokenService generateTokenService;
 
-    public Object verify(User user, VerificationToken claims, PasswordRequest req, HttpServletResponse response) {
+    public Object verify(User user, VerificationToken claims, ResetPasswordRequest req, HttpServletResponse response) {
         Purpose purpose = claims.getPurpose();
 
         return switch (purpose) {
@@ -57,7 +57,7 @@ public class VerificationService {
         return "Email Updated Successfully";
     }
 
-    private String resetPassword(User user, PasswordRequest req) {
+    private String resetPassword(User user, ResetPasswordRequest req) {
         if (req == null) {
             throw new RequestBodyIsMissingException("Missing Request body");
         }

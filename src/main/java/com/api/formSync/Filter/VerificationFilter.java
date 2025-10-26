@@ -67,11 +67,11 @@ public class VerificationFilter extends OncePerRequestFilter {
             Set<Purpose> verifyPurposes = Set.of(Purpose.VERIFY_USER, Purpose.RESET_PASSWORD,
                     Purpose.REACTIVATE_USER, Purpose.UPDATE_EMAIL);
 
-            if (purpose != null && verifyPurposes.contains(purpose)) {
+            if (purpose == null || !verifyPurposes.contains(purpose)) {
                 throw new InvalidPurposeException("Invalid Token Purpose");
             }
 
-            String email = claims.getSubject();
+            String email = claims.get("email", String.class);
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
             VerificationToken tokenData =

@@ -25,6 +25,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateEntrypointEmailException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
     private ErrorResponse handle(DuplicateEntrypointEmailException exp) {
         log.warn("Duplicate Entry For Email Exception. Message {}", exp.getMessage());
         return ErrorResponse.build("Invalid Email.", HttpStatus.CONFLICT, exp.getMessage());

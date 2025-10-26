@@ -64,8 +64,8 @@ public class UserInfoService {
     }
 
     public User update(User user) {
-        if (user.getId() != null) {
-            throw new RuntimeException("User id is provided in update function");
+        if (user.getId() == null) {
+            throw new RuntimeException("User id is not provided");
         }
 
         return repo.save(user);
