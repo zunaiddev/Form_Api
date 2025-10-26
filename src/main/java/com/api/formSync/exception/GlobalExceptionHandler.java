@@ -51,9 +51,9 @@ public class GlobalExceptionHandler {
         return ErrorResponse.build("Authentication Failed.", HttpStatus.UNAUTHORIZED, exp.getMessage());
     }
 
-    @ExceptionHandler(CouldNotFoundCookie.class)
+    @ExceptionHandler(CouldNotFoundTokenException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private ErrorResponse handle(CouldNotFoundCookie exp) {
+    private ErrorResponse handle(CouldNotFoundTokenException exp) {
         log.warn("Unable To find Cookie. {}", exp.getMessage());
         return ErrorResponse.build("Authentication Failed.", HttpStatus.UNAUTHORIZED, exp.getMessage());
     }

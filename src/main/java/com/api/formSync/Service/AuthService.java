@@ -4,7 +4,7 @@ import com.api.formSync.Email.EmailService;
 import com.api.formSync.Email.EmailTemplate;
 import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.dto.*;
-import com.api.formSync.exception.CouldNotFoundCookie;
+import com.api.formSync.exception.CouldNotFoundTokenException;
 import com.api.formSync.exception.InvalidTokenException;
 import com.api.formSync.exception.UnauthorisedException;
 import com.api.formSync.exception.UnverifiedEmailException;
@@ -16,8 +16,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -39,7 +42,7 @@ public class AuthService {
         return new SignupResponse(user.getName(), user.getEmail());
     }
 
-    public LoginResponse signIn(LoginRequest req, HttpServletResponse response) {
+    public SignInResponse signIn(LoginRequest req, HttpServletResponse response) {
         Authentication auth = userInfo.getAuthentication(req.getEmail(), req.getPassword());
 
         if (!auth.isAuthenticated()) {
@@ -50,42 +53,45 @@ public class AuthService {
 
         if (user.getDeleteAt() != null) {
             String token = tokenService.reactivateToken(user);
-            return new LoginResponse(token, UserStatus.PENDING_DELETION);
+            return new SignInResponse(token, UserStatus.PENDING_DELETION);
         }
 
         String accessToken = tokenService.accessToken(user);
         String refreshToken = tokenService.refreshToken(user);
 
         Common.setCookie(response, refreshToken);
-        return new LoginResponse(accessToken, UserStatus.ACTIVE);
+        return new SignInResponse(accessToken, UserStatus.ACTIVE);
     }
 
-
-    //Take care of account deleted, marks as deleted, locked or other cases
-    public LoginResponse refreshToken(String token) {
+    public SignInResponse refreshToken(String token) {
         if (token == null) {
-            throw new CouldNotFoundCookie("refresh token Cookie is null.");
+            throw new CouldNotFoundTokenException("Refresh Token is Missing");
         }
-
-        long id = Long.parseLong(jwtService.extractSubject(token));
-
-        User user = userInfo.load(id);
 
         if (jwtService.isTokenExpired(token)) {
             throw new InvalidTokenException("Token has expired.");
         }
 
-        Purpose purpose = jwtService.extractClaims(token)
-                .get("purpose", Purpose.class);
+        String purpose = jwtService.extractClaims(token)
+                .get("purpose", String.class);
 
-        if (purpose == null || !purpose.equals(Purpose.REFRESH_TOKEN)) {
-            log.warn("Purpose is missing or not found");
+        if (purpose == null || !purpose.equals(Purpose.REFRESH_TOKEN.name())) {
+            log.warn("Invalid Token Used at REFRESH_TOKEN");
             throw new InvalidTokenException("Invalid Token Type or Token type is missing");
         }
 
-        String accessToken = tokenService.accessToken(user);
+        long id = Long.parseLong(jwtService.extractSubject(token));
+        User user = userInfo.load(id);
 
-        return new LoginResponse(accessToken, UserStatus.ACTIVE);
+        if (user.isLocked()) throw new LockedException("User is Locked");
+
+        UserStatus status = Objects.isNull(user.getDeleteAt()) ?
+                UserStatus.ACTIVE : UserStatus.PENDING_DELETION;
+
+        String accessToken = status.equals(UserStatus.ACTIVE) ?
+                tokenService.accessToken(user) : null;
+
+        return new SignInResponse(accessToken, status);
     }
 
     public EmailResponse forgetPassword(String email) {

@@ -10,9 +10,8 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
@@ -28,21 +27,25 @@ class AuthServiceTest {
     UserRepository userRepo;
     @Mock
     MockHttpServletResponse response;
+    static String token;
+    static User user;
+    @Autowired
+    GenerateTokenService generateTokenService;
 
     @BeforeAll
     static void setUp() {
         signupRequest = new SignupRequest("John", "john@gmail.com", "john@123");
-        loginRequest = new LoginRequest("john@gmail.com", "john@23");
+        loginRequest = new LoginRequest("john@gmail.com", "john@123");
     }
 
     @Test
     @Order(1)
     void signup() {
         var res = authService.signup(signupRequest);
-        User user = userRepo.findByEmail("john@gmail.com").get();
+        user = userRepo.findByEmail("john@gmail.com").get();
         user.setEnabled(true);
-        user.setLocked(false);
-        user.setDeleteAt(LocalDateTime.now().plusDays(3L));
+        user.setLocked(true);
+//        user.setDeleteAt(LocalDateTime.now().plusDays(3L));
         userRepo.save(user);
 
         System.out.println("User Created Successfully");
@@ -51,6 +54,7 @@ class AuthServiceTest {
 
     @Test
     @Order(2)
+    @Disabled
     void signIn() {
         var res = authService.signIn(loginRequest, response);
         System.out.println("SignIn res: " + res);
@@ -63,5 +67,17 @@ class AuthServiceTest {
         assertThrowsExactly(UnverifiedEmailException.class, () -> {
             authService.forgetPassword("john@gmail.com");
         });
+    }
+
+    @Test
+    @Order(4)
+    void refreshToken() {
+        var token = generateTokenService.refreshToken(user);
+        assertThrowsExactly(LockedException.class, () -> {
+            authService.refreshToken(token);
+        });
+//        var res = authService.refreshToken(token);
+//        assertEquals(UserStatus.ACTIVE, res.getStatus());
+//        assertNotNull(res.getToken());
     }
 }

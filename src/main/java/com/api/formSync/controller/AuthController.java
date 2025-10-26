@@ -21,13 +21,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public SuccessRes<LoginResponse> signIn(@Valid @RequestBody LoginRequest req,
-                                            HttpServletResponse response) {
+    public SuccessRes<SignInResponse> signIn(@Valid @RequestBody LoginRequest req,
+                                             HttpServletResponse response) {
         return SuccessRes.build(service.signIn(req, response));
     }
 
     @PostMapping("/refresh")
-    public SuccessRes<LoginResponse> refreshToken(@CookieValue("refresh_token") String refreshToken) {
+    public SuccessRes<SignInResponse> refreshToken(@CookieValue("refresh_token") String refreshToken) {
         return SuccessRes.build(service.refreshToken(refreshToken));
     }
 

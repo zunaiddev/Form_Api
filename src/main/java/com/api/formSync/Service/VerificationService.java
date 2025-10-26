@@ -1,6 +1,6 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.dto.LoginResponse;
+import com.api.formSync.dto.SignInResponse;
 import com.api.formSync.exception.DuplicateEntrypointEmailException;
 import com.api.formSync.model.User;
 import com.api.formSync.util.Common;
@@ -19,7 +19,7 @@ public class VerificationService {
     private final GenerateTokenService generateTokenService;
     private final JwtService jwtService;
 
-    public LoginResponse verifyUser(String email, String token, HttpServletResponse response) {
+    public SignInResponse verifyUser(String email, String token, HttpServletResponse response) {
         User user = userService.load(email);
         user.setEnabled(true);
         userService.update(user);
@@ -30,7 +30,7 @@ public class VerificationService {
 
         Common.setCookie(response, refreshToken);
 
-        return new LoginResponse(accessToken, UserStatus.ACTIVE);
+        return new SignInResponse(accessToken, UserStatus.ACTIVE);
     }
 
     public String updateEmail(String email, String newEmail, String token) {

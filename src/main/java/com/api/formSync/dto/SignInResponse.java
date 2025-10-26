@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class LoginResponse {
+public class SignInResponse {
     private String token;
     private UserStatus status;
 }
