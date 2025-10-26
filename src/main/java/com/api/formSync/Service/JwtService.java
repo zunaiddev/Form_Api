@@ -41,7 +41,11 @@ public class JwtService {
     }
 
     public Claims extractClaims(String token) {
-        return extractAllClaims(token);
+        return Jwts.parser()
+                .verifyWith(getKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     @Deprecated
@@ -51,18 +55,11 @@ public class JwtService {
     }
 
     private <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
+        final Claims claims = extractClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
-
+    @Deprecated(since = "Using this method is totally Redundant")
     public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }

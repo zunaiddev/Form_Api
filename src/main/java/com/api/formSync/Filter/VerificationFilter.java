@@ -4,7 +4,13 @@ import com.api.formSync.Service.JwtService;
 import com.api.formSync.Service.TokenService;
 import com.api.formSync.Service.UserDetailsServiceImpl;
 import com.api.formSync.dto.ErrorResponse;
+import com.api.formSync.exception.InvalidHeaderException;
+import com.api.formSync.exception.InvalidPurposeException;
+import com.api.formSync.exception.UsedTokenException;
 import com.api.formSync.util.Common;
+import com.api.formSync.util.Purpose;
+import com.api.formSync.util.Role;
+import com.api.formSync.util.VerificationToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -24,6 +30,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -43,28 +50,35 @@ public class VerificationFilter extends OncePerRequestFilter {
         String authHeader = req.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Missing Or In valid Header, {}", authHeader);
-            Common.sendErrorResponse(res, ErrorResponse.build("Authentication Failed", HttpStatus.UNAUTHORIZED, "Missing or Invalid Authorization Header"));
-            return;
+            throw new InvalidHeaderException("Missing or Invalid Authorization Header");
         }
 
         String token = authHeader.substring(7);
 
         try {
-            String email = jwtService.extractSubject(token);
-
             if (tokenService.isTokenUsed(authHeader)) {
-                Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.IM_USED, "Url Already used."));
-                return;
+                throw new UsedTokenException("Jwt Token has already been used");
             }
 
+            Claims claims = jwtService.extractClaims(token);
+
+            Purpose purpose = Purpose.from(claims.get("purpose"));
+            Set<Purpose> verifyPurposes = Set.of(Purpose.VERIFY_USER, Purpose.RESET_PASSWORD,
+                    Purpose.REACTIVATE_USER, Purpose.UPDATE_EMAIL);
+
+            if (purpose != null && verifyPurposes.contains(purpose)) {
+                throw new InvalidPurposeException("Invalid Token Purpose");
+            }
+
+            String email = "";
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            if (jwtService.validateToken(token, userDetails)) {
-                Claims claims = jwtService.extractClaims(token);
-                req.setAttribute("email", email);
-                req.setAttribute("purpose", claims.get("purpose"));
-                req.setAttribute("newEmail", claims.get("newEmail"));
+            if (!jwtService.isTokenExpired(token)) {
+                VerificationToken tokenData = new VerificationToken(email, claims.get("newEmail", String.class),
+                        Role.valueOf(claims.get("role", String.class)),
+                        Purpose.valueOf(claims.get("purpose", String.class)));
+
+                req.setAttribute("tokenData", tokenData);
 
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         userDetails, null, AuthorityUtils.NO_AUTHORITIES

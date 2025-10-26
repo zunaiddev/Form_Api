@@ -15,7 +15,7 @@ public class GenerateTokenService {
     public String accessToken(User user) {
         return jwtService.generateToken(user.getId(),
                 Map.of("email", user.getEmail(), "role", user.getRole(),
-                        "purpose", Purpose.AUTH), 900);
+                        "purpose", Purpose.AUTHENTICATION), 900);
     }
 
     public String refreshToken(User user) {

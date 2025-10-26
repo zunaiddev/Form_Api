@@ -1,5 +1,6 @@
 package com.api.formSync.Service;
 
+import com.api.formSync.dto.ResetPasswordRequest;
 import com.api.formSync.dto.SignInResponse;
 import com.api.formSync.exception.DuplicateEntrypointEmailException;
 import com.api.formSync.model.User;
@@ -19,11 +20,13 @@ public class VerificationService {
     private final GenerateTokenService generateTokenService;
     private final JwtService jwtService;
 
-    public SignInResponse verifyUser(String email, String token, HttpServletResponse response) {
-        User user = userService.load(email);
+    public Object verify(String newEmail, ResetPasswordRequest req, HttpServletResponse res) {
+        return new Object();
+    }
+
+    public SignInResponse verifyUser(User user, HttpServletResponse response) {
         user.setEnabled(true);
         userService.update(user);
-        tokenService.saveUsedToken(token);
 
         String accessToken = generateTokenService.accessToken(user);
         String refreshToken = generateTokenService.refreshToken(user);
@@ -33,9 +36,7 @@ public class VerificationService {
         return new SignInResponse(accessToken, UserStatus.ACTIVE);
     }
 
-    public String updateEmail(String email, String newEmail, String token) {
-        User user = userService.load(email);
-
+    public String updateEmail(User user, String newEmail) {
         if (userService.isExists(newEmail)) {
             throw new DuplicateEntrypointEmailException("user already have been verified by this email.");
         }
@@ -43,16 +44,13 @@ public class VerificationService {
         user.setEmail(newEmail);
         userService.update(user);
 
-        tokenService.saveUsedToken(token);
         return "Email Updated Successfully";
     }
 
-    public String resetPassword(String email, String password, String token) {
-        User user = userService.load(email);
+    public String resetPassword(User user, String password) {
         user.setPassword(encoder.encode(password));
         userService.update(user);
 
-        tokenService.saveUsedToken(token);
         return "Password Reset Successfully";
     }
 }
