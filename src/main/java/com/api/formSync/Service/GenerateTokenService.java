@@ -23,12 +23,12 @@ public class GenerateTokenService {
                 Map.of("purpose", Purpose.REFRESH_TOKEN), 2_592_000);
     }
 
-    public String resetPassword(User user) {
+    public String resetPasswordToken(User user) {
         return jwtService.generateToken(user.getId(),
                 Map.of("email", user.getEmail(), "role", user.getRole(), "purpose", Purpose.RESET_PASSWORD), 900);
     }
 
-    public String verifyUser(User user) {
+    public String verificationToken(User user) {
         return jwtService.generateToken(user.getId(),
                 Map.of("email", user.getEmail(),
                         "role", user.getRole(),

@@ -5,17 +5,18 @@ import com.api.formSync.Email.EmailTemplate;
 import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.dto.*;
 import com.api.formSync.exception.CouldNotFoundTokenException;
-import com.api.formSync.exception.InvalidTokenException;
 import com.api.formSync.exception.UnauthorisedException;
-import com.api.formSync.exception.UnverifiedEmailException;
 import com.api.formSync.model.User;
 import com.api.formSync.util.Common;
 import com.api.formSync.util.Purpose;
 import com.api.formSync.util.UserStatus;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class AuthService {
 
     public SignupResponse signup(SignupRequest req) {
         User user = userInfo.create(req.getName(), req.getEmail(), req.getPassword());
-        String token = tokenService.verifyUser(user);
+        String token = tokenService.verificationToken(user);
 
         emailService.sendEmail(user.getEmail(), "Please Verify Your Email.", EmailTemplate.tokenBody(user.getName(), BASE_URL + "/verify?token=" + token));
         log.info("Verification Email Sent to: {}", user.getEmail());
@@ -68,19 +69,15 @@ public class AuthService {
             throw new CouldNotFoundTokenException("Refresh Token is Missing");
         }
 
-        if (jwtService.isTokenExpired(token)) {
-            throw new InvalidTokenException("Token has expired.");
-        }
+        Claims claims = jwtService.extractClaims(token);
+        Purpose purpose = Purpose.from(claims.get("purpose"));
 
-        String purpose = jwtService.extractClaims(token)
-                .get("purpose", String.class);
-
-        if (purpose == null || !purpose.equals(Purpose.REFRESH_TOKEN.name())) {
+        if (purpose == null || !purpose.equals(Purpose.REFRESH_TOKEN)) {
             log.warn("Invalid Token Used at REFRESH_TOKEN");
-            throw new InvalidTokenException("Invalid Token Type or Token type is missing");
+            throw new JwtException("Invalid Token Type or Token type is missing");
         }
 
-        long id = Long.parseLong(jwtService.extractSubject(token));
+        long id = Long.parseLong(claims.getSubject());
         User user = userInfo.load(id);
 
         if (user.isLocked()) throw new LockedException("User is Locked");
@@ -98,10 +95,10 @@ public class AuthService {
         User user = userInfo.load(email);
 
         if (!user.isEnabled()) {
-            throw new UnverifiedEmailException("Please Verify Your Email: " + email);
+            throw new DisabledException("User is Disabled");
         }
 
-        String token = tokenService.resetPassword(user);
+        String token = tokenService.resetPasswordToken(user);
 
         emailService.sendEmail(email, "Reset Your Password", EmailTemplate.resetPassword(user.getName(), "http://" + BASE_URL + "/api/auth/verify/reset-password?token=" + token));
         return new EmailResponse(email);

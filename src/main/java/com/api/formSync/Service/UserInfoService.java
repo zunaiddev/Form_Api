@@ -1,6 +1,6 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.exception.DuplicateEntrypointEmailException;
+import com.api.formSync.exception.DuplicateEmailException;
 import com.api.formSync.exception.UserNotFoundException;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.UserRepository;
@@ -36,10 +36,6 @@ public class UserInfoService {
     }
 
     public User save(User user) {
-        if (repo.findByEmail(user.getEmail()).isPresent()) {
-            throw new DuplicateEntrypointEmailException(String.format("User with %s email Already Exists", user.getEmail()));
-        }
-
         return repo.save(user);
     }
 
@@ -48,7 +44,7 @@ public class UserInfoService {
 
         if (user != null) {
             if (user.isEnabled()) {
-                throw new DuplicateEntrypointEmailException("User With email " + email + " already exists.");
+                throw new DuplicateEmailException(email);
             }
 
             user.setName(name);

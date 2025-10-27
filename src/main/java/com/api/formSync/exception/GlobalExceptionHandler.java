@@ -1,22 +1,21 @@
 package com.api.formSync.exception;
 
+import com.api.formSync.dto.ErrorRes;
 import com.api.formSync.dto.ErrorResponse;
-import io.jsonwebtoken.security.SignatureException;
-import jakarta.validation.ValidationException;
+import com.api.formSync.util.ErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.mail.MailSendException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,47 +23,57 @@ import java.util.Map;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(DuplicateEntrypointEmailException.class)
+    //Auth Exceptions
+    @ExceptionHandler(DuplicateEmailException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    private ErrorResponse handle(DuplicateEntrypointEmailException exp) {
-        log.warn("Duplicate Entry For Email Exception. Message {}", exp.getMessage());
-        return ErrorResponse.build("Invalid Email.", HttpStatus.CONFLICT, exp.getMessage());
+    public ErrorRes handleEmailConflict(DuplicateEmailException exp) {
+        log.warn(exp.getMessage());
+        return new ErrorRes(HttpStatus.CONFLICT, exp);
+    }
+
+    @ExceptionHandler({BadCredentialsException.class, UnauthorisedException.class})
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorRes handleInvalidUsername(AuthenticationException exp) {
+        log.warn(exp.getMessage());
+        return new ErrorRes(HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHORIZED, "Unauthorized");
     }
 
     @ExceptionHandler(DisabledException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    private ErrorResponse handle(DisabledException exp) {
-        log.warn("Disabled User is trying To login. Message {}", exp.getMessage());
-        return ErrorResponse.build("Authentication Failed.", HttpStatus.FORBIDDEN, "Please Verify Your email to login.");
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorRes handleDisabledUser(DisabledException exp) {
+        log.warn(exp.getMessage());
+        return new ErrorRes(HttpStatus.BAD_REQUEST, ErrorCode.DISABLED, exp.getMessage());
     }
 
     @ExceptionHandler(LockedException.class)
     @ResponseStatus(HttpStatus.LOCKED)
-    private ErrorResponse handle(LockedException exp) {
-        log.warn("Locked User is trying To login. Message {}", exp.getMessage());
-        return ErrorResponse.build("Authentication Failed.", HttpStatus.FORBIDDEN, "You are temporary disabled. please contact to admin.");
-    }
-
-    @ExceptionHandler(UnauthorisedException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    private ErrorResponse handle(UnauthorisedException exp) {
-        log.error("Authentication Failed. Message {}", exp.getMessage());
-        return ErrorResponse.build("Authentication Failed.", HttpStatus.UNAUTHORIZED, exp.getMessage());
+    public ErrorRes handleLockedUser(LockedException exp) {
+        log.warn(exp.getMessage());
+        return new ErrorRes(HttpStatus.LOCKED, ErrorCode.LOCKED, exp.getMessage());
     }
 
     @ExceptionHandler(CouldNotFoundTokenException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private ErrorResponse handle(CouldNotFoundTokenException exp) {
-        log.warn("Unable To find Cookie. {}", exp.getMessage());
-        return ErrorResponse.build("Authentication Failed.", HttpStatus.UNAUTHORIZED, exp.getMessage());
+    public ErrorRes handleTokenNotFound(CouldNotFoundTokenException exp) {
+        log.warn(exp.getMessage());
+        return new ErrorRes(HttpStatus.BAD_REQUEST, exp);
     }
 
-    @ExceptionHandler(UnverifiedEmailException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    private ErrorResponse handle(UnverifiedEmailException exp) {
-        log.warn("User Email Not Verified and trying to login. {}", exp.getMessage());
-        return ErrorResponse.build("Authentication Failed.", HttpStatus.UNAUTHORIZED, exp.getMessage());
+    // JWT Exceptions
+    @ExceptionHandler({ExpiredJwtException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorRes handleExpiredToken(ExpiredJwtException exp) {
+        log.warn(exp.getMessage());
+        return new ErrorRes(HttpStatus.BAD_REQUEST, ErrorCode.EXPIRED_TOKEN, "Token has expired");
     }
+
+    @ExceptionHandler(JwtException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorRes handleJwtException(JwtException exp) {
+        log.warn(exp.getMessage());
+        return new ErrorRes(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_TOKEN, exp.getMessage());
+    }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -78,118 +87,5 @@ public class GlobalExceptionHandler {
             log.warn("Validation Failed for {} Cause {}", error.getField(), error.getDefaultMessage());
         }
         return ErrorResponse.build("Invalid Argument.", HttpStatus.UNPROCESSABLE_ENTITY, errors.toString());
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private ErrorResponse handle(HttpMessageNotReadableException exp) {
-        log.warn("Request Body was Missing. {}", exp.getMessage());
-        return ErrorResponse.build("Request Body is Missing.", HttpStatus.BAD_REQUEST, "Request Body is Missing");
-    }
-
-    @ExceptionHandler(InvalidTokenException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    private ErrorResponse handle(InvalidTokenException exp) {
-        log.error("Token Invalid After Check {}", exp.getMessage());
-        return ErrorResponse.build("Authentication Failed.", HttpStatus.BAD_REQUEST, exp.getMessage());
-    }
-
-    @ExceptionHandler(MissingRequestCookieException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    private ErrorResponse handle(MissingRequestCookieException exp) {
-        log.error("Cookie is Missing {}", exp.getMessage());
-        return ErrorResponse.build("Authentication Failed.", HttpStatus.UNAUTHORIZED, "Cookie is missing.");
-    }
-
-    @ExceptionHandler(RequestBodyIsMissingException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private ErrorResponse handle(RequestBodyIsMissingException exp) {
-        log.error("Request Body is Missing {}", exp.getMessage());
-        return ErrorResponse.build("Verification Failed.", HttpStatus.BAD_REQUEST, "Request Body is missing.");
-    }
-
-    @ExceptionHandler(NoHandlerFoundException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private ErrorResponse handle(NoHandlerFoundException exp) {
-        log.error("Request To Wrong URL {}", exp.getRequestURL());
-        return ErrorResponse.build("Failed", HttpStatus.BAD_REQUEST, "No Endpoint " + exp.getRequestURL() + ".");
-    }
-
-    @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    private ErrorResponse handle(ValidationException exp) {
-        log.error("Validation Failed {}", exp.getMessage());
-        return ErrorResponse.build("Invalid Format.", HttpStatus.UNPROCESSABLE_ENTITY, exp.getMessage());
-    }
-
-    @ExceptionHandler(DuplicatePasswordException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private ErrorResponse handle(DuplicatePasswordException exp) {
-        log.error("Same Password As previous {}", exp.getMessage());
-        return ErrorResponse.build("Bad credentials.", HttpStatus.BAD_REQUEST, exp.getMessage());
-    }
-
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private ErrorResponse handle(HttpRequestMethodNotSupportedException exp) {
-        log.error("Bad Request Method. Message {}", exp.getMessage());
-        return ErrorResponse.build("Bad Request.", HttpStatus.BAD_REQUEST, exp.getMessage());
-    }
-
-    @ExceptionHandler(MailSendException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    private ErrorResponse handle(MailSendException exp) {
-        log.error("Email Send Fail {}", exp.getMessage());
-        return ErrorResponse.build("Something Went Wrong", HttpStatus.INTERNAL_SERVER_ERROR, "Could Not send Email");
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private ErrorResponse handle(UserNotFoundException exp) {
-        log.error("User Not Found {}", exp.getMessage());
-        return ErrorResponse.build("Something Went Wrong", HttpStatus.BAD_REQUEST, exp.getMessage());
-    }
-
-    @ExceptionHandler(InvalidApiKeyException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    private ErrorResponse handle(InvalidApiKeyException exp) {
-        log.error("Invalid Api key {}", exp.getMessage());
-        return ErrorResponse.build("Something Went Wrong", HttpStatus.UNAUTHORIZED, exp.getMessage());
-    }
-
-    @ExceptionHandler(KeyCreatedException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    private ErrorResponse handle(KeyCreatedException exp) {
-        log.error("Duplicate key generate. {}", exp.getMessage());
-        return ErrorResponse.build("Something Went Wrong", HttpStatus.CONFLICT, exp.getMessage());
-    }
-
-    @ExceptionHandler(DomainAlreadyExistsException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    private ErrorResponse handle(DomainAlreadyExistsException exp) {
-        log.error("Duplicate Domain name. {}", exp.getMessage());
-        return ErrorResponse.build("Duplicate Domain name", HttpStatus.CONFLICT, exp.getMessage());
-    }
-
-    @ExceptionHandler(DomainNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    private ErrorResponse handle(DomainNotFoundException exp) {
-        log.error("Not Found Domain name. {}", exp.getMessage());
-        return ErrorResponse.build("Domain name not found", HttpStatus.NOT_FOUND, exp.getMessage());
-    }
-
-    //Jwt Exceptions
-    @ExceptionHandler(SignatureException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    private ErrorResponse handle(SignatureException exp) {
-        log.error("Token Signature is Invalid {}", exp.getMessage());
-        return ErrorResponse.build("Authentication Failed.", HttpStatus.BAD_REQUEST, "Invalid Token Signature.");
-    }
-
-    @ExceptionHandler(ForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    private ErrorResponse handle(ForbiddenException exp) {
-        log.error("Unauthorised access {}", exp.getMessage());
-        return ErrorResponse.build("Forbidden.", HttpStatus.FORBIDDEN, exp.getMessage());
     }
 }

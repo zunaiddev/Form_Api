@@ -2,7 +2,7 @@ package com.api.formSync.Service;
 
 import com.api.formSync.dto.ResetPasswordRequest;
 import com.api.formSync.dto.SignInResponse;
-import com.api.formSync.exception.DuplicateEntrypointEmailException;
+import com.api.formSync.exception.DuplicateEmailException;
 import com.api.formSync.exception.InvalidPurposeException;
 import com.api.formSync.exception.RequestBodyIsMissingException;
 import com.api.formSync.model.User;
@@ -48,7 +48,7 @@ public class VerificationService {
 
     private String updateEmail(User user, String newEmail) {
         if (userService.isExists(newEmail)) {
-            throw new DuplicateEntrypointEmailException("user already have been verified by this email.");
+            throw new DuplicateEmailException(newEmail);
         }
 
         user.setEmail(newEmail);
