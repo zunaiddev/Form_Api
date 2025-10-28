@@ -3,9 +3,9 @@ package com.api.formSync.Filter;
 import com.api.formSync.Service.JwtService;
 import com.api.formSync.Service.TokenService;
 import com.api.formSync.Service.UserDetailsServiceImpl;
-import com.api.formSync.dto.ErrorResponse;
+import com.api.formSync.exception.DuplicateEmailException;
 import com.api.formSync.exception.InvalidHeaderException;
-import com.api.formSync.exception.InvalidPurposeException;
+import com.api.formSync.exception.RequestBodyIsMissingException;
 import com.api.formSync.exception.UsedTokenException;
 import com.api.formSync.util.Common;
 import com.api.formSync.util.Purpose;
@@ -13,9 +13,7 @@ import com.api.formSync.util.Role;
 import com.api.formSync.util.VerificationToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,6 +45,7 @@ public class VerificationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {
+        try {
         String authHeader = req.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -55,7 +54,7 @@ public class VerificationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        try {
+
             if (tokenService.isTokenUsed(authHeader)) {
                 throw new UsedTokenException("Jwt Token has already been used");
             }
@@ -65,10 +64,10 @@ public class VerificationFilter extends OncePerRequestFilter {
             Purpose purpose = Purpose.from(claims.get("purpose"));
 
             Set<Purpose> verifyPurposes = Set.of(Purpose.VERIFY_USER, Purpose.RESET_PASSWORD,
-                    Purpose.REACTIVATE_USER, Purpose.UPDATE_EMAIL);
+                    Purpose.REACTIVATE, Purpose.UPDATE_EMAIL);
 
             if (purpose == null || !verifyPurposes.contains(purpose)) {
-                throw new InvalidPurposeException("Invalid Token Purpose");
+                throw new JwtException("Invalid Token Purpose");
             }
 
             String email = claims.get("email", String.class);
@@ -89,21 +88,28 @@ public class VerificationFilter extends OncePerRequestFilter {
             if (res.getStatus() >= 200 && res.getStatus() < 300) {
                 //mark the token as used
             }
+        } catch (InvalidHeaderException e) {
+            log.warn(e.getMessage());
+            Common.setError(res, HttpStatus.BAD_REQUEST, "Invalid Header", e.getMessage());
         } catch (ExpiredJwtException e) {
             log.warn("Token has expired. Message {}", e.getMessage());
-            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.UNAUTHORIZED, "Token has expired"));
-        } catch (MalformedJwtException | UnsupportedJwtException e) {
-            log.error("Invalid token Format. Message {}", "Someone change the token");
-            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.BAD_REQUEST, "Invalid token format"));
-        } catch (SignatureException e) {
-            log.error("Invalid Token Signature. Message {}", "Invalid Jwt token Signature.");
-            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.UNAUTHORIZED, "Invalid token signature"));
-        } catch (IllegalArgumentException e) {
-            log.error("Token is null or Empty.");
-            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.BAD_REQUEST, "Token cannot be null or empty"));
+            Common.setError(res, HttpStatus.BAD_REQUEST, "Token Expired", "Verification Token Expired");
+        } catch (JwtException e) {
+            log.error("Invalid token. Message {}", e.getMessage());
+            Common.setError(res, HttpStatus.BAD_REQUEST, "Invalid Token", "The verification Token is not valid. Please check the Token and try again.");
+        } catch (UsedTokenException e) {
+            log.warn(e.getMessage());
+            Common.setError(res, HttpStatus.IM_USED, "This Token Has Already Been Used",
+                    "It seems this verification Token was already used before. You cannot use the same Token again.");
+        } catch (DuplicateEmailException e) {
+            log.warn(e.getMessage());
+            Common.setError(res, HttpStatus.CONFLICT, "Email Already Registered", e.getMessage());
+        } catch (RequestBodyIsMissingException e) {
+            log.warn(e.getMessage());
+            Common.setError(res, HttpStatus.BAD_REQUEST, "Missing Request Body", e.getMessage());
         } catch (Exception e) {
             log.error("Invalid Token. {}", e.getMessage());
-            Common.sendErrorResponse(res, ErrorResponse.build("Verification Failed", HttpStatus.BAD_REQUEST, "Invalid Token"));
+            Common.setError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "Something Went Wrong");
         }
     }
 }

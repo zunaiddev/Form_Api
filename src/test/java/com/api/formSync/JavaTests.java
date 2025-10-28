@@ -1,20 +1,22 @@
 package com.api.formSync;
 
-import com.api.formSync.util.Purpose;
+import com.api.formSync.dto.ErrorResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import org.springframework.http.HttpStatus;
 
 
 public class JavaTests {
 
     @Test
-    void test() {
-        Set<Purpose> authPurposes = Set.of(Purpose.VERIFY_USER, Purpose.RESET_PASSWORD,
-                Purpose.REACTIVATE_USER, Purpose.UPDATE_EMAIL);
+    void test() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        ErrorResponse err = new ErrorResponse(HttpStatus.OK.name(), "Ok ", null);
 
-        assertFalse(authPurposes.contains(null));
+        System.out.println(mapper.writeValueAsString(err));
+        String title = "Something wrong";
+        String message = "Something wrong";
+        System.out.println(String.format("{\"title\": \"%s\",\"message\": \"%s\"}", title, message));
     }
 }

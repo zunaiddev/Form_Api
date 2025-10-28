@@ -39,6 +39,6 @@ public class GenerateTokenService {
         return jwtService.generateToken(user.getId(),
                 Map.of("email", user.getEmail(),
                         "role", user.getRole(),
-                        "purpose", Purpose.REACTIVATE_USER), 900);
+                        "purpose", Purpose.REACTIVATE), 900);
     }
 }

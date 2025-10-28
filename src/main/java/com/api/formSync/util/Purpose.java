@@ -6,17 +6,13 @@ public enum Purpose {
     VERIFY_USER,
     REFRESH_TOKEN,
     UPDATE_EMAIL,
-    REACTIVATE_USER;
+    REACTIVATE;
 
     public static Purpose from(Object object) {
-        Purpose purpose;
-
         try {
-            purpose = valueOf(object.toString());
+            return valueOf(object.toString());
         } catch (Exception _) {
-            purpose = null;
+            return null;
         }
-
-        return purpose;
     }
 }

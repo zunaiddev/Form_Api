@@ -2,14 +2,15 @@ package com.api.formSync.Service;
 
 import com.api.formSync.dto.ResetPasswordRequest;
 import com.api.formSync.dto.SignInResponse;
+import com.api.formSync.dto.VerificationResponse;
 import com.api.formSync.exception.DuplicateEmailException;
-import com.api.formSync.exception.InvalidPurposeException;
 import com.api.formSync.exception.RequestBodyIsMissingException;
 import com.api.formSync.model.User;
 import com.api.formSync.util.Common;
 import com.api.formSync.util.Purpose;
 import com.api.formSync.util.UserStatus;
 import com.api.formSync.util.VerificationToken;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,19 +23,18 @@ public class VerificationService {
     private final PasswordEncoder encoder;
     private final GenerateTokenService generateTokenService;
 
-    public Object verify(User user, VerificationToken claims, ResetPasswordRequest req, HttpServletResponse response) {
+    public VerificationResponse<?> verify(User user, VerificationToken claims, ResetPasswordRequest req, HttpServletResponse response) {
         Purpose purpose = claims.getPurpose();
 
         return switch (purpose) {
             case VERIFY_USER -> verifyUser(user, response);
             case UPDATE_EMAIL -> updateEmail(user, claims.getNewEmail());
             case RESET_PASSWORD -> resetPassword(user, req);
-            case REACTIVATE_USER -> "Not Available yet";
-            default -> throw new InvalidPurposeException("Invalid Token Purpose");
+            default -> throw new JwtException("Invalid Token Purpose");
         };
     }
 
-    private SignInResponse verifyUser(User user, HttpServletResponse response) {
+    private VerificationResponse<SignInResponse> verifyUser(User user, HttpServletResponse response) {
         user.setEnabled(true);
         userService.update(user);
 
@@ -43,10 +43,12 @@ public class VerificationService {
 
         Common.setCookie(response, refreshToken);
 
-        return new SignInResponse(accessToken, UserStatus.ACTIVE);
+        return new VerificationResponse<>("Account Verified Successfully",
+                "Your email has been confirmed and your account is now active. You can continue using the service securely.",
+                new SignInResponse(accessToken, UserStatus.ACTIVE));
     }
 
-    private String updateEmail(User user, String newEmail) {
+    private VerificationResponse<?> updateEmail(User user, String newEmail) {
         if (userService.isExists(newEmail)) {
             throw new DuplicateEmailException(newEmail);
         }
@@ -54,10 +56,11 @@ public class VerificationService {
         user.setEmail(newEmail);
         userService.update(user);
 
-        return "Email Updated Successfully";
+        return new VerificationResponse<>("Email Updated Successfully",
+                "Your email address has been changed. For security reasons, please use this updated email when signing in.Your email address has been changed. For security reasons, please use this updated email when signing in.", null);
     }
 
-    private String resetPassword(User user, ResetPasswordRequest req) {
+    private VerificationResponse<?> resetPassword(User user, ResetPasswordRequest req) {
         if (req == null) {
             throw new RequestBodyIsMissingException("Missing Request body");
         }
@@ -65,6 +68,12 @@ public class VerificationService {
         user.setPassword(encoder.encode(req.getPassword()));
         userService.update(user);
 
-        return "Password Reset Successfully";
+        return new VerificationResponse<>("Password Changed Successfully",
+                "Your password has been updated. You can now log in using your new password.", null);
+    }
+
+    private VerificationResponse<?> reactivate() {
+        return new VerificationResponse<>("Account Reactivated",
+                "Your account has been restored and is active again. If you did not request this reactivation, please contact support immediately.", null);
     }
 }

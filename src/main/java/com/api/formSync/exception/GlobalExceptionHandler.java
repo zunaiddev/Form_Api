@@ -12,6 +12,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -77,7 +78,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    private ErrorResponse handle(MethodArgumentNotValidException exp) {
+    public ErrorResponse handle(MethodArgumentNotValidException exp) {
         log.warn("Invalid Method Argument. {}", exp.getMessage());
 
         Map<String, String> errors = new HashMap<>();
@@ -87,5 +88,19 @@ public class GlobalExceptionHandler {
             log.warn("Validation Failed for {} Cause {}", error.getField(), error.getDefaultMessage());
         }
         return ErrorResponse.build("Invalid Argument.", HttpStatus.UNPROCESSABLE_ENTITY, errors.toString());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorRes handleNotFound(HttpRequestMethodNotSupportedException exp) {
+        log.warn("A bad url get hit with bad request {}", exp.getMessage());
+        return new ErrorRes(HttpStatus.NOT_FOUND, ErrorCode.NONE, exp.getLocalizedMessage());
+    }
+
+    @ExceptionHandler(InvalidHeaderException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorRes handleInvalidHeader(InvalidHeaderException exp) {
+        log.warn(exp.getMessage());
+        return new ErrorRes(HttpStatus.BAD_REQUEST, ErrorCode.NONE, exp.getLocalizedMessage());
     }
 }

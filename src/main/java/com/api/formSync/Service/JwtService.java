@@ -30,7 +30,7 @@ public class JwtService {
                 .signWith(getKey()).compact();
         
         if (environment.equals("local")) {
-            System.out.println("Token Generated: " + token);
+            System.out.println("Token Generated:\n" + token);
         }
 
         return token;

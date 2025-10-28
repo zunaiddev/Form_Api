@@ -39,7 +39,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if (bucket.tryConsume(1)) {
             chain.doFilter(req, res);
         } else {
-            Common.sendErrorResponse(res, ErrorResponse.build("Too Many Attempts.", HttpStatus.TOO_MANY_REQUESTS, "You have reached a limited time period please try again later."));
+            Common.setError(res, ErrorResponse.build("Too Many Attempts.", HttpStatus.TOO_MANY_REQUESTS, "You have reached a limited time period please try again later."));
         }
     }
 

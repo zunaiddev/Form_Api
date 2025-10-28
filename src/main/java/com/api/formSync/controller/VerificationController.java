@@ -4,6 +4,7 @@ import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.Service.VerificationService;
 import com.api.formSync.dto.ResetPasswordRequest;
 import com.api.formSync.dto.SuccessRes;
+import com.api.formSync.dto.VerificationResponse;
 import com.api.formSync.util.VerificationToken;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -17,11 +18,11 @@ import org.springframework.web.bind.annotation.*;
 public class VerificationController {
     private final VerificationService service;
 
-    @GetMapping
-    private SuccessRes<Object> verify(@AuthenticationPrincipal UserPrincipal details,
-                                      @RequestAttribute VerificationToken claims,
-                                      @RequestBody(required = false) @Valid ResetPasswordRequest req,
-                                      HttpServletResponse res) {
+    @PostMapping
+    private SuccessRes<VerificationResponse<?>> verify(@AuthenticationPrincipal UserPrincipal details,
+                                                       @RequestAttribute VerificationToken claims,
+                                                       @RequestBody(required = false) @Valid ResetPasswordRequest req,
+                                                       HttpServletResponse res) {
         return SuccessRes.build(service.verify(details.getUser(), claims, req, res));
     }
 }

@@ -76,7 +76,7 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
         String domain = extractDomain(origin != null ? origin : referer);
         
         if (!environment.equalsIgnoreCase("local") && domain == null) {
-            Common.sendErrorResponse(response, ErrorResponse.build("Invalid Domain.", HttpStatus.BAD_REQUEST, "Domain is null please use direct js."));
+            Common.setError(response, ErrorResponse.build("Invalid Domain.", HttpStatus.BAD_REQUEST, "Domain is null please use direct js."));
             return;
         }
 
@@ -85,9 +85,9 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(auth);
             filterChain.doFilter(request, response);
         } catch (TodayLimitReachedException exp) {
-            Common.sendErrorResponse(response, ErrorResponse.build("Limit Reached.", HttpStatus.TOO_MANY_REQUESTS, exp.getMessage()));
+            Common.setError(response, ErrorResponse.build("Limit Reached.", HttpStatus.TOO_MANY_REQUESTS, exp.getMessage()));
         } catch (ForbiddenException exp) {
-            Common.sendErrorResponse(response, ErrorResponse.build("Forbidden", HttpStatus.FORBIDDEN, exp.getMessage()));
+            Common.setError(response, ErrorResponse.build("Forbidden", HttpStatus.FORBIDDEN, exp.getMessage()));
         } catch (Exception exp) {
             log.warn(exp.getMessage());
             response.sendError(HttpStatus.UNAUTHORIZED.value(), exp.getMessage());
