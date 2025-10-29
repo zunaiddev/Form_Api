@@ -3,7 +3,7 @@ package com.api.formSync.Service;
 import com.api.formSync.dto.ResetPasswordRequest;
 import com.api.formSync.dto.SignInResponse;
 import com.api.formSync.dto.VerificationResponse;
-import com.api.formSync.exception.DuplicateEmailException;
+import com.api.formSync.exception.ConflictException;
 import com.api.formSync.exception.RequestBodyIsMissingException;
 import com.api.formSync.model.User;
 import com.api.formSync.util.Common;
@@ -50,7 +50,7 @@ public class VerificationService {
 
     private VerificationResponse<?> updateEmail(User user, String newEmail) {
         if (userService.isExists(newEmail)) {
-            throw new DuplicateEmailException(newEmail);
+            throw new ConflictException("Email already in use");
         }
 
         user.setEmail(newEmail);

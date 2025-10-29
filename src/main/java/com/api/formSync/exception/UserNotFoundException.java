@@ -1,9 +1,9 @@
 package com.api.formSync.exception;
 
-import org.springframework.security.core.AuthenticationException;
+import com.api.formSync.util.ErrorCode;
 
-public class UserNotFoundException extends AuthenticationException {
-    public UserNotFoundException(String message) {
-        super(message);
+public class UserNotFoundException extends CustomException {
+    public UserNotFoundException() {
+        super(ErrorCode.USER_NOT_FOUND, "User Not Found");
     }
 }

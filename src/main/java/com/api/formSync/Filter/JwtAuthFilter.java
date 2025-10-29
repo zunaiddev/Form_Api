@@ -1,13 +1,14 @@
 package com.api.formSync.Filter;
 
+import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.Service.JwtService;
-import com.api.formSync.Service.UserDetailsServiceImpl;
 import com.api.formSync.dto.ErrorResponse;
+import com.api.formSync.exception.InvalidHeaderException;
+import com.api.formSync.model.User;
 import com.api.formSync.util.Common;
 import com.api.formSync.util.Purpose;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import com.api.formSync.util.Role;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +30,6 @@ import java.io.IOException;
 @AllArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService service;
-    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest req) {
@@ -39,42 +39,38 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {
-        String authHeader = req.getHeader("Authorization");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            Common.setError(res, ErrorResponse.build("Authentication Failed", HttpStatus.UNAUTHORIZED, "Missing or Invalid Authorization Header"));
-            return;
-        }
-
-        String token = authHeader.substring(7);
-        String username;
-
         try {
-            username = service.extractSubject(token);
+            String authHeader = req.getHeader("Authorization");
 
-            if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
-                Common.setError(res, ErrorResponse.build("Authentication Failed", HttpStatus.BAD_REQUEST, "Invalid Token"));
-                return;
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                throw new InvalidHeaderException("Invalid or missing Authorization header");
             }
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            String token = authHeader.substring(7);
+            Claims claims = service.extractClaims(token);
 
-            if (service.validateToken(token, userDetails)) {
+            Purpose purpose = Purpose.from(claims.get("purpose"));
 
-                if (service.extractClaims(token).get("purpose") == null || !service.extractClaims(token).get("purpose").equals(Purpose.AUTHENTICATION.name())) {
-                    log.warn("Purpose is missing or not found");
-                    Common.setError(res, ErrorResponse.build("Authentication Failed", HttpStatus.FORBIDDEN, "Invalid token type for authentication"));
-                    return;
-                }
-
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            if (purpose != Purpose.AUTHENTICATION) {
+                throw new JwtException("This Token is Not Allowed for Authentication");
             }
 
+            User user = new User();
+            user.setId(Long.valueOf(claims.getSubject()));
+            user.setEmail(claims.get("email", String.class));
+            user.setRole(Role.valueOf(claims.get("role", String.class)));
+
+            UserDetails details = new UserPrincipal(user);
+
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                    details, null, details.getAuthorities()
+            );
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
             chain.doFilter(req, res);
+        } catch (InvalidHeaderException e) {
+            log.warn("Invalid Header. {}", e.getMessage());
+            Common.setError(res, ErrorResponse.build("Authentication Failed", HttpStatus.BAD_REQUEST, e.getMessage()));
         } catch (ExpiredJwtException e) {
             log.warn("Expired Token. {}", e.getMessage());
             Common.setError(res, ErrorResponse.build("Authentication Failed", HttpStatus.UNAUTHORIZED, "Token has expired"));
@@ -84,9 +80,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         } catch (SignatureException e) {
             log.warn("Invalid Token Signature. {}", e.getMessage());
             Common.setError(res, ErrorResponse.build("Authentication Failed", HttpStatus.UNAUTHORIZED, "Invalid token signature"));
-        } catch (IllegalArgumentException e) {
-            log.warn("Null or Empty Token. {}", e.getMessage());
-            Common.setError(res, ErrorResponse.build("Authentication Failed", HttpStatus.BAD_REQUEST, "Token cannot be null or empty"));
         } catch (Exception e) {
             log.warn("Something went wrong. {}", e.getMessage());
             Common.setError(res, ErrorResponse.build("Authentication Failed", HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong."));

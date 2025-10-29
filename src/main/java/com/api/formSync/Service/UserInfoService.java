@@ -1,6 +1,6 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.exception.DuplicateEmailException;
+import com.api.formSync.exception.ConflictException;
 import com.api.formSync.exception.UserNotFoundException;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.UserRepository;
@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +28,12 @@ public class UserInfoService {
 
     public User load(Long id) {
         return repo.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User Not Found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
     }
 
     public User load(String email) {
         return repo.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User Not Found"));
+                .orElseThrow(UserNotFoundException::new);
     }
 
     public User save(User user) {
@@ -44,7 +45,7 @@ public class UserInfoService {
 
         if (user != null) {
             if (user.isEnabled()) {
-                throw new DuplicateEmailException(email);
+                throw new ConflictException("Email already in use");
             }
 
             user.setName(name);
@@ -77,7 +78,7 @@ public class UserInfoService {
 
     public User loadWithKey(Long id) {
         return repo.findWithKeyById(id)
-                .orElseThrow(() -> new UserNotFoundException("User Not found"));
+                .orElseThrow(UserNotFoundException::new);
     }
 
     public boolean isExists(String newEmail) {
@@ -87,6 +88,6 @@ public class UserInfoService {
 
     public User loadWithForms(Long id) {
         return repo.findWithFormsById(id)
-                .orElseThrow(() -> new UserNotFoundException("User Not Found Exception"));
+                .orElseThrow(UserNotFoundException::new);
     }
 }

@@ -1,6 +1,5 @@
 package com.api.formSync.Email;
 
-import com.api.formSync.exception.EmailSenderFailException;
 import com.api.formSync.util.Log;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -47,7 +46,7 @@ public class EmailService {
             helper.setText(body, true);
             message.addHeader("List-Unsubscribe", "<mailto:unsubscribe@zunaiddev@gmail.com>, <https://formsync.com/unsubscribe>");
         } catch (MessagingException e) {
-            throw new EmailSenderFailException("Unable To Send Email.");
+            throw new RuntimeException("Unable To Send Email.");
         }
 
         mailSender.send(message);

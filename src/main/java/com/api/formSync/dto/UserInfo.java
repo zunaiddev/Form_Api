@@ -2,7 +2,6 @@ package com.api.formSync.dto;
 
 import com.api.formSync.model.User;
 import com.api.formSync.util.Role;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,7 +12,6 @@ public class UserInfo {
     private String name;
     private String email;
     private Role role;
-    @JsonFormat(pattern = "dd-MMM-yyyy hh-mm", timezone = "Asia/Kolkata")
     private LocalDateTime createdAt;
 
     public UserInfo(User user) {

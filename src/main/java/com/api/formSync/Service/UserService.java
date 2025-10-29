@@ -3,10 +3,9 @@ package com.api.formSync.Service;
 import com.api.formSync.Email.EmailService;
 import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.dto.*;
-import com.api.formSync.exception.DomainAlreadyExistsException;
+import com.api.formSync.exception.ConflictException;
 import com.api.formSync.exception.DomainNotFoundException;
 import com.api.formSync.exception.InvalidApiKeyException;
-import com.api.formSync.exception.KeyCreatedException;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Domain;
 import com.api.formSync.model.User;
@@ -33,7 +32,11 @@ public class UserService {
     private final DomainService domainService;
     private final FormService formService;
 
-    public UserInfo update(Long id, UserUpdateRequest req) {
+    public UserInfo userInfo(Long id) {
+        return new UserInfo(userInfoService.load(id));
+    }
+
+    public UserInfo updateUser(Long id, UserUpdateRequest req) {
         User user = userInfoService.load(id);
         user.setName(req.getName());
 
@@ -55,23 +58,18 @@ public class UserService {
         response.addCookie(cookie);
     }
 
-    public UserInfo getInfo(Long id) {
-        return new UserInfo(userInfoService.load(id));
-    }
-
     @Transactional
-    public ApiKeyInfo generateKey(Long id, String domain) {
+    public ApiKeyInfo generateKey(Long id) {
         User user = userInfoService.loadWithKey(id);
 
         if (user.getKey() != null) {
-            throw new KeyCreatedException("Api Key is Already created. Please regenerate the key.");
+            throw new ConflictException("Api Key is Already created. Please regenerate the key.");
         }
 
-        Domain savedDomain = domainService.create(domain);
-        ApiKey apiKey = apiKeyService.create(user, savedDomain);
-        user.setKey(apiKey);
-        userInfoService.update(user);
-        return new ApiKeyInfo(apiKey);
+        user.setKey(new ApiKey(user));
+
+        User saveduser = userInfoService.save(user);
+        return new ApiKeyInfo(saveduser.getKey());
     }
 
     @Transactional
@@ -94,7 +92,7 @@ public class UserService {
         List<Domain> domains = apiKey.getDomains();
 
         if (!domains.stream().filter(d -> Objects.equals(d.getName(), domain)).toList().isEmpty()) {
-            throw new DomainAlreadyExistsException("this domain is already exists");
+            throw new ConflictException("this domain is already exists");
         }
 
         domains.add(domainService.create(domain));

@@ -22,8 +22,8 @@ import java.util.List;
 public class ApiKeyService {
     private final ApiKeyRepository repo;
 
-    public ApiKey create(User user, Domain domain) {
-        ApiKey apiKey = new ApiKey(user, domain);
+    public ApiKey create(User user) {
+        ApiKey apiKey = new ApiKey(user);
         return repo.save(apiKey);
     }
 
@@ -61,6 +61,8 @@ public class ApiKeyService {
     }
 
     public ApiKey update(ApiKey apiKey) {
+        if (apiKey.getId() == null) throw new RuntimeException("Api Key id is null");
+
         return repo.save(apiKey);
     }
 

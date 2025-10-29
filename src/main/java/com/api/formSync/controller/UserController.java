@@ -21,13 +21,13 @@ public class UserController {
 
     @GetMapping
     public SuccessRes<UserInfo> info(@AuthenticationPrincipal UserPrincipal details) {
-        return SuccessRes.build(service.getInfo(details.getId()));
+        return SuccessRes.build(service.userInfo(details.getId()));
     }
 
     @PatchMapping
     public SuccessRes<UserInfo> update(@AuthenticationPrincipal UserPrincipal details,
                                        @RequestBody @Valid UserUpdateRequest req) {
-        return SuccessRes.build(service.update(details.getId(), req));
+        return SuccessRes.build(service.updateUser(details.getId(), req));
     }
 
     @DeleteMapping
@@ -42,9 +42,8 @@ public class UserController {
 
     @PostMapping("/api-key")
     @ResponseStatus(HttpStatus.CREATED)
-    public SuccessRes<ApiKeyInfo> generate(@AuthenticationPrincipal UserPrincipal details,
-                                           @RequestBody @Valid DomainRequest req) {
-        return SuccessRes.build(HttpStatus.CREATED, service.generateKey(details.getId(), req.getDomain()));
+    public SuccessRes<ApiKeyInfo> generate(@AuthenticationPrincipal UserPrincipal details) {
+        return SuccessRes.build(HttpStatus.CREATED, service.generateKey(details.getId()));
     }
 
     @PutMapping("/api-key")

@@ -2,7 +2,6 @@ package com.api.formSync.Service;
 
 import com.api.formSync.dto.LoginRequest;
 import com.api.formSync.dto.SignupRequest;
-import com.api.formSync.exception.UnverifiedEmailException;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.UserRepository;
 import org.junit.jupiter.api.*;
@@ -64,9 +63,7 @@ class AuthServiceTest {
     @Order(3)
     @Disabled
     void forgetPassword() {
-        assertThrowsExactly(UnverifiedEmailException.class, () -> {
-            authService.forgetPassword("john@gmail.com");
-        });
+
     }
 
     @Test

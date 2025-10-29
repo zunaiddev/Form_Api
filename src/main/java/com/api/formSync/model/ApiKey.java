@@ -45,13 +45,13 @@ public class ApiKey {
     private User user;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Domain> domains;
 
-    public ApiKey(User user, Domain domain) {
+    public ApiKey(User user) {
         this.user = user;
         this.apiKey = generate();
         this.role = user.getRole();
-        this.domains = List.of(domain);
     }
 
     public void reGenerate() {

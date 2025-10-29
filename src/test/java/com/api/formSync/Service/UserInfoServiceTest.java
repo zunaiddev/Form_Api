@@ -20,6 +20,7 @@ class UserInfoServiceTest {
     @Autowired
     PasswordEncoder encoder;
 
+
     @Test
     @Order(1)
     void save() {

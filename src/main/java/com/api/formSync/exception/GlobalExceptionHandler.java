@@ -7,7 +7,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,56 +26,70 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     //Auth Exceptions
-    @ExceptionHandler(DuplicateEmailException.class)
+    @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorRes handleEmailConflict(DuplicateEmailException exp) {
+    public ErrorRes handleEmailConflict(ConflictException exp) {
         log.warn(exp.getMessage());
         return new ErrorRes(HttpStatus.CONFLICT, exp);
     }
 
-    @ExceptionHandler({BadCredentialsException.class, UnauthorisedException.class})
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorRes handleInvalidUsername(AuthenticationException exp) {
-        log.warn(exp.getMessage());
-        return new ErrorRes(HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHORIZED, "Unauthorized");
-    }
-
-    @ExceptionHandler(DisabledException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorRes handleDisabledUser(DisabledException exp) {
-        log.warn(exp.getMessage());
-        return new ErrorRes(HttpStatus.BAD_REQUEST, ErrorCode.DISABLED, exp.getMessage());
-    }
-
-    @ExceptionHandler(LockedException.class)
-    @ResponseStatus(HttpStatus.LOCKED)
-    public ErrorRes handleLockedUser(LockedException exp) {
-        log.warn(exp.getMessage());
-        return new ErrorRes(HttpStatus.LOCKED, ErrorCode.LOCKED, exp.getMessage());
-    }
-
-    @ExceptionHandler(CouldNotFoundTokenException.class)
+    @ExceptionHandler({CouldNotFoundTokenException.class,
+            UserNotFoundException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorRes handleTokenNotFound(CouldNotFoundTokenException exp) {
         log.warn(exp.getMessage());
         return new ErrorRes(HttpStatus.BAD_REQUEST, exp);
     }
 
-    // JWT Exceptions
-    @ExceptionHandler({ExpiredJwtException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorRes handleExpiredToken(ExpiredJwtException exp) {
+    //Authentication Exception Handler
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<?> handleAuthenticationException(AuthenticationException exp) {
         log.warn(exp.getMessage());
-        return new ErrorRes(HttpStatus.BAD_REQUEST, ErrorCode.EXPIRED_TOKEN, "Token has expired");
+        HttpStatus status;
+        ErrorCode code;
+        String message;
+
+        if (exp instanceof DisabledException) {
+            status = HttpStatus.BAD_REQUEST;
+            code = ErrorCode.DISABLED;
+            message = "User is disabled";
+        } else if (exp instanceof LockedException) {
+            status = HttpStatus.LOCKED;
+            code = ErrorCode.LOCKED;
+            message = "User is locked";
+        } else {
+            status = HttpStatus.UNAUTHORIZED;
+            code = ErrorCode.UNAUTHORIZED;
+            message = "Unauthorized";
+        }
+
+        return new ResponseEntity<>(
+                new ErrorRes(status, code, message),
+                status
+        );
     }
 
+    //Jwt Exception Handler
     @ExceptionHandler(JwtException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorRes handleJwtException(JwtException exp) {
+    public ResponseEntity<?> handleJwtException(JwtException exp) {
         log.warn(exp.getMessage());
-        return new ErrorRes(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_TOKEN, exp.getMessage());
-    }
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ErrorCode code;
+        String message;
 
+        if (exp instanceof ExpiredJwtException) {
+            code = ErrorCode.EXPIRED_TOKEN;
+            message = "Token has expired";
+        } else {
+            code = ErrorCode.INVALID_TOKEN;
+            message = "Invalid token";
+        }
+
+        return new ResponseEntity<>(
+                new ErrorRes(status, code, message),
+                status
+        );
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -91,16 +106,16 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public ErrorRes handleNotFound(HttpRequestMethodNotSupportedException exp) {
         log.warn("A bad url get hit with bad request {}", exp.getMessage());
-        return new ErrorRes(HttpStatus.NOT_FOUND, ErrorCode.NONE, exp.getLocalizedMessage());
+        return new ErrorRes(HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.NONE, exp.getLocalizedMessage());
     }
 
-    @ExceptionHandler(InvalidHeaderException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorRes handleInvalidHeader(InvalidHeaderException exp) {
-        log.warn(exp.getMessage());
-        return new ErrorRes(HttpStatus.BAD_REQUEST, ErrorCode.NONE, exp.getLocalizedMessage());
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorRes handleNoHandlerFound(NoHandlerFoundException exp) {
+        log.warn("No handler found for the request {}", exp.getMessage());
+        return new ErrorRes(HttpStatus.NOT_FOUND, ErrorCode.NONE, "The requested URL " + exp.getRequestURL() + " was not found on the server.");
     }
 }

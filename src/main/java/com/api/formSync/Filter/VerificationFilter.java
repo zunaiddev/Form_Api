@@ -3,7 +3,7 @@ package com.api.formSync.Filter;
 import com.api.formSync.Service.JwtService;
 import com.api.formSync.Service.TokenService;
 import com.api.formSync.Service.UserDetailsServiceImpl;
-import com.api.formSync.exception.DuplicateEmailException;
+import com.api.formSync.exception.ConflictException;
 import com.api.formSync.exception.InvalidHeaderException;
 import com.api.formSync.exception.RequestBodyIsMissingException;
 import com.api.formSync.exception.UsedTokenException;
@@ -101,7 +101,7 @@ public class VerificationFilter extends OncePerRequestFilter {
             log.warn(e.getMessage());
             Common.setError(res, HttpStatus.IM_USED, "This Token Has Already Been Used",
                     "It seems this verification Token was already used before. You cannot use the same Token again.");
-        } catch (DuplicateEmailException e) {
+        } catch (ConflictException e) {
             log.warn(e.getMessage());
             Common.setError(res, HttpStatus.CONFLICT, "Email Already Registered", e.getMessage());
         } catch (RequestBodyIsMissingException e) {
