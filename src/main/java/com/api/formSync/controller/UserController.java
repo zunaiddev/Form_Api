@@ -30,9 +30,26 @@ public class UserController {
         return SuccessRes.build(service.updateUser(details.getId(), req));
     }
 
+    @PatchMapping("/change-password")
+    public SuccessRes<String> changePassword(@AuthenticationPrincipal UserPrincipal details,
+                                             @RequestBody @Valid ChangePasswordRequest req) {
+        service.changePassword(details.getId(), req);
+        return SuccessRes.build("Password Changed Successfully");
+    }
+
+    @PatchMapping("/change-email")
+    public SuccessRes<String> changeEmail(@AuthenticationPrincipal UserPrincipal details,
+                                          @RequestBody @Valid ChangeEmailRequest req) {
+        service.changeEmail(details.getId(), req);
+        return SuccessRes.build("An email has been sent to your new email address for verification.");
+    }
+
     @DeleteMapping
-    public SuccessRes<String> deleteUser(@AuthenticationPrincipal UserPrincipal details, @RequestBody @Valid PasswordRequest req, HttpServletResponse res) {
-        return SuccessRes.build("Currently Under Development");
+    public SuccessRes<String> deleteUser(@AuthenticationPrincipal UserPrincipal details,
+                                         @RequestBody @Valid PasswordRequest req,
+                                         HttpServletResponse res) {
+        service.deleteUser(details.getId(), req, res);
+        return SuccessRes.build("User Deletion Initiated. Your account will be permanently deleted after 3 days.");
     }
 
     @GetMapping("/api-key")
@@ -46,9 +63,21 @@ public class UserController {
         return SuccessRes.build(HttpStatus.CREATED, service.generateKey(details.getId()));
     }
 
-    @PutMapping("/api-key")
+    @PatchMapping("/api-key/regenerate")
     public SuccessRes<ApiKeyInfo> regenerate(@AuthenticationPrincipal UserPrincipal details) {
         return SuccessRes.build(service.regenerateKey(details.getId()));
+    }
+
+    @PatchMapping("/api-key/activate")
+    public SuccessRes<String> activate(@AuthenticationPrincipal UserPrincipal details) {
+        service.updateKey(details.getId(), true);
+        return SuccessRes.build("API Key activated successfully");
+    }
+
+    @PatchMapping("/api-key/deactivate")
+    public SuccessRes<String> deactivate(@AuthenticationPrincipal UserPrincipal details) {
+        service.updateKey(details.getId(), false);
+        return SuccessRes.build("API Key Deactivated successfully");
     }
 
     @PostMapping("/api-key/domain")
@@ -64,12 +93,6 @@ public class UserController {
                                           @NotNull(message = "id could not be null") @PathVariable("id") Long id) {
         service.deleteDomain(details.getId(), id);
     }
-
-//    @DeleteMapping("/api-key")
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    public void deleteKey(@AuthenticationPrincipal UserPrincipal details) {
-//        service.deleteApiKey(details.getUser());
-//    }
 
     @GetMapping("/forms")
     public SuccessRes<List<FormResponse>> getForms(@AuthenticationPrincipal UserPrincipal details) {

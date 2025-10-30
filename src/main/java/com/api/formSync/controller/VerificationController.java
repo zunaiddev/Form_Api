@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class VerificationController {
     private final VerificationService service;
 
-    @PostMapping
+    @PatchMapping
     private SuccessRes<VerificationResponse<?>> verify(@AuthenticationPrincipal UserPrincipal details,
                                                        @RequestAttribute VerificationToken claims,
                                                        @RequestBody(required = false) @Valid ResetPasswordRequest req,

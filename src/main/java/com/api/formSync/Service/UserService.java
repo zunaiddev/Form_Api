@@ -1,22 +1,24 @@
 package com.api.formSync.Service;
 
 import com.api.formSync.Email.EmailService;
-import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.dto.*;
 import com.api.formSync.exception.ConflictException;
 import com.api.formSync.exception.DomainNotFoundException;
 import com.api.formSync.exception.InvalidApiKeyException;
+import com.api.formSync.exception.UnauthorisedException;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Domain;
 import com.api.formSync.model.User;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -43,9 +45,11 @@ public class UserService {
         return new UserInfo(userInfoService.save(user));
     }
 
-    @Transactional
-    public String deleteUser(UserPrincipal details, PasswordRequest req, HttpServletResponse res) {
-        return "User Deleted";
+    public void deleteUser(long id, PasswordRequest req, HttpServletResponse res) {
+        User user = userInfoService.load(id);
+
+        user.setDeleteAt(LocalDateTime.now().plusDays(3L));
+        userInfoService.update(user);
     }
 
     public void logout(HttpServletResponse response) {
@@ -86,8 +90,22 @@ public class UserService {
         return new ApiKeyInfo(apiKeyService.update(apiKey));
     }
 
+    public ApiKeyInfo updateKey(long id, boolean activate) {
+        User user = userInfoService.loadWithKey(id);
+        ApiKey apiKey = user.getKey();
+
+        if (apiKey == null) {
+            throw new InvalidApiKeyException("Could Not Found Api Key.");
+        }
+
+        apiKey.setEnabled(activate);
+
+        return new ApiKeyInfo(apiKeyService.update(apiKey));
+    }
+
+    @Transactional
     public ApiKeyInfo addDomain(Long id, String domain) {
-        User savedUser = userInfoService.load(id);
+        User savedUser = userInfoService.loadWithKey(id);
         ApiKey apiKey = savedUser.getKey();
         List<Domain> domains = apiKey.getDomains();
 
@@ -99,11 +117,6 @@ public class UserService {
         apiKey.setDomains(domains);
 
         return new ApiKeyInfo(apiKeyService.update(apiKey));
-    }
-
-    public void deleteApiKey(User user) {
-//        user.setKey(null);
-//        userInfoService.update(user);
     }
 
     public void deleteDomain(Long id, Long domainId) {
@@ -145,5 +158,36 @@ public class UserService {
 
     public void deleteForms(Long id, List<Long> ids) {
 //        formService.delete(user, ids);
+    }
+
+    public void changePassword(Long id, @Valid ChangePasswordRequest req) {
+        if (req.getPassword().equals(req.getNewPassword())) {
+            throw new ConflictException("New Password must be different from Old Password");
+        }
+
+        User user = userInfoService.load(id);
+
+        if (!encoder.matches(req.getPassword(), user.getPassword())) {
+            throw new UnauthorisedException("Password is incorrect");
+        }
+
+        user.setPassword(encoder.encode(req.getNewPassword()));
+        userInfoService.update(user);
+
+//        emailService.sendPasswordChangeNotification(user.getEmail(), user.getName());
+    }
+
+    public void changeEmail(Long id, @Valid ChangeEmailRequest req) {
+        User user = userInfoService.load(id);
+
+        if (!encoder.matches(req.getPassword(), user.getPassword())) {
+            throw new UnauthorisedException("Password is incorrect");
+        }
+
+        if (userInfoService.isExists(req.getEmail())) {
+            throw new ConflictException("Email is already in use");
+        }
+
+
     }
 }
