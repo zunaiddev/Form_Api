@@ -90,7 +90,7 @@ public class UserService {
         return new ApiKeyInfo(apiKeyService.update(apiKey));
     }
 
-    public ApiKeyInfo updateKey(long id, boolean activate) {
+    public void updateKey(long id, boolean activate) {
         User user = userInfoService.loadWithKey(id);
         ApiKey apiKey = user.getKey();
 
@@ -99,8 +99,7 @@ public class UserService {
         }
 
         apiKey.setEnabled(activate);
-
-        return new ApiKeyInfo(apiKeyService.update(apiKey));
+        apiKeyService.update(apiKey);
     }
 
     @Transactional

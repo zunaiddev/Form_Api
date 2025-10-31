@@ -53,14 +53,13 @@ public class AuthService {
         User user = ((UserPrincipal) auth.getPrincipal()).getUser();
 
         if (user.getDeleteAt() != null) {
-            String token = tokenService.reactivateToken(user);
-            return new SignInResponse(token, UserStatus.PENDING_DELETION);
+            return new SignInResponse(tokenService.reactivateToken(user), UserStatus.PENDING_DELETION);
         }
 
         String accessToken = tokenService.accessToken(user);
         String refreshToken = tokenService.refreshToken(user);
 
-        Common.setCookie(response, refreshToken);
+        response.addCookie(Common.getCookie(refreshToken));
         return new SignInResponse(accessToken, UserStatus.ACTIVE);
     }
 

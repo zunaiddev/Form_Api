@@ -26,7 +26,7 @@ public class AuthController {
         return SuccessRes.build(service.signIn(req, response));
     }
 
-    @PostMapping("/refresh")
+    @GetMapping("/refresh")
     public SuccessRes<SignInResponse> refreshToken(@CookieValue("refresh_token") String refreshToken) {
         return SuccessRes.build(service.refreshToken(refreshToken));
     }

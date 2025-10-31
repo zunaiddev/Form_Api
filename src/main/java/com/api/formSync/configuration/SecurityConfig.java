@@ -79,7 +79,7 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 BASE_URL
         ));
-        privateCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        privateCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         privateCorsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         privateCorsConfig.setAllowCredentials(true);
 

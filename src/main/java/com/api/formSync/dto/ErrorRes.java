@@ -14,7 +14,7 @@ public class ErrorRes {
     public ErrorRes(HttpStatus status, CustomException exp) {
         this.status = status;
         this.code = exp.getCode();
-        this.message = exp.getMessage();
+        this.message = exp.getLocalizedMessage();
     }
 
     public ErrorRes(HttpStatus status, ErrorCode code, String message) {
