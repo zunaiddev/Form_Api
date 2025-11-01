@@ -68,16 +68,11 @@ public class UserController {
         return SuccessRes.build(service.regenerateKey(details.getId()));
     }
 
-    @PatchMapping("/api-key/activate")
-    public SuccessRes<String> activate(@AuthenticationPrincipal UserPrincipal details) {
-        service.updateKey(details.getId(), true);
-        return SuccessRes.build("API Key activated successfully");
-    }
+    @PatchMapping("/api-key/status")
+    public SuccessRes<ApiKeyInfo> activate(@AuthenticationPrincipal UserPrincipal details,
+                                           @RequestBody @Valid ApiKeyStatusRequest req) {
 
-    @PatchMapping("/api-key/deactivate")
-    public SuccessRes<String> deactivate(@AuthenticationPrincipal UserPrincipal details) {
-        service.updateKey(details.getId(), false);
-        return SuccessRes.build("API Key Deactivated successfully");
+        return SuccessRes.build(service.updateStatus(details.getId(), req.getActive()));
     }
 
     @PostMapping("/api-key/domain")

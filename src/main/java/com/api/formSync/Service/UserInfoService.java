@@ -33,7 +33,7 @@ public class UserInfoService {
 
     public User load(String email) {
         return repo.findByEmail(email)
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
     }
 
     public User save(User user) {

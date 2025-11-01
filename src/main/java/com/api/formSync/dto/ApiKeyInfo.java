@@ -12,7 +12,7 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 public class ApiKeyInfo {
-    private String apiKey;
+    private String key;
     private List<DomainInfo> domains;
     private int requests;
     private Role role;
@@ -21,7 +21,7 @@ public class ApiKeyInfo {
     public ApiKeyInfo(ApiKey apiKey) {
         List<Domain> domains = apiKey.getDomains();
 
-        this.apiKey = apiKey.getApiKey();
+        this.key = apiKey.getApiKey();
         this.domains = Objects.isNull(domains) ? List.of() : domains.stream().map(DomainInfo::new).toList();
         this.requests = apiKey.getRequestCount();
         this.active = apiKey.isEnabled();

@@ -9,7 +9,7 @@ import com.api.formSync.exception.UnauthorisedException;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Domain;
 import com.api.formSync.model.User;
-import jakarta.servlet.http.Cookie;
+import com.api.formSync.util.Common;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -42,24 +42,20 @@ public class UserService {
         User user = userInfoService.load(id);
         user.setName(req.getName());
 
-        return new UserInfo(userInfoService.save(user));
+        return new UserInfo(userInfoService.update(user));
     }
 
     public void deleteUser(long id, PasswordRequest req, HttpServletResponse res) {
         User user = userInfoService.load(id);
 
+        if (!encoder.matches(req.getPassword(), user.getPassword())) {
+            throw new UnauthorisedException("Password is incorrect");
+        }
+
         user.setDeleteAt(LocalDateTime.now().plusDays(3L));
         userInfoService.update(user);
-    }
 
-    public void logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("refresh_token", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-
-        response.addCookie(cookie);
+        res.addCookie(Common.getEmptyCookie());
     }
 
     @Transactional
@@ -90,7 +86,7 @@ public class UserService {
         return new ApiKeyInfo(apiKeyService.update(apiKey));
     }
 
-    public void updateKey(long id, boolean activate) {
+    public ApiKeyInfo updateStatus(long id, boolean status) {
         User user = userInfoService.loadWithKey(id);
         ApiKey apiKey = user.getKey();
 
@@ -98,10 +94,15 @@ public class UserService {
             throw new InvalidApiKeyException("Could Not Found Api Key.");
         }
 
-        apiKey.setEnabled(activate);
-        apiKeyService.update(apiKey);
+        if (apiKey.isEnabled() == status) {
+            throw new ConflictException("Api Key is already " + (status ? "enabled" : "disabled"));
+        }
+
+        apiKey.setEnabled(status);
+        return new ApiKeyInfo(apiKeyService.update(apiKey));
     }
 
+    //ToDo: Needs to check domain validity
     @Transactional
     public ApiKeyInfo addDomain(Long id, String domain) {
         User savedUser = userInfoService.loadWithKey(id);
@@ -159,7 +160,7 @@ public class UserService {
 //        formService.delete(user, ids);
     }
 
-    public void changePassword(Long id, @Valid ChangePasswordRequest req) {
+    public void changePassword(Long id, ChangePasswordRequest req) {
         if (req.getPassword().equals(req.getNewPassword())) {
             throw new ConflictException("New Password must be different from Old Password");
         }
@@ -186,7 +187,5 @@ public class UserService {
         if (userInfoService.isExists(req.getEmail())) {
             throw new ConflictException("Email is already in use");
         }
-
-
     }
 }

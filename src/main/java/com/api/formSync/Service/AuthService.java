@@ -63,6 +63,7 @@ public class AuthService {
         return new SignInResponse(accessToken, UserStatus.ACTIVE);
     }
 
+    //TODO: Logout user if status not active during refresh token
     public SignInResponse refreshToken(String token) {
         if (token == null) {
             throw new CouldNotFoundTokenException("Refresh Token is Missing");
@@ -101,10 +102,5 @@ public class AuthService {
 
         emailService.sendEmail(email, "Reset Your Password", EmailTemplate.resetPassword(user.getName(), "http://" + BASE_URL + "/api/auth/verify/reset-password?token=" + token));
         return new EmailResponse(email);
-    }
-
-    public void logout(HttpServletResponse response) {
-        response.setHeader("Set-Cookie",
-                String.format("refresh_token=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None", null, 0));
     }
 }

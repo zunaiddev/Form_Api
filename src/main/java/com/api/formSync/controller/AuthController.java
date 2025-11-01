@@ -2,6 +2,7 @@ package com.api.formSync.controller;
 
 import com.api.formSync.Service.AuthService;
 import com.api.formSync.dto.*;
+import com.api.formSync.util.Common;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,6 @@ public class AuthController {
     @GetMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(HttpServletResponse response) {
-        service.logout(response);
+        response.addCookie(Common.getEmptyCookie());
     }
 }

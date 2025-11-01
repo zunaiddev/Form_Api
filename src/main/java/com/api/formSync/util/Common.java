@@ -44,4 +44,14 @@ public class Common {
         cookie.setHttpOnly(true);
         return cookie;
     }
+
+    public static Cookie getEmptyCookie() {
+        Cookie cookie = new Cookie("refresh_token", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setSecure(true);
+        cookie.setMaxAge(0);
+
+        return cookie;
+    }
 }
