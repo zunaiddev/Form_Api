@@ -17,24 +17,24 @@ public class AuthController {
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public SuccessRes<SignupResponse> signup(@Valid @RequestBody SignupRequest req) {
-        return SuccessRes.build(HttpStatus.CREATED, service.signup(req));
+    public SignupResponse signup(@Valid @RequestBody SignupRequest req) {
+        return service.signup(req);
     }
 
     @PostMapping("/login")
-    public SuccessRes<SignInResponse> signIn(@Valid @RequestBody LoginRequest req,
+    public SignInResponse signIn(@Valid @RequestBody LoginRequest req,
                                              HttpServletResponse response) {
-        return SuccessRes.build(service.signIn(req, response));
+        return service.signIn(req, response);
     }
 
     @GetMapping("/refresh")
-    public SuccessRes<SignInResponse> refreshToken(@CookieValue("refresh_token") String refreshToken) {
-        return SuccessRes.build(service.refreshToken(refreshToken));
+    public SignInResponse refreshToken(@CookieValue("refresh_token") String refreshToken) {
+        return service.refreshToken(refreshToken);
     }
 
     @PostMapping("/forget-password")
-    public SuccessRes<EmailResponse> forgetPassword(@RequestBody @Valid EmailRequest req) {
-        return SuccessRes.build(service.forgetPassword(req.getEmail()));
+    public EmailResponse forgetPassword(@RequestBody @Valid EmailRequest req) {
+        return service.forgetPassword(req.getEmail());
     }
 
     @GetMapping("/logout")

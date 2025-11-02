@@ -4,9 +4,12 @@ import com.api.formSync.util.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 public class SignInResponse {
     private String token;
     private UserStatus status;
+    private LocalDateTime deleteAt;
 }

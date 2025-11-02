@@ -30,6 +30,7 @@ public class VerificationService {
             case VERIFY_USER -> verifyUser(user, response);
             case UPDATE_EMAIL -> updateEmail(user, claims.getNewEmail());
             case RESET_PASSWORD -> resetPassword(user, req);
+            case REACTIVATE -> reactivate(user, response);
             default -> throw new JwtException("Invalid Token Purpose");
         };
     }
@@ -45,7 +46,7 @@ public class VerificationService {
 
         return new VerificationResponse<>("Account Verified Successfully",
                 "Your email has been confirmed and your account is now active. You can continue using the service securely.",
-                new SignInResponse(accessToken, UserStatus.ACTIVE));
+                new SignInResponse(accessToken, UserStatus.ACTIVE, null));
     }
 
     private VerificationResponse<?> updateEmail(User user, String newEmail) {
@@ -57,7 +58,8 @@ public class VerificationService {
         userService.update(user);
 
         return new VerificationResponse<>("Email Updated Successfully",
-                "Your email address has been changed. For security reasons, please use this updated email when signing in.Your email address has been changed. For security reasons, please use this updated email when signing in.", null);
+                "Your email address has been changed. For security reasons, please use this updated email when signing in.Your email address has been changed. For security reasons, please use this updated email when signing in.",
+                null);
     }
 
     private VerificationResponse<?> resetPassword(User user, ResetPasswordRequest req) {
@@ -72,8 +74,16 @@ public class VerificationService {
                 "Your password has been updated. You can now log in using your new password.", null);
     }
 
-    private VerificationResponse<?> reactivate() {
+    private VerificationResponse<SignInResponse> reactivate(User user, HttpServletResponse response) {
+        user.setDeleteAt(null);
+        userService.update(user);
+
+        String accessToken = generateTokenService.accessToken(user);
+        String refreshToken = generateTokenService.refreshToken(user);
+
+        response.addCookie(Common.getCookie(refreshToken));
         return new VerificationResponse<>("Account Reactivated",
-                "Your account has been restored and is active again. If you did not request this reactivation, please contact support immediately.", null);
+                "Your account has been restored and is active again. If you did not request this reactivation, please contact support immediately.",
+                new SignInResponse(accessToken, UserStatus.ACTIVE, null));
     }
 }

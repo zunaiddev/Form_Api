@@ -1,7 +1,6 @@
 package com.api.formSync.Service;
 
 import com.api.formSync.Email.EmailService;
-import com.api.formSync.Email.EmailTemplate;
 import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.dto.*;
 import com.api.formSync.exception.CouldNotFoundTokenException;
@@ -15,7 +14,6 @@ import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
@@ -31,14 +29,13 @@ public class AuthService {
     private final EmailService emailService;
     private final JwtService jwtService;
     private final GenerateTokenService tokenService;
-    @Value("${BASE_URL}")
-    private String BASE_URL;
 
     public SignupResponse signup(SignupRequest req) {
         User user = userInfo.create(req.getName(), req.getEmail(), req.getPassword());
         String token = tokenService.verificationToken(user);
 
-        emailService.sendEmail(user.getEmail(), "Please Verify Your Email.", EmailTemplate.tokenBody(user.getName(), BASE_URL + "/verify?token=" + token));
+        emailService.sendVerificationEmail(user.getEmail(), user.getName(), token);
+
         log.info("Verification Email Sent to: {}", user.getEmail());
         return new SignupResponse(user.getName(), user.getEmail());
     }
@@ -53,14 +50,14 @@ public class AuthService {
         User user = ((UserPrincipal) auth.getPrincipal()).getUser();
 
         if (user.getDeleteAt() != null) {
-            return new SignInResponse(tokenService.reactivateToken(user), UserStatus.PENDING_DELETION);
+            return new SignInResponse(tokenService.reactivateToken(user), UserStatus.PENDING_DELETION, user.getDeleteAt());
         }
 
         String accessToken = tokenService.accessToken(user);
         String refreshToken = tokenService.refreshToken(user);
 
         response.addCookie(Common.getCookie(refreshToken));
-        return new SignInResponse(accessToken, UserStatus.ACTIVE);
+        return new SignInResponse(accessToken, UserStatus.ACTIVE, null);
     }
 
     //TODO: Logout user if status not active during refresh token
@@ -88,7 +85,7 @@ public class AuthService {
         String accessToken = status.equals(UserStatus.ACTIVE) ?
                 tokenService.accessToken(user) : null;
 
-        return new SignInResponse(accessToken, status);
+        return new SignInResponse(accessToken, status, null);
     }
 
     public EmailResponse forgetPassword(String email) {
@@ -100,7 +97,7 @@ public class AuthService {
 
         String token = tokenService.resetPasswordToken(user);
 
-        emailService.sendEmail(email, "Reset Your Password", EmailTemplate.resetPassword(user.getName(), "http://" + BASE_URL + "/api/auth/verify/reset-password?token=" + token));
+        emailService.sendPasswordResetEmail(user.getEmail(), user.getName(), token);
         return new EmailResponse(email);
     }
 }

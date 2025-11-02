@@ -1,288 +1,283 @@
 package com.api.formSync.Email;
 
-import jakarta.validation.constraints.NotNull;
+import com.api.formSync.dto.FormResponse;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class EmailTemplate {
-    public static String tokenBody(String name, String link) {
+    @Value("${BASE_URL}")
+    public String BASE_URL;
+
+    public String verificationBody(String name, String token) {
         return """
-                <html lang="en">
+                <html>
                 <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>Email Verification</title>
-                  <style>
-                    body {
-                      font-family: Arial, sans-serif;
-                      line-height: 1.6;
-                      margin: 0;
-                      padding: 0;
-                      background-color: #f4f4f4;
-                    }
-                    .email-container {
-                      max-width: 600px;
-                      margin: 20px auto;
-                      padding: 20px;
-                      background-color: #ffffff;
-                      border-radius: 8px;
-                      border: 2px solid white;
-                      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-                    }
-                    .button {
-                      display: inline-block;
-                      padding: 10px 20px;
-                      margin: 20px auto;
-                      font-size: 16px;
-                      color: #ffffff;
-                      background-color: #007bff;
-                      text-decoration: none;
-                      border-radius: 5px;
-                     }
-                     a{
-                        word-break: break-all;
-                     }
-                  </style>
+                  <meta charset="UTF-8" />
+                  <title>Verify Your Email - FormSync</title>
                 </head>
-                <body>
-                  <div class="email-container">
-                    <h2>Verify Your Email Address</h2>
-                    <p>Dear $NAME,</p>
-                    <p>Thank you for signing up with Form sync To complete your registration and ensure the security of your account, please verify your email address by clicking the button below:</p>
-                    <a href="$LINK" class="button">Verify Email Address</a>
-                    <p>If the button above doesn’t work, you can copy and paste the following URL into your browser:</p>
-                    <p><a href="$LINK">$LINK</a></p>
-                    <p>Please note that this link will expire in <b>15 minutes</b>, so be sure to verify your email soon.</p>
-                    <p>If you did not create an account with us, please ignore this email</p>
-                    <p>Thank you for choosing Form sync! We’re excited to have you on board.</p>
-                  </div>
+                <body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif;">
+                  <table width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td align="center" style="padding: 40px 0;">
+                        <table width="600" cellspacing="0" cellpadding="0" style="background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e6e6e6;">
+                
+                          <tr>
+                            <td style="background: #111827; text-align: center; padding: 20px;">
+                              <img src="https://your-logo-url.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
+                              <h1 style="color: #ffffff; margin: 0; font-size: 22px;">FormSync</h1>
+                            </td>
+                          </tr>
+                
+                          <tr>
+                            <td style="padding: 30px; color: #333333; font-size: 15px; line-height: 1.6;">
+                              <p style="margin-top: 0;">Hi <strong>{{username}}</strong>,</p>
+                
+                              <p>
+                                Thank you for creating an account with <strong>FormSync</strong>. \s
+                                To ensure the security of your account, please verify your email address by clicking the button below.
+                              </p>
+                
+                              <div style="text-align: center; margin: 35px 0;">
+                                <a href="{{verificationUrl}}"\s
+                                   style="background-color: #2563EB; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-size: 16px; display: inline-block;">
+                                  Verify Email
+                                </a>
+                              </div>
+                
+                              <p>
+                                If the button above does not work, copy and paste the link below into your web browser:
+                              </p>
+                
+                              <p style="word-break: break-all;">
+                                <a href="{{verificationUrl}}" style="color: #2563EB;">{{verificationUrl}}</a>
+                              </p>
+                
+                              <p>
+                                If you did not request this account, you may safely ignore this email.
+                              </p>
+                            </td>
+                          </tr>
+                
+                          <tr>
+                            <td style="background: #f9f9f9; text-align: center; padding: 20px; font-size: 13px; color: #666;">
+                              © FormSync — All Rights Reserved.
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
                 </body>
                 </html>
-                \s""".replace("$NAME", name).replace("$LINK", link);
+                """.replace("{{username}}", name)
+                .replace("{{verificationUrl}}", getLink(token));
     }
 
-    public static String adminBody(String name) {
-        return "<html lang=\"en\">\n" +
-                "<head>\n" +
-                "    <meta charset=\"UTF-8\">\n" +
-                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-                "    <title>Thank You for Contacting Zunaid</title>\n" +
-                "    <style>\n" +
-                "        body {\n" +
-                "            font-family: Arial, sans-serif;\n" +
-                "            background-color: #f4f4f4;\n" +
-                "            margin: 0;\n" +
-                "            padding: 0;\n" +
-                "        }\n" +
-                "        .email-container {\n" +
-                "            max-width: 600px;\n" +
-                "            margin: 0 auto;\n" +
-                "            background-color: #ffffff;\n" +
-                "            padding: 20px;\n" +
-                "            border-radius: 8px;\n" +
-                "            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n" +
-                "        }\n" +
-                "        .header {\n" +
-                "            text-align: center;\n" +
-                "            padding: 20px 0;\n" +
-                "        }\n" +
-                "        .header h1 {\n" +
-                "            color: #333333;\n" +
-                "            font-size: 24px;\n" +
-                "            margin: 0;\n" +
-                "        }\n" +
-                "        .content {\n" +
-                "            padding: 20px;\n" +
-                "            color: #555555;\n" +
-                "            line-height: 1.6;\n" +
-                "        }\n" +
-                "        .content h2 {\n" +
-                "            color: #333333;\n" +
-                "            font-size: 20px;\n" +
-                "            margin-bottom: 10px;\n" +
-                "        }\n" +
-                "        .content p {\n" +
-                "            margin: 0 0 15px;\n" +
-                "        }\n" +
-                "        .footer {\n" +
-                "            text-align: center;\n" +
-                "            padding: 20px;\n" +
-                "            color: #777777;\n" +
-                "            font-size: 14px;\n" +
-                "        }\n" +
-                "        .footer a {\n" +
-                "            color: #007BFF;\n" +
-                "            text-decoration: none;\n" +
-                "        }\n" +
-                "        .footer a:hover {\n" +
-                "            text-decoration: underline;\n" +
-                "        }\n" +
-                "        @media (max-width: 600px) {\n" +
-                "            .email-container {\n" +
-                "                padding: 10px;\n" +
-                "            }\n" +
-                "            .header h1 {\n" +
-                "                font-size: 20px;\n" +
-                "            }\n" +
-                "            .content h2 {\n" +
-                "                font-size: 18px;\n" +
-                "            }\n" +
-                "        }\n" +
-                "    </style>\n" +
-                "</head>\n" +
-                "<body>\n" +
-                "    <div class=\"email-container\">\n" +
-                "        <div class=\"content\">\n" +
-                "            <h2>Hello " + name + ",</h2>\n" +
-                "            <p>Thank you for reaching out! I have received your message and will get back to you as soon as possible.\n</p>\n" +
-                "            <p>If you have any urgent inquiries, feel free to contact me directly at <a href=\"mailto:zunaiddev@outlook.com\">zunaiddev@outlook.com</a>.</p>\n" +
-                "            <p>Best regards,</p>\n" +
-                "            <p>Zunaid</p>\n" +
-                "        </div>\n" +
-                "        <div class=\"footer\">\n" +
-                "            <p>You are receiving this email because you submitted a form on <a href=\"https://zunaid.netlify.app/\">my portfolio</a>.</p>\n" +
-                "            <p>If you did not submit this form, please ignore this email.</p>\n" +
-                "        </div>\n" +
-                "    </div>\n" +
-                "</body>\n" +
-                "</html>";
-    }
-
-    public static String resetPassword(String name, String link) {
+    public String passwordResetBody(String name, String token) {
         return """
-                <html lang="en">
+                <!DOCTYPE html>
+                <html>
                 <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>Email Verification</title>
-                  <style>
-                    body {
-                      font-family: Arial, sans-serif;
-                      line-height: 1.6;
-                      margin: 0;
-                      padding: 0;
-                      background-color: #000000;
-                      color: #ffffff;
-                    }
-                    .email-container {
-                      max-width: 600px;
-                      margin: 20px auto;
-                      padding: 20px;
-                      border-radius: 8px;
-                      border: 2px solid white;
-                      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-                    }
-                    .button {
-                      display: inline-block;
-                      padding: 10px 20px;
-                      margin: 20px auto;
-                      font-size: 16px;
-                      color: #ffffff;
-                      background-color: #007bff;
-                      text-decoration: none;
-                      border-radius: 5px;
-                     }
-                     a{
-                        word-break: break-all;
-                     }
-                  </style>
+                  <meta charset="UTF-8" />
+                  <title>Reset Your Password - FormSync</title>
                 </head>
-                <body>
-                  <div class="email-container">
-                    <h2>Reset Your Password</h2>
-                    <p>Dear $NAME,</p>
-                    <p>We received a request to reset your password. Click the button below to reset it:</p>
-                    <a href="$LINK" class="button">Reset Password</a>
-                    <p>If the button above doesn’t work, you can copy and paste the following URL into your browser:</p>
-                    <p><a href="$LINK">$LINK</a></p>
-                    <p>Please note that this link will expire in <b>15 minutes</b>, so be sure to verify your email soon.</p>
-                    <p>If you did not request this, please ignore this email or contact our support team for assistance.</p>
-                  </div>
+                <body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif;">
+                  <table width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td align="center" style="padding: 40px 0;">
+                        <table width="600" cellspacing="0" cellpadding="0" style="background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e6e6e6;">
+                
+                          <tr>
+                            <td style="background: #111827; text-align: center; padding: 20px;">
+                              <img src="https://your-logo-url.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
+                              <h1 style="color: #ffffff; margin: 0; font-size: 22px;">FormSync</h1>
+                            </td>
+                          </tr>
+                
+                          <tr>
+                            <td style="padding: 30px; color: #333333; font-size: 15px; line-height: 1.6;">
+                              <p style="margin-top: 0;">Hi <strong>{{username}}</strong>,</p>
+                
+                              <p>
+                                We received a request to reset the password associated with your FormSync account.
+                                If you initiated this request, please click the button below to create a new password.
+                              </p>
+                
+                              <div style="text-align: center; margin: 35px 0;">
+                                <a href="{{resetUrl}}"
+                                   style="background-color: #DC2626; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-size: 16px; display: inline-block;">
+                                  Reset Password
+                                </a>
+                              </div>
+                
+                              <p>
+                                If the button above does not work, copy and paste the following link into your browser:
+                              </p>
+                
+                              <p style="word-break: break-all;">
+                                <a href="{{resetUrl}}" style="color: #2563EB;">{{resetUrl}}</a>
+                              </p>
+                
+                              <p>
+                                If you did not request a password reset, you can ignore this email. Your account will remain secure.
+                              </p>
+                            </td>
+                          </tr>
+                
+                          <tr>
+                            <td style="background: #f9f9f9; text-align: center; padding: 20px; font-size: 13px; color: #666;">
+                              © FormSync — All Rights Reserved.
+                            </td>
+                          </tr>
+                
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
                 </body>
                 </html>
-                \s""".replace("$NAME", name).replace("$LINK", link);
+                """.replace("{{username}}", name).replace("{{resetUrl}}", getLink(token));
     }
 
-    public static String updateEmail(@NotNull String name, String url) {
+    public String emailChangeBody(String name, String token) {
         return """
-                <html lang="en">
+                <!DOCTYPE html>
+                <html>
                 <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>Email Verification</title>
-                  <style>
-                    body {
-                      font-family: Arial, sans-serif;
-                      line-height: 1.6;
-                      margin: 0;
-                      padding: 0;
-                      background-color: #000000;
-                      color: #ffffff;
-                    }
-                    .email-container {
-                      max-width: 600px;
-                      margin: 20px auto;
-                      padding: 20px;
-                      border-radius: 8px;
-                      border: 2px solid white;
-                      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-                    }
-                    .button {
-                      display: inline-block;
-                      padding: 10px 20px;
-                      margin: 20px auto;
-                      font-size: 16px;
-                      color: #ffffff;
-                      background-color: #007bff;
-                      text-decoration: none;
-                      border-radius: 5px;
-                     }
-                     a{
-                        word-break: break-all;
-                     }
-                  </style>
+                  <meta charset="UTF-8" />
+                  <title>Confirm Email Change - FormSync</title>
                 </head>
-                <body>
-                  <div class="email-container">
-                    <h2>Verify Your Email</h2>
-                    <p>Dear $NAME,</p>
-                    <p>We received a request to update your Email. Click the button below to update it:</p>
-                    <a href="$LINK" class="button">Update Email</a>
-                    <p>If the button above doesn’t work, you can copy and paste the following URL into your browser:</p>
-                    <p><a href="$LINK">$LINK</a></p>
-                    <p>Please note that this link will expire in <b>15 minutes</b>, so be sure to verify your email soon.</p>
-                    <small>If you did not request this, please ignore this email or contact our support team for assistance.</small>
-                  </div>
+                <body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif;">
+                  <table width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td align="center" style="padding: 40px 0;">
+                        <table width="600" cellspacing="0" cellpadding="0" style="background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e6e6e6;">
+                
+                          <tr>
+                            <td style="background: #111827; text-align: center; padding: 20px;">
+                              <img src="https://your-logo-url.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
+                              <h1 style="color: #ffffff; margin: 0; font-size: 22px;">FormSync</h1>
+                            </td>
+                          </tr>
+                
+                          <tr>
+                            <td style="padding: 30px; color: #333333; font-size: 15px; line-height: 1.6;">
+                              <p style="margin-top: 0;">Hi <strong>{{username}}</strong>,</p>
+                
+                              <p>
+                                You requested to change the email associated with your FormSync account. \s
+                                To confirm and complete this change, please click the button below.
+                              </p>
+                
+                              <div style="text-align: center; margin: 35px 0;">
+                                <a href="{{confirmEmailChangeUrl}}"
+                                   style="background-color: #2563EB; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-size: 16px; display: inline-block;">
+                                  Confirm Email Change
+                                </a>
+                              </div>
+                
+                              <p>
+                                If the button does not work, use the link below:
+                              </p>
+                
+                              <p style="word-break: break-all;">
+                                <a href="{{confirmEmailChangeUrl}}" style="color: #2563EB;">{{confirmEmailChangeUrl}}</a>
+                              </p>
+                
+                              <p>
+                                If you did not request this change, you can ignore this email.
+                              </p>
+                            </td>
+                          </tr>
+                
+                          <tr>
+                            <td style="background: #f9f9f9; text-align: center; padding: 20px; font-size: 13px; color: #666;">
+                              © FormSync — All Rights Reserved.
+                            </td>
+                          </tr>
+                
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
                 </body>
                 </html>
-                \s""".replace("$NAME", name).replace("$LINK", url);
+                """.replace("{{username}}", name)
+                .replace("{{confirmEmailChangeUrl}}", getLink(token));
     }
 
-    public static String formResponse(String username, String submitterName, String email, String subject, String message) {
-        return "<html lang=\"en\">"
-                + "<head>"
-                + "<meta charset=\"UTF-8\">"
-                + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
-                + "<title>Form Submission Notification</title>"
-                + "<style>"
-                + "body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f2f4f8; padding: 20px; }"
-                + ".container { max-width: 600px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }"
-                + "h2 { color: #2e7d32; }"
-                + "p { font-size: 16px; line-height: 1.6; color: #333333; }"
-                + ".info { background-color: #f0f0f0; padding: 10px 15px; border-left: 4px solid #2e7d32; margin: 10px 0; border-radius: 5px; }"
-                + ".footer { font-size: 13px; color: #777777; margin-top: 30px; text-align: center; }"
-                + "</style>"
-                + "</head>"
-                + "<body>"
-                + "<div class=\"container\">"
-                + "<h2>Hey " + username + ", 👋</h2>"
-                + "<p>Someone just submitted a form on your website. Here's the info:</p>"
-                + "<div class=\"info\"><strong>Name:</strong> " + submitterName + "</div>"
-                + "<div class=\"info\"><strong>Email:</strong> " + email + "</div>"
-                + "<div class=\"info\"><strong>Subject:</strong> " + subject + "</div>"
-                + "<div class=\"info\"><strong>Message:</strong><br>" + message + "</div>"
-                + "<p class=\"footer\">This message was sent to you by FormSync. If you didn't expect it, you can ignore it.</p>"
-                + "</div>"
-                + "</body>"
-                + "</html>";
+    public String formSubmissionBody(FormResponse response) {
+        return """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset="UTF-8" />
+                  <title>New Form Submission - FormSync</title>
+                </head>
+                <body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif;">
+                  <table width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td align="center" style="padding: 40px 0;">
+                        <table width="600" cellspacing="0" cellpadding="0" style="background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e6e6e6;">
+                
+                          <tr>
+                            <td style="background: #111827; text-align: center; padding: 20px;">
+                              <img src="https://your-logo-url.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
+                              <h1 style="color: #ffffff; margin: 0; font-size: 22px;">FormSync</h1>
+                            </td>
+                          </tr>
+                
+                          <tr>
+                            <td style="padding: 30px; color: #333333; font-size: 15px; line-height: 1.6;">
+                              <h2 style="margin-top: 0;">New Form Submission</h2>
+                
+                              <p>A new form has been submitted on your website. Details are provided below:</p>
+                
+                              <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse: collapse; margin-top: 15px;">
+                                <tr>
+                                  <td style="background: #f9f9f9; width: 30%; font-weight: bold;">Name</td>
+                                  <td>{{name}}</td>
+                                </tr>
+                                <tr>
+                                  <td style="background: #f9f9f9; font-weight: bold;">Email</td>
+                                  <td>{{email}}</td>
+                                </tr>
+                                <tr>
+                                  <td style="background: #f9f9f9; font-weight: bold;">Subject</td>
+                                  <td>{{subject}}</td>
+                                </tr>
+                                <tr>
+                                  <td style="background: #f9f9f9; font-weight: bold;">Message</td>
+                                  <td>{{message}}</td>
+                                </tr>
+                              </table>
+                
+                              <p style="margin-top: 25px;">
+                                You can view this form and others in your dashboard on FormSync.
+                              </p>
+                            </td>
+                          </tr>
+                
+                          <tr>
+                            <td style="background: #f9f9f9; text-align: center; padding: 20px; font-size: 13px; color: #666;">
+                              © FormSync — All Rights Reserved.
+                            </td>
+                          </tr>
+                
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </body>
+                </html>
+                """.replace("{{name}}", response.getName())
+                .replace("{{email}}", response.getEmail())
+                .replace("{{subject}}", response.getSubject())
+                .replace("{{message}}", response.getMessage());
     }
 
+    public String getLink(String token) {
+        return BASE_URL + "/verify?token=" + token;
+    }
 }

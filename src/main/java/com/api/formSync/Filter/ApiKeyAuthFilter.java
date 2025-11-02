@@ -1,13 +1,12 @@
 package com.api.formSync.Filter;
 
-import com.api.formSync.Principal.ApiKeyPrincipal;
 import com.api.formSync.Service.ApiKeyService;
 import com.api.formSync.dto.ErrorResponse;
+import com.api.formSync.dto.FormResponse;
 import com.api.formSync.exception.ForbiddenException;
 import com.api.formSync.exception.TodayLimitReachedException;
-import com.api.formSync.model.ApiKey;
 import com.api.formSync.util.Common;
-import com.api.formSync.util.Role;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,15 +15,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.Random;
 
 @Slf4j
 @Component
@@ -52,21 +52,20 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             return;
         }
 
+        System.out.println("Origin " + request.getHeader("Origin"));
+        System.out.println("Referer " + request.getHeader("Referer"));
+
         if (API_KEY.equals(testKey)) {
-            ApiKey apiKey = new ApiKey();
+            ObjectMapper mapper = new ObjectMapper();
 
-            apiKey.setId(1L);
-            apiKey.setApiKey(testKey);
-            apiKey.setRole(Role.USER);
+            ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
+            String body = new String(wrappedRequest.getInputStream().readAllBytes(), wrappedRequest.getCharacterEncoding());
+            FormResponse form = mapper.readValue(body, FormResponse.class);
+            form.setId(new Random().nextLong(2, 200));
+            form.setSubmittedAt(LocalDateTime.now());
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    new ApiKeyPrincipal(apiKey),
-                    AuthorityUtils.NO_AUTHORITIES
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            filterChain.doFilter(request, response);
+            response.getWriter().write(mapper.writeValueAsString(form));
+            response.setStatus(HttpStatus.CREATED.value());
             return;
         }
 

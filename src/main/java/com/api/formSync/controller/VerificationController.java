@@ -3,7 +3,6 @@ package com.api.formSync.controller;
 import com.api.formSync.Principal.UserPrincipal;
 import com.api.formSync.Service.VerificationService;
 import com.api.formSync.dto.ResetPasswordRequest;
-import com.api.formSync.dto.SuccessRes;
 import com.api.formSync.dto.VerificationResponse;
 import com.api.formSync.util.VerificationToken;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,10 +18,10 @@ public class VerificationController {
     private final VerificationService service;
 
     @PatchMapping
-    private SuccessRes<VerificationResponse<?>> verify(@AuthenticationPrincipal UserPrincipal details,
+    private VerificationResponse<?> verify(@AuthenticationPrincipal UserPrincipal details,
                                                        @RequestAttribute VerificationToken claims,
                                                        @RequestBody(required = false) @Valid ResetPasswordRequest req,
                                                        HttpServletResponse res) {
-        return SuccessRes.build(service.verify(details.getUser(), claims, req, res));
+        return service.verify(details.getUser(), claims, req, res);
     }
 }

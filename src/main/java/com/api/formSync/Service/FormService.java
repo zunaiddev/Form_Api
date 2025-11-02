@@ -1,7 +1,6 @@
 package com.api.formSync.Service;
 
 import com.api.formSync.Email.EmailService;
-import com.api.formSync.Email.EmailTemplate;
 import com.api.formSync.Principal.ApiKeyPrincipal;
 import com.api.formSync.dto.FormRequest;
 import com.api.formSync.dto.FormResponse;
@@ -40,11 +39,6 @@ public class FormService {
 
         Role role = user.getRole();
 
-        emailService.sendEmailAsync(user.getEmail(), "New Form Submission Received.", EmailTemplate.formResponse(user.getName(), form.getName(), form.getEmail(), form.getSubject(), form.getMessage()));
-
-        if (role.equals(Role.ADMIN)) {
-            emailService.sendEmailAsync(req.getEmail(), "Thank You for Contacting Zunaid", EmailTemplate.adminBody(req.getName()));
-        }
 
         if (!role.equals(Role.ADMIN) && !role.equals(Role.ULTIMATE)) {
             ApiKey apiKey = keyService.findByUser(user);

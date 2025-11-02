@@ -20,28 +20,27 @@ public class UserController {
     private final UserService service;
 
     @GetMapping
-    public SuccessRes<UserInfo> info(@AuthenticationPrincipal UserPrincipal details) {
-        return SuccessRes.build(service.userInfo(details.getId()));
+    public UserInfo info(@AuthenticationPrincipal UserPrincipal details) {
+        return service.userInfo(details.getId());
     }
 
     @PatchMapping
-    public SuccessRes<UserInfo> update(@AuthenticationPrincipal UserPrincipal details,
+    public UserInfo update(@AuthenticationPrincipal UserPrincipal details,
                                        @RequestBody @Valid UserUpdateRequest req) {
-        return SuccessRes.build(service.updateUser(details.getId(), req));
+        return service.updateUser(details.getId(), req);
     }
 
     @PatchMapping("/change-password")
-    public SuccessRes<String> changePassword(@AuthenticationPrincipal UserPrincipal details,
+    public String changePassword(@AuthenticationPrincipal UserPrincipal details,
                                              @RequestBody @Valid ChangePasswordRequest req) {
         service.changePassword(details.getId(), req);
-        return SuccessRes.build("Password Changed Successfully");
+        return "Password Changed Successfully";
     }
 
     @PatchMapping("/change-email")
-    public SuccessRes<String> changeEmail(@AuthenticationPrincipal UserPrincipal details,
+    public EmailResponse changeEmail(@AuthenticationPrincipal UserPrincipal details,
                                           @RequestBody @Valid ChangeEmailRequest req) {
-        service.changeEmail(details.getId(), req);
-        return SuccessRes.build("An email has been sent to your new email address for verification.");
+        return service.changeEmail(details.getId(), req);
     }
 
     @DeleteMapping
@@ -53,33 +52,32 @@ public class UserController {
     }
 
     @GetMapping("/api-key")
-    public SuccessRes<ApiKeyInfo> keyInfo(@AuthenticationPrincipal UserPrincipal details) {
-        return SuccessRes.build(service.getKeyInfo(details.getId()));
+    public ApiKeyInfo keyInfo(@AuthenticationPrincipal UserPrincipal details) {
+        return service.getKeyInfo(details.getId());
     }
 
     @PostMapping("/api-key")
     @ResponseStatus(HttpStatus.CREATED)
-    public SuccessRes<ApiKeyInfo> generate(@AuthenticationPrincipal UserPrincipal details) {
-        return SuccessRes.build(HttpStatus.CREATED, service.generateKey(details.getId()));
+    public ApiKeyInfo generate(@AuthenticationPrincipal UserPrincipal details) {
+        return service.generateKey(details.getId());
     }
 
     @PatchMapping("/api-key/regenerate")
-    public SuccessRes<ApiKeyInfo> regenerate(@AuthenticationPrincipal UserPrincipal details) {
-        return SuccessRes.build(service.regenerateKey(details.getId()));
+    public ApiKeyInfo regenerate(@AuthenticationPrincipal UserPrincipal details) {
+        return service.regenerateKey(details.getId());
     }
 
     @PatchMapping("/api-key/status")
-    public SuccessRes<ApiKeyInfo> activate(@AuthenticationPrincipal UserPrincipal details,
+    public ApiKeyInfo activate(@AuthenticationPrincipal UserPrincipal details,
                                            @RequestBody @Valid ApiKeyStatusRequest req) {
 
-        return SuccessRes.build(service.updateStatus(details.getId(), req.getActive()));
+        return service.updateStatus(details.getId(), req.getActive());
     }
 
     @PostMapping("/api-key/domain")
-    public SuccessRes<ApiKeyInfo> addDomain(@AuthenticationPrincipal UserPrincipal details,
+    public ApiKeyInfo addDomain(@AuthenticationPrincipal UserPrincipal details,
                                             @RequestBody @Valid DomainRequest req) {
-        return SuccessRes.build(service.addDomain(details.getId(),
-                req.getDomain()));
+        return service.addDomain(details.getId(), req.getDomain());
     }
 
     @DeleteMapping("/api-key/domain/{id}")
@@ -90,8 +88,8 @@ public class UserController {
     }
 
     @GetMapping("/forms")
-    public SuccessRes<List<FormResponse>> getForms(@AuthenticationPrincipal UserPrincipal details) {
-        return SuccessRes.build(service.getForms(details.getId()));
+    public List<FormResponse> getForms(@AuthenticationPrincipal UserPrincipal details) {
+        return service.getForms(details.getId());
     }
 
     @DeleteMapping("/forms")
