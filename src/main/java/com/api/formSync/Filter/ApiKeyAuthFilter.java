@@ -1,5 +1,6 @@
 package com.api.formSync.Filter;
 
+import com.api.formSync.Principal.ApiKeyPrincipal;
 import com.api.formSync.Service.ApiKeyService;
 import com.api.formSync.dto.ErrorResponse;
 import com.api.formSync.dto.FormResponse;
@@ -23,7 +24,6 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.IOException;
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.Random;
 
 @Slf4j
@@ -62,7 +62,7 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             String body = new String(wrappedRequest.getInputStream().readAllBytes(), wrappedRequest.getCharacterEncoding());
             FormResponse form = mapper.readValue(body, FormResponse.class);
             form.setId(new Random().nextLong(2, 200));
-            form.setSubmittedAt(LocalDateTime.now());
+//            form.setSubmittedAt(LocalDateTime.now());
 
             response.getWriter().write(mapper.writeValueAsString(form));
             response.setStatus(HttpStatus.CREATED.value());
@@ -81,6 +81,16 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
         try {
             Authentication auth = keyService.getAuthentication(API_KEY, domain);
+            ApiKeyPrincipal principal = (ApiKeyPrincipal) auth.getPrincipal();
+
+            if (!principal.isAccountNonLocked()) {
+                throw new ForbiddenException("Your Api Key has been locked. ");
+            }
+
+            if (!principal.isEnabled()) {
+                throw new ForbiddenException("Your Api Key is disabled.");
+            }
+
             SecurityContextHolder.getContext().setAuthentication(auth);
             filterChain.doFilter(request, response);
         } catch (TodayLimitReachedException exp) {

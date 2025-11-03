@@ -1,9 +1,7 @@
 package com.api.formSync.Service;
 
 import com.api.formSync.Principal.ApiKeyPrincipal;
-import com.api.formSync.exception.ForbiddenException;
 import com.api.formSync.exception.InvalidApiKeyException;
-import com.api.formSync.exception.TodayLimitReachedException;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Domain;
 import com.api.formSync.model.User;
@@ -14,7 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -28,19 +26,18 @@ public class ApiKeyService {
     }
 
     public Authentication getAuthentication(String key, String domain) {
-        ApiKey matchedKey = repo.findByApiKey(key)
+        ApiKey matchedKey = repo.findWithDomainsAndUserByApiKey(key)
                 .orElseThrow(() -> new InvalidApiKeyException("Invalid API Key"));
 
-        if (domain != null && !matchedKey.getDomains().stream().map(Domain::getName).toList().contains(domain)) {
-            throw new ForbiddenException("You are not allowed to access this resource");
-        }
+        List<String> domains = matchedKey.getDomains()
+                .stream().map(Domain::getName).toList();
 
-        if (matchedKey.getLastReset().isBefore(LocalDate.now())) {
+//        if (!domains.contains(domain)) {
+//            throw new ForbiddenException("You are not allowed to access this resource");
+//        }
+
+        if (matchedKey.getLastReset().isBefore(Instant.now())) {
             matchedKey = resetRequestCount(matchedKey);
-        }
-
-        if (matchedKey.isLocked()) {
-            throw new TodayLimitReachedException("Today Limit Reached. Api key is locked");
         }
 
         return new UsernamePasswordAuthenticationToken(
@@ -83,7 +80,7 @@ public class ApiKeyService {
 
     public ApiKey resetRequestCount(ApiKey apiKey) {
         apiKey.setRequestCount(0);
-        apiKey.setLastReset(LocalDate.now());
+        apiKey.setLastReset(Instant.now());
         apiKey.setLocked(false);
         return update(apiKey);
     }

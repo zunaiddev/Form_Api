@@ -47,11 +47,11 @@ public class User {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @ToString.Exclude
     private ApiKey key;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
     @ToString.Exclude
     private List<Form> forms;
 

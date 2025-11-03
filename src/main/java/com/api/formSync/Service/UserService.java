@@ -7,6 +7,7 @@ import com.api.formSync.exception.InvalidApiKeyException;
 import com.api.formSync.exception.UnauthorisedException;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Domain;
+import com.api.formSync.model.Form;
 import com.api.formSync.model.User;
 import com.api.formSync.util.Common;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -138,7 +139,7 @@ public class UserService {
 
         apiKey.setRole(user.getRole());
 
-        if (apiKey.getLastReset().isBefore(LocalDate.now())) {
+        if (apiKey.getLastReset().isBefore(Instant.now())) {
             apiKey = apiKeyService.resetRequestCount(apiKey);
         }
 
@@ -147,21 +148,26 @@ public class UserService {
 
     @Transactional
     public List<FormResponse> getForms(Long id) {
-//        User savedUser = userInfoService.loadWithForms(id);
+        User savedUser = userInfoService.loadWithForms(id);
 
-//        return savedUser.getForms().stream().map(FormResponse::new).toList();
-
-        return List.of(
-                new FormResponse(1L, "John Doe", "john@gmail.com", "Subject 1", "Message 1", LocalDateTime.now()),
-                new FormResponse(2L, "Jane Smith", "jane@gmail.com", "Subject 2", "Message 2", LocalDateTime.now()),
-                new FormResponse(3L, "Bob Johnson", "bob@gmail.com", "Subject 3", "Message 3", LocalDateTime.now())
-        );
+        return savedUser.getForms().stream().map(FormResponse::new).toList();
     }
 
     @Transactional
-    public void deleteForms(Long id, List<Long> ids) {
-        User user = userInfoService.load(id);
-        formService.delete(user, ids);
+    public void deleteForms(Long userId, List<Long> ids) {
+        User user = userInfoService.loadWithForms(userId);
+
+        List<Form> formsToDel = user.getForms()
+                .stream().filter(form -> ids.contains(form.getId()))
+                .collect(Collectors.toList());
+
+        List<Form> forms = user.getForms();
+        forms.removeAll(formsToDel);
+        user.setForms(forms);
+
+        userInfoService.update(user);
+
+        formService.delete(formsToDel);
     }
 
     public void changePassword(Long id, ChangePasswordRequest req) {

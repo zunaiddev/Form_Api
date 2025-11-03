@@ -9,13 +9,11 @@ import com.api.formSync.model.Form;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.FormRepository;
 import com.api.formSync.util.Role;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -23,24 +21,22 @@ public class FormService {
     private final FormRepository repo;
     private final EmailService emailService;
     private final ApiKeyService keyService;
+    private final UserInfoService userInfoService;
 
-    @Value("${TEST_API_KEY}")
-    private String testKey;
-
+    @Transactional
     public FormResponse submit(FormRequest req, ApiKeyPrincipal details) {
-        if (details.getUsername().equals(testKey)) {
-            return new FormResponse(new Random().nextLong(1000), req.getName(), req.getEmail(), req.getSubject(), req.getMessage(), LocalDateTime.now());
-        }
-
-        User user = details.getUser();
+        User user = userInfoService.loadWithForms(details.getUser().getId());
         Form form = new Form(req.getName(), req.getSubject(), req.getEmail(), req.getMessage(), user);
 
         Form submittedForm = repo.save(form);
 
+        List<Form> forms = user.getForms();
+        forms.add(submittedForm);
+        user.setForms(forms);
+
         Role role = user.getRole();
 
-
-        if (!role.equals(Role.ADMIN) && !role.equals(Role.ULTIMATE)) {
+        if (role.equals(Role.USER)) {
             ApiKey apiKey = keyService.findByUser(user);
 
             apiKey.setRequestCount(apiKey.getRequestCount() + 1);
@@ -52,6 +48,7 @@ public class FormService {
             keyService.update(apiKey);
         }
 
+        emailService.sendFormEmail(user.getEmail(), new FormResponse(submittedForm));
         return new FormResponse(submittedForm);
     }
 
@@ -61,7 +58,7 @@ public class FormService {
                 .toList();
     }
 
-    public void delete(User user, List<Long> ids) {
-        repo.deleteAllByIdInAndUser(ids, user);
+    public void delete(List<Form> forms) {
+        repo.deleteAll(forms);
     }
 }

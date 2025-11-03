@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.security.SecureRandom;
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class ApiKey {
     private Integer requestCount = 0;
 
     @Column(name = "last_reset", nullable = false)
-    private LocalDate lastReset = LocalDate.now();
+    private Instant lastReset;
 
     @NotNull
     @Enumerated(value = EnumType.STRING)
@@ -52,6 +52,7 @@ public class ApiKey {
         this.user = user;
         this.apiKey = generate();
         this.role = user.getRole();
+        this.lastReset = Instant.now();
     }
 
     public void reGenerate() {

@@ -55,7 +55,7 @@ public class VerificationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
 
-            if (tokenService.isTokenUsed(authHeader)) {
+            if (tokenService.isTokenUsed(token)) {
                 throw new UsedTokenException("Jwt Token has already been used");
             }
 
@@ -86,7 +86,7 @@ public class VerificationFilter extends OncePerRequestFilter {
             chain.doFilter(req, res);
 
             if (res.getStatus() >= 200 && res.getStatus() < 300) {
-                //mark the token as used
+                tokenService.saveToken(token);
             }
         } catch (InvalidHeaderException e) {
             log.warn(e.getMessage());

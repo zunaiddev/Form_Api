@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @Entity
@@ -33,7 +33,7 @@ public class Form {
     private User user;
 
     @CreationTimestamp
-    private LocalDateTime submittedAt;
+    private Instant submittedAt;
 
     public Form(String name, String subject, String email, String message, User user) {
         this.name = name;

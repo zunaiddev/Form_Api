@@ -67,6 +67,10 @@ public class VerificationService {
             throw new RequestBodyIsMissingException("Missing Request body");
         }
 
+        if (encoder.matches(req.getPassword(), user.getPassword())) {
+            throw new ConflictException("New password cannot be the same as the old password");
+        }
+
         user.setPassword(encoder.encode(req.getPassword()));
         userService.update(user);
 
