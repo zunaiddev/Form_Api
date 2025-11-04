@@ -16,4 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @EntityGraph(attributePaths = "forms")
     Optional<User> findWithFormsById(Long id);
+
+    @EntityGraph(attributePaths = {"key", "key.domains"})
+    Optional<User> findWithKeyAndDomainsById(Long id);
 }

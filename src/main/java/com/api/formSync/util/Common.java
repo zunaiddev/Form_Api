@@ -1,6 +1,6 @@
 package com.api.formSync.util;
 
-import com.api.formSync.dto.ErrorResponse;
+import com.api.formSync.Dto.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

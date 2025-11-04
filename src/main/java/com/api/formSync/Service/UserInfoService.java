@@ -1,7 +1,7 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.exception.ConflictException;
-import com.api.formSync.exception.UserNotFoundException;
+import com.api.formSync.Exception.ConflictException;
+import com.api.formSync.Exception.UserNotFoundException;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -51,7 +51,7 @@ public class UserInfoService {
             user.setName(name);
             user.setEmail(email);
             user.setPassword(encoder.encode(password));
-            user.setCreatedAt(LocalDateTime.now());
+            user.setCreatedAt(Instant.now());
             return repo.save(user);
         }
 
@@ -78,6 +78,11 @@ public class UserInfoService {
 
     public User loadWithKey(Long id) {
         return repo.findWithKeyById(id)
+                .orElseThrow(UserNotFoundException::new);
+    }
+
+    public User loadWithKeyAndDomains(Long id) {
+        return repo.findWithKeyAndDomainsById(id)
                 .orElseThrow(UserNotFoundException::new);
     }
 

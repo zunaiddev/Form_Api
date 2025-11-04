@@ -1,10 +1,10 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.dto.ResetPasswordRequest;
-import com.api.formSync.dto.SignInResponse;
-import com.api.formSync.dto.VerificationResponse;
-import com.api.formSync.exception.ConflictException;
-import com.api.formSync.exception.RequestBodyIsMissingException;
+import com.api.formSync.Dto.ResetPasswordRequest;
+import com.api.formSync.Dto.SignInResponse;
+import com.api.formSync.Dto.VerificationResponse;
+import com.api.formSync.Exception.ConflictException;
+import com.api.formSync.Exception.RequestBodyIsMissingException;
 import com.api.formSync.model.User;
 import com.api.formSync.util.Common;
 import com.api.formSync.util.Purpose;

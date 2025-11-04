@@ -29,17 +29,13 @@ public class Form {
     @NotNull
     private String message;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    private User user;
-
     @CreationTimestamp
     private Instant submittedAt;
 
-    public Form(String name, String subject, String email, String message, User user) {
+    public Form(String name, String subject, String email, String message) {
         this.name = name;
         this.email = email;
         this.message = message;
         this.subject = subject;
-        this.user = user;
     }
 }

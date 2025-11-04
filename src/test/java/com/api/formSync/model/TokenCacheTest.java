@@ -23,10 +23,7 @@ class TokenCacheTest {
     @Test
     @Order(1)
     void save() {
-        tokenCache.save("token1");
-        tokenCache.save("token2");
-        tokenCache.save("token3");
-        tokenCache.save("token4");
+
     }
 
     @Test

@@ -1,9 +1,9 @@
 package com.api.formSync.Service;
 
+import com.api.formSync.Dto.FormRequest;
+import com.api.formSync.Dto.FormResponse;
 import com.api.formSync.Email.EmailService;
 import com.api.formSync.Principal.ApiKeyPrincipal;
-import com.api.formSync.dto.FormRequest;
-import com.api.formSync.dto.FormResponse;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Form;
 import com.api.formSync.model.User;
@@ -26,7 +26,7 @@ public class FormService {
     @Transactional
     public FormResponse submit(FormRequest req, ApiKeyPrincipal details) {
         User user = userInfoService.loadWithForms(details.getUser().getId());
-        Form form = new Form(req.getName(), req.getSubject(), req.getEmail(), req.getMessage(), user);
+        Form form = new Form(req.getName(), req.getSubject(), req.getEmail(), req.getMessage());
 
         Form submittedForm = repo.save(form);
 
@@ -50,12 +50,6 @@ public class FormService {
 
         emailService.sendFormEmail(user.getEmail(), new FormResponse(submittedForm));
         return new FormResponse(submittedForm);
-    }
-
-    public List<FormResponse> get(User user) {
-        return repo.findAllByUser(user).stream()
-                .map(FormResponse::new)
-                .toList();
     }
 
     public void delete(List<Form> forms) {

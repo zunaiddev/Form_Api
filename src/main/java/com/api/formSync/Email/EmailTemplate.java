@@ -1,6 +1,6 @@
 package com.api.formSync.Email;
 
-import com.api.formSync.dto.FormResponse;
+import com.api.formSync.Dto.FormResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

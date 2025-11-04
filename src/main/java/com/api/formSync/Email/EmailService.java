@@ -1,6 +1,6 @@
 package com.api.formSync.Email;
 
-import com.api.formSync.dto.FormResponse;
+import com.api.formSync.Dto.FormResponse;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;

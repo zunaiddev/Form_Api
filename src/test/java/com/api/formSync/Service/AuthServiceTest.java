@@ -1,7 +1,7 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.dto.LoginRequest;
-import com.api.formSync.dto.SignupRequest;
+import com.api.formSync.Dto.LoginRequest;
+import com.api.formSync.Dto.SignupRequest;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.UserRepository;
 import org.junit.jupiter.api.*;

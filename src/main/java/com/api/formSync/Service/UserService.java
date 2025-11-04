@@ -1,10 +1,10 @@
 package com.api.formSync.Service;
 
+import com.api.formSync.Dto.*;
 import com.api.formSync.Email.EmailService;
-import com.api.formSync.dto.*;
-import com.api.formSync.exception.ConflictException;
-import com.api.formSync.exception.InvalidApiKeyException;
-import com.api.formSync.exception.UnauthorisedException;
+import com.api.formSync.Exception.ConflictException;
+import com.api.formSync.Exception.InvalidApiKeyException;
+import com.api.formSync.Exception.UnauthorisedException;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Domain;
 import com.api.formSync.model.Form;
@@ -17,9 +17,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,7 +52,7 @@ public class UserService {
             throw new UnauthorisedException("Password is incorrect");
         }
 
-        user.setDeleteAt(LocalDateTime.now().plusDays(3L));
+        user.setDeleteAt(Instant.now().plus(3, ChronoUnit.DAYS));
         userInfoService.update(user);
 
         res.addCookie(Common.getEmptyCookie());
@@ -101,12 +102,11 @@ public class UserService {
         return new ApiKeyInfo(apiKeyService.update(apiKey));
     }
 
-    //ToDo: Needs to check domain validity
     @Transactional
     public ApiKeyInfo addDomain(Long id, String domain) {
-        User savedUser = userInfoService.loadWithKey(id);
+        User savedUser = userInfoService.loadWithKeyAndDomains(id);
         ApiKey apiKey = savedUser.getKey();
-        List<Domain> domains = apiKey.getDomains();
+        Set<Domain> domains = apiKey.getDomains();
 
         for (Domain d : domains) {
             if (d.getName().equals(domain)) throw new ConflictException("Domain Already Exists");
@@ -118,13 +118,13 @@ public class UserService {
         return new ApiKeyInfo(apiKeyService.update(apiKey));
     }
 
-    public void deleteDomain(Long id, Long domainId) {
-        User savedUser = userInfoService.loadWithKey(id);
-        ApiKey apiKey = savedUser.getKey();
-        List<Domain> domains = apiKey.getDomains();
+    public void removeDomain(Long id, Long domainId) {
+        ApiKey apiKey = apiKeyService.findWithDomainsByUserId(id);
+        Set<Domain> domains = apiKey.getDomains();
+        System.out.println("Domains before removal: " + domains);
 
         domains = domains.stream().filter(domain -> !Objects.equals(domain.getId(), domainId))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
         apiKey.setDomains(domains);
 
@@ -132,7 +132,7 @@ public class UserService {
     }
 
     public ApiKeyInfo getKeyInfo(Long id) {
-        User user = userInfoService.loadWithKey(id);
+        User user = userInfoService.loadWithKeyAndDomains(id);
         ApiKey apiKey = user.getKey();
 
         if (apiKey == null) return null;

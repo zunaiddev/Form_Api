@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -20,8 +21,9 @@ public class Domain {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "domains")
-    private List<ApiKey> apiKeys;
+    @ManyToMany(mappedBy = "domains", fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ToString.Exclude
+    private Set<ApiKey> apiKeys;
 
     public Domain(String name) {
         this.name = name;

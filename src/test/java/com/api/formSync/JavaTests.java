@@ -1,6 +1,6 @@
 package com.api.formSync;
 
-import com.api.formSync.dto.ErrorResponse;
+import com.api.formSync.Dto.ErrorResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;

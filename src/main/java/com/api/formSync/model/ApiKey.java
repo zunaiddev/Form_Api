@@ -10,7 +10,7 @@ import lombok.ToString;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -30,7 +30,7 @@ public class ApiKey {
     @Column(name = "last_reset", nullable = false)
     private Instant lastReset;
 
-    @NotNull
+    @NotNull(message = "Role cannot be null")
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
@@ -44,9 +44,9 @@ public class ApiKey {
     @ToString.Exclude
     private User user;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.DETACH})
     @ToString.Exclude
-    private List<Domain> domains;
+    private Set<Domain> domains;
 
     public ApiKey(User user) {
         this.user = user;

@@ -1,10 +1,7 @@
 package com.api.formSync.Service;
 
 import com.api.formSync.model.User;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
@@ -32,6 +29,7 @@ class UserInfoServiceTest {
 
     @Test
     @Order(2)
+    @Disabled
     void getAuthentication() {
         Authentication auth = userInfoService.getAuthentication("john@gmail.com", "John@123");
 

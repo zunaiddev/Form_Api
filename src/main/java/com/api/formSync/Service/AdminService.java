@@ -1,6 +1,6 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.dto.UserInfo;
+import com.api.formSync.Dto.UserInfo;
 import com.api.formSync.model.User;
 import com.api.formSync.util.Role;
 import com.api.formSync.util.Validator;

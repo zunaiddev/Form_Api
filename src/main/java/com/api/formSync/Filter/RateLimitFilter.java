@@ -1,6 +1,6 @@
 package com.api.formSync.Filter;
 
-import com.api.formSync.dto.ErrorResponse;
+import com.api.formSync.Dto.ErrorResponse;
 import com.api.formSync.util.Common;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
