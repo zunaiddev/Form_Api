@@ -1,13 +1,11 @@
 package com.api.formSync.Email;
 
 import com.api.formSync.Dto.FormResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EmailTemplate {
-    @Value("${BASE_URL}")
-    public String BASE_URL;
+    public String BASE_URL = "https://formsync.netlify.app";
 
     public String verificationBody(String name, String token) {
         return """
@@ -24,7 +22,7 @@ public class EmailTemplate {
                 
                           <tr>
                             <td style="background: #111827; text-align: center; padding: 20px;">
-                              <img src="https://your-logo-url.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
+                              <img src="https://formsync.netlify.app/logo.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
                               <h1 style="color: #ffffff; margin: 0; font-size: 22px;">FormSync</h1>
                             </td>
                           </tr>
@@ -90,7 +88,7 @@ public class EmailTemplate {
                 
                           <tr>
                             <td style="background: #111827; text-align: center; padding: 20px;">
-                              <img src="https://your-logo-url.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
+                              <img src="https://formsync.netlify.app/logo.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
                               <h1 style="color: #ffffff; margin: 0; font-size: 22px;">FormSync</h1>
                             </td>
                           </tr>
@@ -156,7 +154,7 @@ public class EmailTemplate {
                 
                           <tr>
                             <td style="background: #111827; text-align: center; padding: 20px;">
-                              <img src="https://your-logo-url.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
+                              <img src="https://formsync.netlify.app/logo.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
                               <h1 style="color: #ffffff; margin: 0; font-size: 22px;">FormSync</h1>
                             </td>
                           </tr>
@@ -223,7 +221,7 @@ public class EmailTemplate {
                 
                           <tr>
                             <td style="background: #111827; text-align: center; padding: 20px;">
-                              <img src="https://your-logo-url.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
+                              <img src="https://formsync.netlify.app/logo.png" alt="FormSync Logo" width="120" style="margin-bottom: 5px;" />
                               <h1 style="color: #ffffff; margin: 0; font-size: 22px;">FormSync</h1>
                             </td>
                           </tr>
