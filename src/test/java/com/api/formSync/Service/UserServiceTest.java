@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 class UserServiceTest {
     /*private static User user;
     @Autowired
-    UserService userService;
+    UserService userService;----------
     @Autowired
     UserRepository userRepository;
 
