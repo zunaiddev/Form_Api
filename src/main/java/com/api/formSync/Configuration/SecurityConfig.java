@@ -40,9 +40,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers("/auth/**", "/error", "/public/**").permitAll()
+                        .requestMatchers("/auth/**", "/error", "/public/**", "/visitor").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 ).sessionManagement(session -> session
@@ -69,25 +69,29 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
         CorsConfiguration publicCorsConfig = new CorsConfiguration();
-        publicCorsConfig.setAllowedOrigins(List.of("*"));
-        publicCorsConfig.setAllowedMethods(List.of("POST"));
+        publicCorsConfig.setAllowedOriginPatterns(List.of("*"));
+        publicCorsConfig.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
         publicCorsConfig.setAllowedHeaders(List.of("*"));
+        publicCorsConfig.setAllowCredentials(false);
+
         source.registerCorsConfiguration("/public/**", publicCorsConfig);
+        source.registerCorsConfiguration("/visitor/**", publicCorsConfig);
 
         CorsConfiguration privateCorsConfig = new CorsConfiguration();
         privateCorsConfig.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 BASE_URL
         ));
-        privateCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
+        privateCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         privateCorsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         privateCorsConfig.setAllowCredentials(true);
 
         source.registerCorsConfiguration("/auth/**", privateCorsConfig);
         source.registerCorsConfiguration("/users/**", privateCorsConfig);
         source.registerCorsConfiguration("/verify/**", privateCorsConfig);
-//        source.registerCorsConfiguration("/admin/**", privateCorsConfig);
+        source.registerCorsConfiguration("/admin/**", privateCorsConfig);
 
         return source;
     }
+
 }
