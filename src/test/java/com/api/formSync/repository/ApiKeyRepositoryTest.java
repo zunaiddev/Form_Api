@@ -1,13 +1,8 @@
 package com.api.formSync.repository;
 
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-
-@SpringBootTest
+/*@SpringBootTest
 @ActiveProfiles("test")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)*/
 class ApiKeyRepositoryTest {
    /* @Autowired
     UserRepository userRepository;

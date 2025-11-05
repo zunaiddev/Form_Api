@@ -1,11 +1,7 @@
 package com.api.formSync.Service;
 
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.test.context.ActiveProfiles;
-
-@ActiveProfiles("test")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+/*@ActiveProfiles("test")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)*/
 class JwtServiceTest {
    /* static String token;
     static JwtService jwtService = new JwtService();

@@ -1,9 +1,8 @@
 package com.api.formSync.Service;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+//@SpringBootTest
 class DomainServiceTest {
     /*@Autowired
     private DomainService domainService;

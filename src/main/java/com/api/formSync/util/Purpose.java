@@ -11,7 +11,7 @@ public enum Purpose {
     public static Purpose from(Object object) {
         try {
             return valueOf(object.toString());
-        } catch (Exception _) {
+        } catch (Exception exp) {
             return null;
         }
     }
