@@ -1,47 +1,35 @@
 package com.api.formSync.Controller;
 
-import com.api.formSync.Dto.UserInfo;
-import com.api.formSync.Service.AdminService;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.websocket.server.PathParam;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
+import java.io.File;
 
 @RestController
 @RequestMapping("/admin")
 @AllArgsConstructor
 public class AdminController {
-    private AdminService service;
 
-    @GetMapping("/users")
-    public ResponseEntity<List<UserInfo>> getAll() {
-        System.out.println("request reswed ");
-        return ResponseEntity.ok(service.getUsers());
-    }
+    @GetMapping("/logs")
+    public ResponseEntity<Resource> getLatestLog() {
+        File logFile = new File("application.log");
 
-    @GetMapping("/users/{id}")
-    public ResponseEntity<UserInfo> get(@PathVariable @NotNull Long id) {
-        return ResponseEntity.ok(service.getUser(id));
-    }
+        if (!logFile.exists()) {
+            return ResponseEntity.notFound().build();
+        }
 
-    @GetMapping("/users2")
-    public ResponseEntity<UserInfo> get(@PathParam("email") @NotBlank String email) {
-        return ResponseEntity.ok(service.getUser(email));
-    }
+        Resource resource = new FileSystemResource(logFile);
 
-    @DeleteMapping("/users/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable @NotNull Long id) {
-        service.deleteUser(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/users/{id}")
-    public ResponseEntity<UserInfo> updateUser(@PathVariable @NotNull Long id, @RequestBody @NotNull Map<String, Object> updates) {
-        return ResponseEntity.ok(service.updateUser(id, updates));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + logFile.getName())
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(resource);
     }
 }

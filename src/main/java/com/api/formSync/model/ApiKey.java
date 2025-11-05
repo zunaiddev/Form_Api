@@ -25,7 +25,7 @@ public class ApiKey {
     private String apiKey;
 
     @Column(name = "request_count", nullable = false)
-    private Integer requestCount = 0;
+    private Integer requestCount;
 
     @Column(name = "last_reset", nullable = false)
     private Instant lastReset;
@@ -35,12 +35,12 @@ public class ApiKey {
     private Role role;
 
     @NotNull
-    private boolean locked = false;
+    private boolean locked;
 
     @NotNull
-    private boolean enabled = true;
+    private boolean enabled;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "key", cascade = CascadeType.REMOVE)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @ToString.Exclude
     private User user;
 
@@ -53,6 +53,9 @@ public class ApiKey {
         this.apiKey = generate();
         this.role = user.getRole();
         this.lastReset = Instant.now();
+        this.requestCount = 0;
+        this.locked = false;
+        this.enabled = true;
     }
 
     public void reGenerate() {

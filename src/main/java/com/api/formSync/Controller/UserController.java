@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
@@ -95,7 +96,7 @@ public class UserController {
     @DeleteMapping("/forms")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteForm(@AuthenticationPrincipal UserPrincipal details,
-                           @RequestBody List<Long> ids) {
+                           @RequestBody Set<Long> ids) {
         service.deleteForms(details.getId(), ids);
     }
 }

@@ -1,7 +1,6 @@
 package com.api.formSync.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +18,7 @@ public class UsedToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @Column(length = 500, unique = true, nullable = false)
     private String token;
 
     @Column(name = "created_at")

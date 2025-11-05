@@ -145,8 +145,7 @@ public class UserService {
 
         return new ApiKeyInfo(apiKey);
     }
-
-    @Transactional
+    
     public List<FormResponse> getForms(Long id) {
         User savedUser = userInfoService.loadWithForms(id);
 
@@ -154,20 +153,14 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteForms(Long userId, List<Long> ids) {
+    public void deleteForms(Long userId, Set<Long> ids) {
         User user = userInfoService.loadWithForms(userId);
-
-        List<Form> formsToDel = user.getForms()
-                .stream().filter(form -> ids.contains(form.getId()))
+        List<Form> forms = user.getForms()
+                .stream().filter(form -> !ids.contains(form.getId()))
                 .collect(Collectors.toList());
 
-        List<Form> forms = user.getForms();
-        forms.removeAll(formsToDel);
         user.setForms(forms);
-
         userInfoService.update(user);
-
-        formService.delete(formsToDel);
     }
 
     public void changePassword(Long id, ChangePasswordRequest req) {

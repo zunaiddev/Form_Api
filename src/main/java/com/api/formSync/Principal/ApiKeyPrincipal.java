@@ -3,12 +3,14 @@ package com.api.formSync.Principal;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.User;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
+@Getter
 @AllArgsConstructor
 public class ApiKeyPrincipal implements UserDetails {
     private final ApiKey apiKey;

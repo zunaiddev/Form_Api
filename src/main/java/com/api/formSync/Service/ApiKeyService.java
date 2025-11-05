@@ -1,10 +1,10 @@
 package com.api.formSync.Service;
 
+import com.api.formSync.Exception.ForbiddenException;
 import com.api.formSync.Exception.InvalidApiKeyException;
 import com.api.formSync.Principal.ApiKeyPrincipal;
 import com.api.formSync.model.ApiKey;
 import com.api.formSync.model.Domain;
-import com.api.formSync.model.User;
 import com.api.formSync.repository.ApiKeyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,9 +27,9 @@ public class ApiKeyService {
         List<String> domains = matchedKey.getDomains()
                 .stream().map(Domain::getName).toList();
 
-//        if (!domains.contains(domain)) {
-//            throw new ForbiddenException("You are not allowed to access this resource");
-//        }
+        if (!domains.contains(domain)) {
+            throw new ForbiddenException("You are not allowed to access this resource");
+        }
 
         if (matchedKey.getLastReset().isBefore(Instant.now())) {
             matchedKey = resetRequestCount(matchedKey);
@@ -42,8 +42,8 @@ public class ApiKeyService {
         );
     }
 
-    public ApiKey findByUser(User user) {
-        return repo.findByUser(user).orElseThrow(() -> new InvalidApiKeyException("Invalid API Key"));
+    public ApiKey findById(long id) {
+        return repo.findById(id).orElseThrow(() -> new InvalidApiKeyException("Invalid API Key"));
     }
 
     public ApiKey findWithDomainsByUserId(Long userId) {
@@ -55,15 +55,6 @@ public class ApiKeyService {
         if (apiKey.getId() == null) throw new RuntimeException("Api Key id is null");
 
         return repo.save(apiKey);
-    }
-
-    public void delete(User user) {
-        ApiKey apiKey = findByUser(user);
-
-        apiKey.setUser(null);
-        update(apiKey);
-
-        repo.delete(apiKey);
     }
 
     public ApiKey resetRequestCount(ApiKey apiKey) {

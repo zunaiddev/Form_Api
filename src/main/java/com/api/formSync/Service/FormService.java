@@ -9,50 +9,37 @@ import com.api.formSync.model.Form;
 import com.api.formSync.model.User;
 import com.api.formSync.repository.FormRepository;
 import com.api.formSync.util.Role;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FormService {
-    private final FormRepository repo;
+    private final FormRepository formRepo;
     private final EmailService emailService;
-    private final ApiKeyService keyService;
     private final UserInfoService userInfoService;
+    private final ApiKeyService apiKeyService;
 
-    @Transactional
     public FormResponse submit(FormRequest req, ApiKeyPrincipal details) {
-        User user = userInfoService.loadWithForms(details.getUser().getId());
-        Form form = new Form(req.getName(), req.getSubject(), req.getEmail(), req.getMessage());
+        User user = userInfoService.loadWithFormsAndKey(details.getUser().getId());
+        Form form = formRepo.save(new Form(req.getName(), req.getSubject(), req.getEmail(), req.getMessage()));
 
-        Form submittedForm = repo.save(form);
-
-        List<Form> forms = user.getForms();
-        forms.add(submittedForm);
-        user.setForms(forms);
+        user.getForms().add(formRepo.save(form));
 
         Role role = user.getRole();
 
         if (role.equals(Role.USER)) {
-            ApiKey apiKey = keyService.findByUser(user);
-
+            ApiKey apiKey = user.getKey();
             apiKey.setRequestCount(apiKey.getRequestCount() + 1);
-
-            if (apiKey.getRequestCount() == 10) {
-                apiKey.setLocked(true);
-            }
-
-            keyService.update(apiKey);
+            apiKey.setLocked(apiKey.getRequestCount() >= 10);
+            user.setKey(apiKeyService.update(apiKey));
         }
 
-        emailService.sendFormEmail(user.getEmail(), new FormResponse(submittedForm));
-        return new FormResponse(submittedForm);
-    }
+        userInfoService.update(user);
 
-    public void delete(List<Form> forms) {
-        repo.deleteAll(forms);
+        emailService.sendFormEmail(user.getEmail(), new FormResponse(form));
+        return new FormResponse(form);
     }
 }

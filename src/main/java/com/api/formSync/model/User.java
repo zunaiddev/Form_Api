@@ -51,7 +51,7 @@ public class User {
     @ToString.Exclude
     private ApiKey key;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.PERSIST})
     @ToString.Exclude
     private List<Form> forms;
 

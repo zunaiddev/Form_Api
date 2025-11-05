@@ -24,7 +24,6 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Random;
 
 @Slf4j
 @Component
@@ -52,17 +51,12 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        System.out.println("Origin " + request.getHeader("Origin"));
-        System.out.println("Referer " + request.getHeader("Referer"));
-
         if (API_KEY.equals(testKey)) {
             ObjectMapper mapper = new ObjectMapper();
 
             ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
             String body = new String(wrappedRequest.getInputStream().readAllBytes(), wrappedRequest.getCharacterEncoding());
             FormResponse form = mapper.readValue(body, FormResponse.class);
-            form.setId(new Random().nextLong(2, 200));
-//            form.setSubmittedAt(LocalDateTime.now());
 
             response.getWriter().write(mapper.writeValueAsString(form));
             response.setStatus(HttpStatus.CREATED.value());
@@ -73,7 +67,7 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
         String referer = request.getHeader("Referer");
 
         String domain = extractDomain(origin != null ? origin : referer);
-        
+
         if (!environment.equalsIgnoreCase("local") && domain == null) {
             Common.setError(response, ErrorResponse.build("Invalid Domain.", HttpStatus.BAD_REQUEST, "Domain is null please use direct js."));
             return;

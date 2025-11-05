@@ -19,11 +19,11 @@ public class FormResponse {
     private Instant submittedAt;
 
     public FormResponse(Form form) {
-        this.id = form.getId();
         this.name = form.getName();
         this.email = form.getEmail();
         this.subject = form.getSubject();
         this.message = form.getMessage();
+        this.id = form.getId();
         this.submittedAt = form.getSubmittedAt();
     }
 }

@@ -1,6 +1,5 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.model.Domain;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,10 +24,7 @@ class DomainServiceTest {
 
     @Test
     void create() {
-        Domain domain = new Domain(1L, "www.google.com1", null);
-        Domain domain2 = new Domain(1L, "www.google.com2", null);
-        Domain domain3 = new Domain(1L, "www.google.com3", null);
-        Domain domain4 = new Domain(1L, "www.google.com4", null);
+
     }
 
     @Test

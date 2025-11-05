@@ -9,11 +9,4 @@ import lombok.Data;
 public class UserUpdateRequest {
     @Pattern(regexp = "^[a-zA-Z\\s'-]+$", message = "Invalid name format.")
     private String name;
-
-//    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "Invalid Email.")
-//    private String email;
-
-//    @Pattern(regexp = "^(?!.*\\\\s)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$&*]).{8,20}$",
-//            message = "password length must be between 8 and 20 and contain at least 1 uppercase, 1 lowercase, 1 special character, and 1 digit")
-//    private String password;
 }

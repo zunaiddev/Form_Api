@@ -20,7 +20,7 @@ public class ApiKeyInfo {
     private boolean active;
 
     public ApiKeyInfo(ApiKey apiKey) {
-        Set<Domain> domains = null;
+        Set<Domain> domains = apiKey.getDomains();
 
         this.key = apiKey.getApiKey();
         this.domains = Objects.isNull(domains) ? Set.of() : domains.stream().map(DomainInfo::new)

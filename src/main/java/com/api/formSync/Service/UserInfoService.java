@@ -95,4 +95,9 @@ public class UserInfoService {
         return repo.findWithFormsById(id)
                 .orElseThrow(UserNotFoundException::new);
     }
+
+    public User loadWithFormsAndKey(Long id) {
+        return repo.findWithFormsAndKeyById(id)
+                .orElseThrow(UserNotFoundException::new);
+    }
 }
