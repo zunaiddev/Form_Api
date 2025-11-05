@@ -1,7 +1,9 @@
 package com.api.formSync.Controller;
 
+import com.api.formSync.repository.UsedTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +18,10 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 @RestController
 @RequestMapping("/visitor")
+@AllArgsConstructor
 public class VisitorController {
+    private final UsedTokenRepository repo;
+
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void visitorEndpoint(HttpServletRequest req, HttpServletResponse res) {
@@ -47,5 +52,6 @@ public class VisitorController {
                         └─ End of log
                         """,
                 utcTime, method, endpoint, query, status, ipAddress, userAgent, timeZone, acceptLang);
+        repo.existsByToken("DemoTokenToKeepDatabaseAlive");
     }
 }

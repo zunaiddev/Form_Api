@@ -23,7 +23,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public SignInResponse signIn(@Valid @RequestBody LoginRequest req,
-                                             HttpServletResponse response) {
+                                 HttpServletResponse response) {
         return service.signIn(req, response);
     }
 
