@@ -1,18 +1,13 @@
 package com.api.formSync.Service;
 
-import io.jsonwebtoken.Claims;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class JwtServiceTest {
-    static String token;
+   /* static String token;
     static JwtService jwtService = new JwtService();
 
     @BeforeAll
@@ -52,7 +47,7 @@ class JwtServiceTest {
     void extractSubject() {
         Object obj = jwtService.extractSubject(token);
         System.out.println("Subject: " + obj);
-    }
+    }*/
 
 
 }

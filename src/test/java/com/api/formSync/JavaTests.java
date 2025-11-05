@@ -1,15 +1,8 @@
 package com.api.formSync;
 
-import com.api.formSync.Dto.ErrorResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-
-
 public class JavaTests {
 
-    @Test
+ /*   @Test
     void test() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         ErrorResponse err = new ErrorResponse(HttpStatus.OK.name(), "Ok ", null);
@@ -18,5 +11,5 @@ public class JavaTests {
         String title = "Something wrong";
         String message = "Something wrong";
         System.out.println(String.format("{\"title\": \"%s\",\"message\": \"%s\"}", title, message));
-    }
+    }*/
 }

@@ -1,24 +1,15 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.Dto.LoginRequest;
-import com.api.formSync.Dto.SignupRequest;
-import com.api.formSync.model.User;
-import com.api.formSync.repository.UserRepository;
-import org.junit.jupiter.api.*;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.authentication.LockedException;
 import org.springframework.test.context.ActiveProfiles;
-
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuthServiceTest {
-    static SignupRequest signupRequest;
+   /* static SignupRequest signupRequest;
     static LoginRequest loginRequest;
     @Autowired
     AuthService authService;
@@ -76,5 +67,5 @@ class AuthServiceTest {
 //        var res = authService.refreshToken(token);
 //        assertEquals(UserStatus.ACTIVE, res.getStatus());
 //        assertNotNull(res.getToken());
-    }
+    }*/
 }

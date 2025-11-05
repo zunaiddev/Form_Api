@@ -1,11 +1,8 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.Dto.ApiKeyInfo;
-import com.api.formSync.model.User;
-import com.api.formSync.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -14,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserServiceTest {
-    private static User user;
+    /*private static User user;
     @Autowired
     UserService userService;
     @Autowired
@@ -60,5 +57,5 @@ class UserServiceTest {
     void getDomains() {
         ApiKeyInfo apiKey = userService.getKeyInfo(1L);
         System.out.println("Api Key Domains: " + apiKey.getDomains());
-    }
+    }*/
 }

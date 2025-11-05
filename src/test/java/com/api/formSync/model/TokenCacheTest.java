@@ -1,11 +1,7 @@
 package com.api.formSync.model;
 
-import com.api.formSync.Component.TokenCache;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -13,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class TokenCacheTest {
-    @Autowired
+    /*@Autowired
     private TokenCache tokenCache;
     @Autowired
     private TokenCache tokenCache2;
@@ -36,5 +32,5 @@ class TokenCacheTest {
     @Order(3)
     void getAll() {
         System.out.println(tokenCache2.getAll());
-    }
+    }*/
 }

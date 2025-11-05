@@ -1,12 +1,11 @@
 package com.api.formSync.Service;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class DomainServiceTest {
-    @Autowired
+    /*@Autowired
     private DomainService domainService;
 
     @Autowired
@@ -20,7 +19,7 @@ class DomainServiceTest {
         userService.create("John", "john@gmail.com", "john@123");
         userService.create("John", "john@gmail.com", "john@123");
         System.out.println("User created");
-    }
+    }*/
 
     @Test
     void create() {

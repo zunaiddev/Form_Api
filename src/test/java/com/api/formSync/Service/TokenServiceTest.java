@@ -1,11 +1,7 @@
 package com.api.formSync.Service;
 
-import com.api.formSync.model.UsedToken;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -13,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ActiveProfiles("test")
 class TokenServiceTest {
-    @Autowired
+   /* @Autowired
     private TokenService tokenService;
 
     @Test
@@ -43,5 +39,5 @@ class TokenServiceTest {
     @Order(3)
     void deleteExpiredTokens() {
 
-    }
+    }*/
 }

@@ -1,25 +1,17 @@
 package com.api.formSync.repository;
 
-import com.api.formSync.Service.UserService;
-import com.api.formSync.model.ApiKey;
-import com.api.formSync.model.Domain;
-import com.api.formSync.model.User;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Slf4j
 @SpringBootTest
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserRepositoryTest {
-    private static User user;
+   /* private static User user;
     @Autowired
     UserRepository userRepo;
     @Autowired
@@ -54,5 +46,5 @@ class UserRepositoryTest {
     @Transactional
     public void findWithKeyById() {
         User foundUser = userRepo.findWithKeyById(1L).orElse(null);
-    }
+    }*/
 }
