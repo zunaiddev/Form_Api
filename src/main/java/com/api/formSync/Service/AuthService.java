@@ -56,7 +56,7 @@ public class AuthService {
         String accessToken = tokenService.accessToken(user);
         String refreshToken = tokenService.refreshToken(user);
 
-        response.addCookie(Common.getCookie(refreshToken));
+        Common.setCookie(response, refreshToken);
         return new SignInResponse(accessToken, UserStatus.ACTIVE, null);
     }
 

@@ -85,7 +85,8 @@ public class VerificationService {
         String accessToken = generateTokenService.accessToken(user);
         String refreshToken = generateTokenService.refreshToken(user);
 
-        response.addCookie(Common.getCookie(refreshToken));
+        Common.setCookie(response, refreshToken);
+
         return new VerificationResponse<>("Account Reactivated",
                 "Your account has been restored and is active again. If you did not request this reactivation, please contact support immediately.",
                 new SignInResponse(accessToken, UserStatus.ACTIVE, null));
