@@ -1,6 +1,5 @@
 package com.api.formSync.Controller;
 
-import com.api.formSync.repository.UsedTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -20,8 +19,6 @@ import java.time.format.DateTimeFormatter;
 @RequestMapping("/visitor")
 @AllArgsConstructor
 public class VisitorController {
-    private final UsedTokenRepository repo;
-
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void visitorEndpoint(HttpServletRequest req, HttpServletResponse res) {
@@ -39,7 +36,8 @@ public class VisitorController {
 
         int status = res.getStatus();
 
-        log.info("""
+        log.info(""" 
+                        \n \n
                         🌐 VISITOR LOG:
                         ├─ Time: {}
                         ├─ Method: {}
@@ -52,6 +50,5 @@ public class VisitorController {
                         └─ End of log
                         """,
                 utcTime, method, endpoint, query, status, ipAddress, userAgent, timeZone, acceptLang);
-        repo.existsByToken("DemoTokenToKeepDatabaseAlive");
     }
 }
